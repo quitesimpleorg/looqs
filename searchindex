@@ -1,0 +1,21 @@
+#!/usr/bin/python3
+import sqlite3
+import sys
+import config
+
+dbcon = sqlite3.connect(config.DBPATH, isolation_level=None)
+cursor = dbcon.cursor()
+
+if len(sys.argv) < 2:
+	print("Error: Missing search")
+	
+search=sys.argv[1:]
+
+for row in cursor.execute("SELECT file.path FROM file INNER JOIN file_fts ON file.id = file_fts.ROWID WHERE file_fts.content MATCH ? ORDER By file.mtime ASC", (search)):
+	print(row[0])
+dbcon.close()
+
+
+
+
+

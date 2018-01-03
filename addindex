@@ -1,0 +1,118 @@
+#!/usr/bin/python3
+import sqlite3
+import os.path
+import sys
+import subprocess
+import zipfile
+import xml.etree.ElementTree
+import re
+import chardet
+import config
+dbcon = sqlite3.connect(config.DBPATH, isolation_level=None)
+
+def striptags(content):
+	result = ""
+	try:
+		result = ''.join(xml.etree.ElementTree.fromstring(content).itertext())
+	except:
+		#TODO: test<br>test2 will make it testtest2 not test test2
+		result = re.sub('<[^>]*>', '', content)
+	
+	return result
+	
+
+def strip_irrelevant(content):
+	result = content.replace("\n", " ").replace("\t", " ").replace("\f", "")
+	result = re.sub(' +', ' ', result)
+	return result;
+	
+def process_pdf(path):
+	args=["pdftotext", path , "-"]
+	stdout,stderr =  subprocess.Popen(args,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+	result = strip_irrelevant(stdout.decode('utf-8'))
+	return result
+	
+def process_odt(path):
+	fd = zipfile.ZipFile(path)
+	content = fd.read("content.xml").decode("utf-8")
+	fd.close()
+	return striptags(content)
+	
+def process_striptags(path):
+	content = process_text(path)
+	return striptags(content)
+	
+def process_text(path):
+	fd = open(path, "rb")
+	content = fd.read()
+	fd.close()
+
+	result=""
+	try:
+		return str(content.decode("utf-8"))
+	except:
+		pass
+	try:
+		encoding = chardet.detect(content)["encoding"];
+		if encoding == None:
+			return ""
+		result = str(content.decode(encoding))
+	except:
+		print("FAILE DECODING: " + path)
+		return ""
+	return result
+	
+def process_nothing(path):
+	return ""
+	
+def exists(abspath, mtime):
+	cursor = dbcon.cursor()
+	cursor.execute("SELECT 1 FROM file WHERE path = ? AND mtime = ?" , (abspath, mtime))
+	result = cursor.fetchone()
+	if result != None and result[0] == 1:
+		return True
+	return False
+
+def insert(path, cursor):
+	print("processing", path)
+	abspath=os.path.abspath(path)
+	mtime = int(os.stat(abspath).st_mtime)
+	
+	if exists(abspath, mtime):
+            print("Leaving alone " + abspath + " because it wasn't changed")
+            return
+	basename=os.path.basename(abspath)
+	ext = os.path.splitext(abspath)[1]
+	
+	content=""
+
+	processor=process_nothing
+	if ext in preprocess:
+		processor=preprocess[ext]
+	content = processor(abspath)
+
+	#if update:
+	#	cursor.execute("UPDATE file SET path = ?, mtime = ?, content =
+	cursor.execute("INSERT OR REPLACE INTO file(path, mtime, content) VALUES(?, ?, ?) ", (abspath, mtime, content))
+
+preprocess={".pdf":process_pdf, ".odt":process_odt, ".html":process_striptags, ".xml":process_nothing, ".txt":process_text, 
+			".sql":process_text, ".c":process_text, ".cpp":process_text, ".js":process_text, ".java":process_text, 
+			".py":process_text, '.md':process_text}	
+
+cursor = dbcon.cursor()
+cursor.execute("BEGIN TRANSACTION")
+
+if len(sys.argv) < 2:
+	for line in sys.stdin:
+		insert(line.replace("\n", ""), cursor)
+else:
+	for inputfile in sys.argv[1:]:
+		insert(inputfile, cursor)
+
+cursor.execute("COMMIT TRANSACTION")
+
+dbcon.close()
+
+
+
+
