@@ -163,7 +163,7 @@ if __name__ == '__main__':
 	with Pool(processes=4,initializer=init) as pool:
 		
 		if len(sys.argv) < 2:
-			pool.map(insert, yieldstdinfiles)
+			pool.map(insert, (l for l in yieldstdinfiles()))
 		else:
 			pool.map(insert, sys.argv[1:])
 
