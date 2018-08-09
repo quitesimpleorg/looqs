@@ -10,9 +10,9 @@ if len(sys.argv) < 2:
 	print("Error: Missing search")
 	
 search=sys.argv[1:]
-
-for row in cursor.execute("SELECT file.path FROM file INNER JOIN file_fts ON file.id = file_fts.ROWID WHERE file_fts.content MATCH ? ORDER By file.mtime ASC", (search)):
-	print(row[0])
+#TODO: machien parseable
+for row in cursor.execute("SELECT file.path, contents.page FROM file INNER JOIN contents ON file.id = contents.fileid INNER JOIN content_fts ON contents.id = content_fts.ROWID WHERE content_fts.content MATCH ? ORDER By file.mtime ASC", (search)):
+	print("File:", row[0], "Page: ", row[1])
 dbcon.close()
 
 

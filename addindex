@@ -10,6 +10,20 @@ import chardet
 import config
 dbcon = sqlite3.connect(config.DBPATH, isolation_level=None)
 
+
+class pagedata:
+	page = 0
+	content = ""
+	
+	
+def singlepagelist(content):
+	result = pagedata()
+	result.content = content
+	result.page = 0
+	l = list();
+	l.append(result)
+	return l
+
 def striptags(content):
 	result = ""
 	try:
@@ -30,17 +44,17 @@ def process_pdf(path):
 	args=["pdftotext", path , "-"]
 	stdout,stderr =  subprocess.Popen(args,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 	result = strip_irrelevant(stdout.decode('utf-8'))
-	return result
+	return singlepagelist(result)
 	
 def process_odt(path):
 	fd = zipfile.ZipFile(path)
 	content = fd.read("content.xml").decode("utf-8")
 	fd.close()
-	return striptags(content)
+	return singlepagelist(striptags(content))
 	
 def process_striptags(path):
 	content = process_text(path)
-	return striptags(content)
+	return singlepagelist(striptags(content))
 	
 def process_text(path):
 	fd = open(path, "rb")
@@ -49,21 +63,22 @@ def process_text(path):
 
 	result=""
 	try:
-		return str(content.decode("utf-8"))
+		result = str(content.decode("utf-8"))
 	except:
-		pass
-	try:
-		encoding = chardet.detect(content)["encoding"];
-		if encoding == None:
-			return ""
-		result = str(content.decode(encoding))
-	except:
-		print("FAILE DECODING: " + path)
-		return ""
-	return result
+		try:
+			encoding = chardet.detect(content)["encoding"];
+			if encoding == None:
+				result = ""
+			else:
+				result = str(content.decode(encoding))
+		except:
+			print("FAILE DECODING: " + path)
+			result = ""
+		
+	return singlepagelist(result)
 	
 def process_nothing(path):
-	return ""
+	return list()
 	
 def exists(abspath, mtime):
 	cursor = dbcon.cursor()
@@ -89,28 +104,27 @@ def insert(path, cursor):
 	processor=process_nothing
 	if ext in preprocess:
 		processor=preprocess[ext]
-	content = processor(abspath)
+	pagedatalist = processor(abspath)
 
-	#if update:
-	#	cursor.execute("UPDATE file SET path = ?, mtime = ?, content =
-	cursor.execute("INSERT OR REPLACE INTO file(path, mtime, content) VALUES(?, ?, ?) ", (abspath, mtime, content))
+	cursor.execute("BEGIN TRANSACTION")
+	cursor.execute("DELETE FROM file WHERE path = ?", (abspath,))
+	cursor.execute("INSERT INTO file(path, mtime) VALUES(?, ?) ", (abspath, mtime))
+	fileid=cursor.lastrowid
+	for pagedata in pagedatalist:
+		cursor.execute("INSERT INTO content(fileid, page, content) VALUES(?, ?, ?)", (fileid, pagedata.page, pagedata.content))
+	cursor.execute("COMMIT TRANSACTION")
 
 preprocess={".pdf":process_pdf, ".odt":process_odt, ".html":process_striptags, ".xml":process_nothing, ".txt":process_text, 
 			".sql":process_text, ".c":process_text, ".cpp":process_text, ".js":process_text, ".java":process_text, 
 			".py":process_text, '.md':process_text}	
 
 cursor = dbcon.cursor()
-cursor.execute("BEGIN TRANSACTION")
-
 if len(sys.argv) < 2:
 	for line in sys.stdin:
 		insert(line.replace("\n", ""), cursor)
 else:
 	for inputfile in sys.argv[1:]:
 		insert(inputfile, cursor)
-
-cursor.execute("COMMIT TRANSACTION")
-
 dbcon.close()
 
 
