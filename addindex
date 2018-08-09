@@ -41,11 +41,8 @@ def strip_irrelevant(content):
 	result = re.sub(' +', ' ', result)
 	return result;
 
-def pdf_pagecount(path):
-	cmd = "pdfinfo " + path + " | grep Pages | awk '{print $2}'"
-	stdout,stderr = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-	result = int(stdout)
-	return result
+
+
 def process_pdf(path):
 	result = list()
 	args=["pdftotext", path, "-"]
