@@ -114,7 +114,7 @@ def exists(abspath, mtime):
 		return True
 	return False
 
-def insert(path, cursor):
+def insert(path):
 	print("processing", path)
 	abspath=os.path.abspath(path)
 	mtime = int(os.stat(abspath).st_mtime)
@@ -151,24 +151,21 @@ preprocess={".pdf":process_pdf, ".odt":process_odt, ".html":process_striptags, "
 def yieldstdinfiles():
 	for line in sys.stdin:
 		yield line.replace("\n", "")
-def poolinserter(path):
-	insert(path, cursor)
+
 	
 def init():
-	global cursor
 	global dbcon
 	dbcon = sqlite3.connect(config.DBPATH, isolation_level=None)
 
 
-cursor = None
 dbcon = None
 if __name__ == '__main__':
 	with Pool(processes=4,initializer=init) as pool:
 		
 		if len(sys.argv) < 2:
-			pool.map(poolinserter, yieldstdinfiles)
+			pool.map(insert, yieldstdinfiles)
 		else:
-			pool.map(poolinserter, sys.argv[1:])
+			pool.map(insert, sys.argv[1:])
 
 	
 
