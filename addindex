@@ -60,10 +60,13 @@ def process_pdf(path):
 		result.append(data)
 		count += 1
 	
-	#everything = pagedata()
-	#everything.page = 0
-	#everything.content = content.replace("\f", "")
-	#result.append(everything)
+	#TODO: current hack, so we can fts search several words over the whole document
+	#this of course uses more space, but in the end that's not a big problem
+	#Nevertheless, this remains a hack
+	everything = pagedata()
+	everything.page = 0
+	everything.content = content.replace("\f", "")
+	result.append(everything)
 	return result
 	
 def process_odt(path):
