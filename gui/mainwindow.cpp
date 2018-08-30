@@ -119,6 +119,9 @@ void MainWindow::makePdfPreview()
 {
 	if(!pdfWorkerThread.isRunning())
 		pdfWorkerThread.start();
+
+	pdfWorker->cancelAndWait();
+	QCoreApplication::processEvents(); // Process not processed images
 	qDeleteAll(ui->scrollAreaWidgetContents->children());
 
 	ui->scrollAreaWidgetContents->setLayout(new QHBoxLayout());

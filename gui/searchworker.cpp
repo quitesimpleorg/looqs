@@ -21,6 +21,12 @@ SearchWorker::SearchWorker(const QString &dbpath)
 						  "content_fts.content MATCH ? ORDER By file.mtime DESC, content.page ASC");
 }
 
+QString normalize(QString str)
+{
+	str = str.replace(" ", " AND ");
+	str = str.replace("|", " OR ");
+	return str;
+}
 void SearchWorker::searchForFile(const QString &query)
 {
 	QVector<SearchResult> results;
