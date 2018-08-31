@@ -8,6 +8,7 @@ class PdfPreview
 	PdfPreview();
 	QImage previewImage;
 	QString documentPath;
+	unsigned int page;
 };
 
 #endif // PDFPREVIEW_H
