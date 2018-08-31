@@ -38,6 +38,7 @@ class MainWindow : public QMainWindow
 	void connectSignals();
 	void makePdfPreview();
 	bool pdfTabActive();
+	unsigned int processedPdfPreviews;
   private slots:
 	void lineEditReturnPressed();
 	void lineEditTextChanged();
