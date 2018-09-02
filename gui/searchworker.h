@@ -32,11 +32,13 @@ class SearchWorker : public QObject
   public:
 	SearchWorker();
 	SearchWorker(const QString &dbpath);
+	bool checkParanthesis(QString expression);
   public slots:
 	void search(const QString &query);
   signals:
 	void searchResultsReady(const QVector<SearchResult> &results);
 	void searchCancelled();
+	void searchError(QString e);
 };
 
 #endif // SEARCHWORKER_H

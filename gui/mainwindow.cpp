@@ -35,6 +35,7 @@ void MainWindow::connectSignals()
 	connect(this, &MainWindow::beginSearch, searchWorker, &SearchWorker::search);
 	connect(searchWorker, &SearchWorker::searchResultsReady, this, &MainWindow::handleSearchResults);
 	connect(searchWorker, &SearchWorker::searchCancelled, this, &MainWindow::handleCancelledSearch);
+	connect(searchWorker, &SearchWorker::searchError, this, &MainWindow::handleSearchError);
 	connect(ui->treeResultsList, &QTreeWidget::itemActivated, this, &MainWindow::treeSearchItemActivated);
 	connect(ui->treeResultsList, &QTreeWidget::customContextMenuRequested, this,
 			&MainWindow::showSearchResultsContextMenu);
@@ -99,6 +100,11 @@ void MainWindow::pdfPreviewReceived(PdfPreview preview)
 void MainWindow::lineEditReturnPressed()
 {
 	QString q = ui->txtSearch->text();
+	if(!searchWorker->checkParanthesis(q))
+	{
+		ui->lblSearchResults->setText("Invalid paranthesis");
+		return;
+	}
 	// TODO: validate q;
 	ui->lblSearchResults->setText("Searching...");
 	emit beginSearch(q);
@@ -154,6 +160,11 @@ void MainWindow::makePdfPreview()
 
 void MainWindow::handleCancelledSearch()
 {
+}
+
+void MainWindow::handleSearchError(QString error)
+{
+	ui->lblSearchResults->setText("Error:" + error);
 }
 
 void MainWindow::treeSearchItemActivated(QTreeWidgetItem *item, int i)
