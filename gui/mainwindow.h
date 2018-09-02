@@ -21,8 +21,7 @@ class MainWindow : public QMainWindow
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
   signals:
-	void beginFileSearch(const QString &query);
-	void beginContentSearch(const QString &query);
+	void beginSearch(const QString &query);
 	void startPdfPreviewGeneration(QVector<SearchResult> paths, double scalefactor);
 
   private:
@@ -41,7 +40,6 @@ class MainWindow : public QMainWindow
 	unsigned int processedPdfPreviews;
   private slots:
 	void lineEditReturnPressed();
-	void lineEditTextChanged();
 	void handleSearchResults(const QVector<SearchResult> &results);
 	void handleCancelledSearch();
 	void treeSearchItemActivated(QTreeWidgetItem *item, int i);
