@@ -11,7 +11,7 @@ QVector<PageData> PdfProcessor::process(const QByteArray &data) const
 	QScopedPointer<Poppler::Document> doc(Poppler::Document::loadFromData(data));
 	if(doc.isNull())
 	{
-		return {};
+		throw QSSGeneralException("Failed to process pdf data");
 	}
 	QRectF entirePage;
 
