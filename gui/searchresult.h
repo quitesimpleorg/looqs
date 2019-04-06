@@ -8,6 +8,8 @@ class SearchResult
 	unsigned int page;
 	QString path;
 	uint64_t mtime;
+	uint64_t size;
+	QChar filetype;
 	SearchResult();
 };
 
