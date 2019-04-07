@@ -183,7 +183,7 @@ int CommandAdd::handle(QStringList arguments)
 								  {
 									  if(result == SKIPPED)
 									  {
-										  qDebug() << "SKIPPED" << path << "as it already exists in the database";
+										  qDebug() << "Skipped" << path << "as it already exists in the database";
 									  }
 									  else
 									  {
