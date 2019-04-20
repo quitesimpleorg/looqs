@@ -18,6 +18,7 @@ class Logger
 	{
 		QMutexLocker locker(&this->mutex);
 		*out << val;
+		// TODO: QDebug may not have flushed yet
 		file->flush();
 		return *this;
 	}
@@ -26,6 +27,7 @@ class Logger
 	{
 		QMutexLocker locker(&this->mutex);
 		*out << val;
+		// TODO: QDebug may not have flushed yet
 		file->flush();
 		return *this;
 	}
