@@ -1,6 +1,7 @@
 #ifndef SQLITESEARCH_H
 #define SQLITESEARCH_H
 #include <QSqlDatabase>
+#include "searchresult.h"
 
 class SqliteSearch
 {
@@ -25,9 +26,8 @@ class SqliteSearch
 	bool checkParanthesis(QString expression);
 
   public:
-	SqliteSearch();
 	SqliteSearch(QSqlDatabase &db);
-	void search(const QString &query);
+	QVector<SearchResult> search(const QString &query);
 };
 
 #endif // SQLITESEARCH_H

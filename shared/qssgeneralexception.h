@@ -10,7 +10,7 @@ class QSSGeneralException : public QException
 	QSSGeneralException(QString message)
 	{
 		this->message = message;
-	};
+	}
 	void raise() const override
 	{
 		throw *this;
