@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "pagedata.h"
 #include "filedata.h"
+#include "../shared/sqlitesearch.h"
 enum SaveFileResult
 {
 	OK,
@@ -25,6 +26,7 @@ class SqliteDbService
 	bool deleteFile(QString path);
 	bool fileExistsInDatabase(QString path);
 	bool fileExistsInDatabase(QString path, qint64 mtime);
+	QVector<SearchResult> search(QString searchQuery);
 };
 
 #endif // SQLITEDBSERVICE_H
