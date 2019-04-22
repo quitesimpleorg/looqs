@@ -19,7 +19,6 @@ class Command
 		this->dbService = &dbService;
 	}
 
-	QSqlDatabase dbConnection();
 	virtual int handle(QStringList arguments) = 0;
 	virtual ~Command(){};
 };
