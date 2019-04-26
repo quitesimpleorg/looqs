@@ -19,10 +19,10 @@ class FileSaver
   public:
 	FileSaver(SqliteDbService &dbService);
 	SaveFileResult saveFile(const QFileInfo &fileInfo);
-	bool processFiles(const QVector<QString> paths, std::function<SaveFileResult(QString path)> saverFunc,
-					  bool keepGoing, bool verbose);
-	bool addFiles(const QVector<QString> paths, bool keepGoing, bool verbose);
-	bool updateFiles(const QVector<QString> paths, bool keepGoing, bool verbose);
+	int processFiles(const QVector<QString> paths, std::function<SaveFileResult(QString path)> saverFunc,
+					 bool keepGoing, bool verbose);
+	int addFiles(const QVector<QString> paths, bool keepGoing, bool verbose);
+	int updateFiles(const QVector<QString> paths, bool keepGoing, bool verbose);
 
 	;
 };
