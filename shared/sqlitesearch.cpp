@@ -104,7 +104,7 @@ QString SqliteSearch::createSortSql(const SqliteSearch::Token &token)
 	// sort:(mtime desc, page asc)
 	if(token.key == "sort")
 	{
-		QString sortsql = " ORDER BY ";
+		QString sortsql;
 		QStringList splitted_inner = token.value.split(",");
 		for(int i = 0; i < splitted_inner.length(); i++)
 		{
@@ -230,7 +230,7 @@ QSqlQuery SqliteSearch::makeSqlQuery(const QVector<SqliteSearch::Token> &tokens)
 		prepSql =
 			"SELECT file.path AS path, group_concat(content.page) AS pages, file.mtime AS mtime, file.size AS size, "
 			"file.filetype AS filetype FROM file INNER JOIN content ON file.id = content.fileid WHERE 1=1 AND " +
-			whereSql + " " + sortSql + " GROUP BY file.path";
+			whereSql + " GROUP BY file.path  " + sortSql;
 	}
 	else
 	{
@@ -265,6 +265,7 @@ QVector<SearchResult> SqliteSearch::search(const QString &query)
 	{
 
 		qDebug() << dbQuery.lastError();
+		qDebug() << dbQuery.executedQuery();
 		throw QSSGeneralException("SQL Error: " + dbQuery.lastError().text());
 	}
 
