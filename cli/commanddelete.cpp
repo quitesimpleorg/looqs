@@ -17,10 +17,10 @@ int CommandDelete::removeNonExistent(bool verbose, bool dryRun, QString pattern)
 	{
 		for(FileData &file : files)
 		{
-			if(!dryRun)
+			QFileInfo fileInfo(file.absPath);
+			if(!fileInfo.exists())
 			{
-				QFileInfo fileInfo(file.absPath);
-				if(!fileInfo.exists())
+				if(!dryRun)
 				{
 					if(this->dbService->deleteFile(file.absPath))
 					{
@@ -35,14 +35,15 @@ int CommandDelete::removeNonExistent(bool verbose, bool dryRun, QString pattern)
 						return 1;
 					}
 				}
-			}
-			else
-			{
-				Logger::info() << "Would delete " << file.absPath << endl;
+				else
+				{
+					Logger::info() << "Would delete " << file.absPath << endl;
+				}
 			}
 		}
+
 		offset += limit;
-		processedRows = this->dbService->getFiles(files, pattern, 0, limit);
+		processedRows = this->dbService->getFiles(files, pattern, offset, limit);
 	}
 	return 0;
 }
