@@ -15,6 +15,7 @@
 #include "ui_mainwindow.h"
 #include "clicklabel.h"
 #include "../shared/sqlitesearch.h"
+#include "../shared/qssgeneralexception.h"
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
@@ -45,8 +46,15 @@ void MainWindow::connectSignals()
 	connect(&searchWatcher, &QFutureWatcher<SearchResult>::finished, this,
 			[&]
 			{
-				auto results = searchWatcher.future().result();
-				handleSearchResults(results);
+				try
+				{
+					auto results = searchWatcher.future().result();
+					handleSearchResults(results);
+				}
+				catch(QSSGeneralException &e)
+				{
+					handleSearchError(e.message);
+				}
 			});
 
 	connect(&pdfWorkerWatcher, &QFutureWatcher<PdfPreview>::resultReadyAt, this,
