@@ -28,9 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		throw std::runtime_error("Failed to open database");
 	}
 	connectSignals();
-	searchThread.start();
 	ui->treeResultsList->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-
 	ui->tabWidget->setCurrentIndex(0);
 	ui->statusBar->addWidget(ui->lblSearchResults);
 	ui->statusBar->addWidget(ui->pdfProcessBar);
@@ -42,7 +40,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 void MainWindow::connectSignals()
 {
 	connect(ui->txtSearch, &QLineEdit::returnPressed, this, &MainWindow::lineEditReturnPressed);
-	// connect(this, &MainWindow::beginSearch, searchWorker, &SearchWorker::search);
 	connect(&searchWatcher, &QFutureWatcher<SearchResult>::finished, this,
 			[&]
 			{
@@ -59,12 +56,8 @@ void MainWindow::connectSignals()
 
 	connect(&pdfWorkerWatcher, &QFutureWatcher<PdfPreview>::resultReadyAt, this,
 			[&](int index) { pdfPreviewReceived(pdfWorkerWatcher.resultAt(index)); });
-
 	connect(&pdfWorkerWatcher, &QFutureWatcher<PdfPreview>::progressValueChanged, ui->pdfProcessBar,
 			&QProgressBar::setValue);
-
-	// connect(searchWorker, &SearchWorker::searchCancelled, this, &MainWindow::handleCancelledSearch);
-	//  connect(searchWorker, &SearchWorker::searchError, this, &MainWindow::handleSearchError);
 	connect(ui->treeResultsList, &QTreeWidget::itemActivated, this, &MainWindow::treeSearchItemActivated);
 	connect(ui->treeResultsList, &QTreeWidget::customContextMenuRequested, this,
 			&MainWindow::showSearchResultsContextMenu);
@@ -223,10 +216,6 @@ void MainWindow::makePdfPreview()
 	this->pdfWorkerWatcher.setFuture(worker.generatePreviews(this->pdfSearchResults, scaleText.toInt() / 100.));
 	ui->pdfProcessBar->setMaximum(this->pdfWorkerWatcher.progressMaximum());
 	ui->pdfProcessBar->setMinimum(this->pdfWorkerWatcher.progressMinimum());
-}
-
-void MainWindow::handleCancelledSearch()
-{
 }
 
 void MainWindow::handleSearchError(QString error)
