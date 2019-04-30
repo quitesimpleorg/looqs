@@ -9,6 +9,11 @@ class PdfPreview
 	QImage previewImage;
 	QString documentPath;
 	unsigned int page;
+
+	bool hasPreviewImage()
+	{
+		return !previewImage.isNull();
+	}
 };
 
 #endif // PDFPREVIEW_H
