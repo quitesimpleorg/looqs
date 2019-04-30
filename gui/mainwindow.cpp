@@ -120,7 +120,7 @@ void MainWindow::pdfPreviewReceived(PdfPreview preview)
 	label->setPixmap(QPixmap::fromImage(preview.previewImage));
 	label->setToolTip(preview.documentPath);
 	ui->scrollAreaWidgetContents->layout()->addWidget(label);
-	connect(label, &ClickLabel::clicked,
+	connect(label, &ClickLabel::leftClick,
 			[=]()
 			{
 				QSettings settings;
