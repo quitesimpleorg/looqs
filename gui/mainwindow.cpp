@@ -118,6 +118,7 @@ void MainWindow::pdfPreviewReceived(PdfPreview preview)
 {
 	ClickLabel *label = new ClickLabel();
 	label->setPixmap(QPixmap::fromImage(preview.previewImage));
+	label->setToolTip(preview.documentPath);
 	ui->scrollAreaWidgetContents->layout()->addWidget(label);
 	connect(label, &ClickLabel::clicked,
 			[=]()
