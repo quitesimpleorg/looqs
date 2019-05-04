@@ -13,9 +13,9 @@ QVector<PageData> PdfProcessor::process(const QByteArray &data) const
 	{
 		throw QSSGeneralException("Failed to process pdf data");
 	}
-	if(doc->isEncrypted() || doc->isLocked())
+	if(doc->isLocked())
 	{
-		throw QSSGeneralException("Doc is encrypted/locked");
+		throw QSSGeneralException("Doc is locked");
 	}
 
 	QRectF entirePage;
