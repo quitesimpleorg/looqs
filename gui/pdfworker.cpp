@@ -33,6 +33,7 @@ struct Renderer
 	{
 		this->scaleX = o.scaleX;
 		this->scaleY = o.scaleY;
+		this->maxTotalPreviewImageMemUsage = o.maxTotalPreviewImageMemUsage;
 	}
 
 	~Renderer()
@@ -105,6 +106,5 @@ QFuture<PdfPreview> PdfWorker::generatePreviews(const QVector<SearchResult> path
 
 	QSettings setting;
 	qsizetype maxPreviewImageMemUsage = setting.value("maxpreviewimagesmemory", 1024 * 1024 * 1024).toLongLong();
-
 	return QtConcurrent::mapped(previews, Renderer(scaleX, scaleY, maxPreviewImageMemUsage));
 }
