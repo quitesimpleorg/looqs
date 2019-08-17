@@ -25,8 +25,7 @@ int CommandSearch::handle(QStringList arguments)
 
 	QStringList files = parser.positionalArguments();
 	QString queryStrings = files.join(' ');
-
-	auto results = dbService->search(queryStrings);
+	auto results = dbService->search(QSSQuery::build(queryStrings));
 
 	for(SearchResult &result : results)
 	{
