@@ -16,7 +16,6 @@
 #include "clicklabel.h"
 #include "../shared/sqlitesearch.h"
 #include "../shared/qssgeneralexception.h"
-#include "../shared/qssquery.h"
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
@@ -164,7 +163,8 @@ void MainWindow::lineEditReturnPressed()
 		[&, q]()
 		{
 			SqliteSearch searcher(db);
-			return searcher.search(QSSQuery::build(q));
+			this->currentQuery = QSSQuery::build(q);
+			return searcher.search(this->currentQuery);
 		});
 	searchWatcher.setFuture(searchFuture);
 }
@@ -215,8 +215,22 @@ void MainWindow::makePdfPreview()
 	processedPdfPreviews = 0;
 	QString scaleText = ui->comboScale->currentText();
 	scaleText.chop(1);
+
+	QVector<QString> wordsToHighlight;
+	for(const Token &token : this->currentQuery.getTokens())
+	{
+		if(token.type == FILTER_CONTENT_CONTAINS)
+		{
+			auto splitted = token.value.split(" ");
+			for(QString &str : splitted)
+			{
+				wordsToHighlight.append(str);
+			}
+		}
+	}
 	PdfWorker worker;
-	this->pdfWorkerWatcher.setFuture(worker.generatePreviews(this->pdfSearchResults, scaleText.toInt() / 100.));
+	this->pdfWorkerWatcher.setFuture(
+		worker.generatePreviews(this->pdfSearchResults, wordsToHighlight, scaleText.toInt() / 100.));
 	ui->pdfProcessBar->setMaximum(this->pdfWorkerWatcher.progressMaximum());
 	ui->pdfProcessBar->setMinimum(this->pdfWorkerWatcher.progressMinimum());
 }

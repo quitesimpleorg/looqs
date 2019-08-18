@@ -6,6 +6,7 @@
 #include <QMutexLocker>
 #include <QtConcurrent/QtConcurrent>
 #include <QtConcurrent/QtConcurrentMap>
+#include <QPainter>
 #include <atomic>
 #include "pdfworker.h"
 
@@ -19,12 +20,13 @@ struct Renderer
 	QHash<QString, Poppler::Document *> documentcache;
 	qsizetype maxTotalPreviewImageMemUsage;
 	std::atomic<qsizetype> currentTotalPreviewImageMemUsage{0};
-
-	Renderer(double scaleX, double scaleY, qsizetype maxPreviewImageMemUsage)
+	QVector<QString> wordsToHighlight;
+	Renderer(double scaleX, double scaleY, qsizetype maxPreviewImageMemUsage, QVector<QString> wordsToHighlight)
 	{
 		this->scaleX = scaleX;
 		this->scaleY = scaleY;
 		this->maxTotalPreviewImageMemUsage = maxPreviewImageMemUsage;
+		this->wordsToHighlight = wordsToHighlight;
 	}
 
 	/*we need this one because std::atomic has none, but this is only a functor for
@@ -34,6 +36,7 @@ struct Renderer
 		this->scaleX = o.scaleX;
 		this->scaleY = o.scaleY;
 		this->maxTotalPreviewImageMemUsage = o.maxTotalPreviewImageMemUsage;
+		this->wordsToHighlight = o.wordsToHighlight;
 	}
 
 	~Renderer()
@@ -79,6 +82,16 @@ struct Renderer
 			}
 			Poppler::Page *pdfPage = doc->page(p);
 			QImage img = pdfPage->renderToImage(scaleX, scaleY);
+			for(QString &word : wordsToHighlight)
+			{
+				QList<QRectF> rects = pdfPage->search(word);
+				for(QRectF &rect : rects)
+				{
+					QPainter painter(&img);
+					painter.scale(scaleX / 72.0, scaleY / 72.0);
+					painter.fillRect(rect, QColor(255, 255, 0, 64));
+				}
+			}
 			result.previewImage = img;
 			currentTotalPreviewImageMemUsage += img.sizeInBytes();
 		}
@@ -86,7 +99,8 @@ struct Renderer
 	}
 };
 
-QFuture<PdfPreview> PdfWorker::generatePreviews(const QVector<SearchResult> paths, double scalefactor)
+QFuture<PdfPreview> PdfWorker::generatePreviews(const QVector<SearchResult> paths, QVector<QString> wordsToHighlight,
+												double scalefactor)
 {
 	QVector<PdfPreview> previews;
 
@@ -106,5 +120,5 @@ QFuture<PdfPreview> PdfWorker::generatePreviews(const QVector<SearchResult> path
 
 	QSettings setting;
 	qsizetype maxPreviewImageMemUsage = setting.value("maxpreviewimagesmemory", 1024 * 1024 * 1024).toLongLong();
-	return QtConcurrent::mapped(previews, Renderer(scaleX, scaleY, maxPreviewImageMemUsage));
+	return QtConcurrent::mapped(previews, Renderer(scaleX, scaleY, maxPreviewImageMemUsage, wordsToHighlight));
 }
