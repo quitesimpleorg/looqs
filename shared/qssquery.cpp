@@ -23,6 +23,11 @@ QueryType QSSQuery::getQueryType()
 	return static_cast<QueryType>(tokensMask & COMBINED);
 }
 
+void QSSQuery::addSortCondition(SortCondition sc)
+{
+	this->sortConditions.append(sc);
+}
+
 bool QSSQuery::checkParanthesis(QString expression)
 {
 	QStack<QChar> open;

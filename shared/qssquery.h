@@ -52,6 +52,7 @@ class QSSQuery
 	{
 		return tokensMask;
 	}
+	void addSortCondition(SortCondition sc);
 	static bool checkParanthesis(QString query);
 	static QSSQuery build(QString query);
 };
