@@ -19,9 +19,10 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+	QSettings settings;
 
 	db = QSqlDatabase::addDatabase("QSQLITE");
-	db.setDatabaseName(QSettings().value("dbpath").toString());
+	db.setDatabaseName(settings.value("dbpath").toString());
 	if(!db.open())
 	{
 		qDebug() << "failed to open database";
@@ -33,8 +34,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	ui->statusBar->addWidget(ui->lblSearchResults);
 	ui->statusBar->addWidget(ui->pdfProcessBar);
 	ui->pdfProcessBar->hide();
-	QSettings settings;
 	ui->comboScale->setCurrentText(settings.value("currentScale").toString());
+	pdfPreviewsPerPage = settings.value("pdfPreviewsPerPage", 20).toInt();
+	ui->spinPdfPreviewPage->setMinimum(1);
 }
 
 void MainWindow::connectSignals()
@@ -64,13 +66,20 @@ void MainWindow::connectSignals()
 	connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWindow::tabChanged);
 	connect(ui->comboScale, qOverload<const QString &>(&QComboBox::currentIndexChanged), this,
 			&MainWindow::comboScaleChanged);
+	connect(ui->spinPdfPreviewPage, qOverload<int>(&QSpinBox::valueChanged), this,
+			&MainWindow::spinPdfPreviewPageValueChanged);
+}
+
+void MainWindow::spinPdfPreviewPageValueChanged(int val)
+{
+	makePdfPreview(val);
 }
 
 void MainWindow::comboScaleChanged(QString text)
 {
 	QSettings scaleSetting;
 	scaleSetting.setValue("currentScale", ui->comboScale->currentText());
-	makePdfPreview();
+	makePdfPreview(ui->spinPdfPreviewPage->value());
 }
 bool MainWindow::pdfTabActive()
 {
@@ -104,7 +113,7 @@ void MainWindow::tabChanged()
 	{
 		if(pdfDirty)
 		{
-			makePdfPreview();
+			makePdfPreview(ui->spinPdfPreviewPage->value());
 		}
 		ui->pdfProcessBar->show();
 	}
@@ -195,13 +204,18 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	ui->treeResultsList->resizeColumnToContents(0);
 	ui->treeResultsList->resizeColumnToContents(1);
 	pdfDirty = !this->pdfSearchResults.empty();
+
+	int numpages = ceil(static_cast<double>(this->pdfSearchResults.size()) / pdfPreviewsPerPage);
+	ui->spinPdfPreviewPage->setMinimum(1);
+	ui->spinPdfPreviewPage->setMaximum(numpages);
+	ui->spinPdfPreviewPage->setValue(1);
 	if(pdfTabActive() && pdfDirty)
 	{
-		makePdfPreview();
+		makePdfPreview(1);
 	}
 }
 
-void MainWindow::makePdfPreview()
+void MainWindow::makePdfPreview(int page)
 {
 
 	this->pdfWorkerWatcher.cancel();
@@ -237,8 +251,10 @@ void MainWindow::makePdfPreview()
 		}
 	}
 	PdfWorker worker;
+	int end = pdfPreviewsPerPage;
+	int begin = page * pdfPreviewsPerPage - pdfPreviewsPerPage;
 	this->pdfWorkerWatcher.setFuture(
-		worker.generatePreviews(this->pdfSearchResults, wordsToHighlight, scaleText.toInt() / 100.));
+		worker.generatePreviews(this->pdfSearchResults.mid(begin, end), wordsToHighlight, scaleText.toInt() / 100.));
 	ui->pdfProcessBar->setMaximum(this->pdfWorkerWatcher.progressMaximum());
 	ui->pdfProcessBar->setMinimum(this->pdfWorkerWatcher.progressMinimum());
 }

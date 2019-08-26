@@ -36,13 +36,14 @@ class MainWindow : public QMainWindow
 	void add(QString path, unsigned int page);
 	QVector<SearchResult> pdfSearchResults;
 	void connectSignals();
-	void makePdfPreview();
+	void makePdfPreview(int page);
 	bool pdfTabActive();
 	void keyPressEvent(QKeyEvent *event) override;
 	unsigned int processedPdfPreviews;
 	void handleSearchResults(const QVector<SearchResult> &results);
 	void handleSearchError(QString error);
 	QSSQuery currentQuery;
+	int pdfPreviewsPerPage;
   private slots:
 	void lineEditReturnPressed();
 	void treeSearchItemActivated(QTreeWidgetItem *item, int i);
@@ -50,6 +51,7 @@ class MainWindow : public QMainWindow
 	void tabChanged();
 	void pdfPreviewReceived(PdfPreview preview);
 	void comboScaleChanged(QString text);
+	void spinPdfPreviewPageValueChanged(int val);
 };
 
 #endif // MAINWINDOW_H
