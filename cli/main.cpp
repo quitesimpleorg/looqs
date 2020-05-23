@@ -10,6 +10,7 @@
 #include <QSqlError>
 #include <QMap>
 #include <QDebug>
+#include <QSettings>
 #include <functional>
 #include <exception>
 #include "encodingdetector.h"
@@ -23,6 +24,8 @@
 #include "commandsearch.h"
 #include "databasefactory.h"
 #include "logger.h"
+#include "../shared/common.h"
+
 void printUsage(QString argv0)
 {
 	qInfo() << "Usage: " << argv0 << "command";
@@ -52,8 +55,9 @@ Command *commandFromName(QString name, SqliteDbService &dbService)
 
 int main(int argc, char *argv[])
 {
-	QCoreApplication app(argc, argv);
+	Common::setupAppInfo();
 
+	QCoreApplication app(argc, argv);
 	QStringList args = app.arguments();
 	QString argv0 = args.takeFirst();
 	if(args.length() < 1)
@@ -63,7 +67,8 @@ int main(int argc, char *argv[])
 	}
 
 	QString commandName = args.first();
-	QString connectionString = QProcessEnvironment::systemEnvironment().value("QSS_PATH");
+	QSettings settings;
+	QString connectionString = settings.value("dbpath").toString();
 	DatabaseFactory dbFactory(connectionString);
 	SqliteDbService dbService(dbFactory);
 	Command *cmd = commandFromName(commandName, dbService);
