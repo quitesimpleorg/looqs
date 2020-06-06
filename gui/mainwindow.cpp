@@ -49,6 +49,7 @@ void MainWindow::connectSignals()
 			{
 				try
 				{
+					this->ui->txtSearch->setEnabled(true);
 					auto results = searchWatcher.future().result();
 					handleSearchResults(results);
 				}
@@ -169,8 +170,7 @@ void MainWindow::lineEditReturnPressed()
 	}
 	// TODO: validate q;
 	ui->lblSearchResults->setText("Searching...");
-	searchWatcher.cancel();
-	searchWatcher.waitForFinished();
+	this->ui->txtSearch->setEnabled(false);
 	QFuture<QVector<SearchResult>> searchFuture = QtConcurrent::run(
 		[&, q]()
 		{
