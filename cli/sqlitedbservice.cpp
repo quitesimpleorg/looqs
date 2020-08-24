@@ -12,7 +12,7 @@ bool SqliteDbService::fileExistsInDatabase(QString path, qint64 mtime)
 	query.addBindValue(mtime);
 	if(!query.exec())
 	{
-		throw QSSGeneralException("Error while trying to query for file existance");
+		throw QSSGeneralException("Error while trying to query for file existance: " + query.lastError().text());
 	}
 	if(!query.next())
 	{
@@ -35,7 +35,7 @@ bool SqliteDbService::fileExistsInDatabase(QString path)
 	query.addBindValue(path);
 	if(!query.exec())
 	{
-		throw QSSGeneralException("Error while trying to query for file existance");
+		throw QSSGeneralException("Error while trying to query for file existance: " + query.lastError().text());
 	}
 	if(!query.next())
 	{
