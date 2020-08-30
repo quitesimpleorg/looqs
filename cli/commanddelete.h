@@ -10,7 +10,7 @@ class CommandDelete : public Command
 	int handle(QStringList arguments) override;
 
   private:
-	int removeNonExistent(bool verbose, bool dryRun, QString pattern);
+	int remove(QString pattern, bool onlyDeleted, bool verbose, bool dryRun);
 	int removePaths(const QStringList &paths, bool verbose, bool dryRun);
 };
 

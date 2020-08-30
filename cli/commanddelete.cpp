@@ -7,8 +7,9 @@
 #include "commanddelete.h"
 #include "logger.h"
 
-int CommandDelete::removeNonExistent(bool verbose, bool dryRun, QString pattern)
+int CommandDelete::remove(QString pattern, bool onlyDeleted, bool verbose, bool dryRun)
 {
+	int deleted = 0;
 	int offset = 0;
 	int limit = 1000;
 	QVector<FileData> files;
@@ -17,8 +18,14 @@ int CommandDelete::removeNonExistent(bool verbose, bool dryRun, QString pattern)
 	{
 		for(FileData &file : files)
 		{
-			QFileInfo fileInfo(file.absPath);
-			if(!fileInfo.exists())
+			if(onlyDeleted && QFileInfo::exists(file.absPath))
+			{
+				if(verbose)
+				{
+					Logger::info() << "Skipping " << file.absPath << " as the file exists on the file system" << endl;
+				}
+			}
+			else
 			{
 				if(!dryRun)
 				{
@@ -28,6 +35,7 @@ int CommandDelete::removeNonExistent(bool verbose, bool dryRun, QString pattern)
 						{
 							Logger::info() << "Deleted" << file.absPath << endl;
 						}
+						++deleted;
 					}
 					else
 					{
@@ -41,9 +49,17 @@ int CommandDelete::removeNonExistent(bool verbose, bool dryRun, QString pattern)
 				}
 			}
 		}
-
-		offset += limit;
+		if(dryRun)
+		{
+			offset += limit;
+		}
+		else
+		{
+			offset = offset + limit - deleted;
+		}
+		files.clear();
 		processedRows = this->dbService->getFiles(files, pattern, offset, limit);
+		deleted = 0;
 	}
 	return 0;
 }
@@ -89,9 +105,10 @@ int CommandDelete::handle(QStringList arguments)
 		{{{"v", "verbose"}, "Print path of the files while deleting them"},
 		 {{"n", "dry-run"}, "Only print which files would be deleted from the database, don't delete them"},
 		 {"pattern",
-		  "Only delete files from index matching the pattern, e. g. */.git/*. Only applies to --deleted or standalone.",
+		  "Only delete files from index matching the pattern, e. g. */.git/*. Can be used to restrict --deleted or "
+		  "standalone.",
 		  "pattern"},
-		 {"deleted", "Delete all files from the index that don't exist anymore"}});
+		 {"deleted", "Delete all files from the index that don't exist anymore. Can be restricted by --pattern."}});
 
 	parser.addHelpOption();
 	parser.addPositionalArgument("delete", "Delete paths from the index", "delete [paths...]");
@@ -99,13 +116,15 @@ int CommandDelete::handle(QStringList arguments)
 	parser.process(arguments);
 	bool verbose = parser.isSet("verbose");
 	bool dryRun = parser.isSet("dry-run");
+	bool deleted = parser.isSet("deleted");
 	QString pattern = parser.value("pattern");
-	if(parser.isSet("deleted"))
-	{
 
-		int result = removeNonExistent(verbose, dryRun, pattern);
+	if(deleted || !pattern.isEmpty())
+	{
+		int result = this->remove(pattern, deleted, verbose, dryRun);
 		if(result != 0)
 		{
+			Logger::error() << "Removal operation did not succeed" << endl;
 			return result;
 		}
 	}
