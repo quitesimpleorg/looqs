@@ -131,11 +131,13 @@ void MainWindow::pdfPreviewReceived(PdfPreview preview)
 	if(preview.hasPreviewImage())
 	{
 		ClickLabel *label = new ClickLabel();
+		QString docPath = preview.documentPath;
+		auto previewPage = preview.page;
 		label->setPixmap(QPixmap::fromImage(preview.previewImage));
 		label->setToolTip(preview.documentPath);
 		ui->scrollAreaWidgetContents->layout()->addWidget(label);
 		connect(label, &ClickLabel::leftClick,
-				[=]()
+				[docPath, previewPage]()
 				{
 					QSettings settings;
 					QString command = settings.value("pdfviewer").toString();
@@ -146,15 +148,15 @@ void MainWindow::pdfPreviewReceived(PdfPreview preview)
 						{
 							QString cmd = splitted[0];
 							QStringList args = splitted.mid(1);
-							args.replaceInStrings("%f", preview.documentPath);
-							args.replaceInStrings("%p", QString::number(preview.page));
+							args.replaceInStrings("%f", docPath);
+							args.replaceInStrings("%p", QString::number(previewPage));
 
 							QProcess::startDetached(cmd, args);
 						}
 					}
 					else
 					{
-						QDesktopServices::openUrl(QUrl::fromLocalFile(preview.documentPath));
+						QDesktopServices::openUrl(QUrl::fromLocalFile(docPath));
 					}
 				});
 	}
