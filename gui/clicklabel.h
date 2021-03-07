@@ -1,6 +1,7 @@
 #ifndef CLICKLABEL_H
 #define CLICKLABEL_H
 #include <QLabel>
+#include <QMenu>
 
 class ClickLabel : public QLabel
 {
@@ -9,6 +10,7 @@ class ClickLabel : public QLabel
 	using QLabel::QLabel;
   signals:
 	void leftClick();
+	void rightClick();
 
   protected:
 	void mousePressEvent(QMouseEvent *event);

@@ -7,5 +7,9 @@ void ClickLabel::mousePressEvent(QMouseEvent *event)
 	{
 		emit leftClick();
 	}
+	if(event->button() == Qt::RightButton)
+	{
+		emit rightClick();
+	}
 	return QLabel::mousePressEvent(event);
 }
