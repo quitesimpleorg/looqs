@@ -21,6 +21,7 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+	setWindowTitle(QCoreApplication::applicationName());
 	QSettings settings;
 
 	db = QSqlDatabase::addDatabase("QSQLITE");
