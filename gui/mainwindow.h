@@ -44,6 +44,7 @@ class MainWindow : public QMainWindow
 	void handleSearchError(QString error);
 	QSSQuery currentQuery;
 	int pdfPreviewsPerPage;
+	void createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo);
   private slots:
 	void lineEditReturnPressed();
 	void treeSearchItemActivated(QTreeWidgetItem *item, int i);

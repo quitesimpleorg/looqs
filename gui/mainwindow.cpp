@@ -160,6 +160,16 @@ void MainWindow::pdfPreviewReceived(PdfPreview preview)
 						QDesktopServices::openUrl(QUrl::fromLocalFile(docPath));
 					}
 				});
+		connect(label, &ClickLabel::rightClick,
+				[this, docPath, previewPage]()
+				{
+					QFileInfo fileInfo{docPath};
+					QMenu menu("labeRightClick", this);
+					createSearchResutlMenu(menu, fileInfo);
+					menu.addAction("Copy page number", [previewPage]
+								   { QGuiApplication::clipboard()->setText(QString::number(previewPage)); });
+					menu.exec(QCursor::pos());
+				});
 	}
 }
 
@@ -269,6 +279,20 @@ void MainWindow::handleSearchError(QString error)
 	ui->lblSearchResults->setText("Error:" + error);
 }
 
+void MainWindow::createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo)
+{
+	menu.addAction("Copy filename to clipboard",
+				   [&fileInfo] { QGuiApplication::clipboard()->setText(fileInfo.fileName()); });
+	menu.addAction("Copy full path to clipboard",
+				   [&fileInfo] { QGuiApplication::clipboard()->setText(fileInfo.absoluteFilePath()); });
+	menu.addAction("Open containing folder",
+				   [&fileInfo]
+				   {
+					   QString dir = fileInfo.absolutePath();
+					   QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
+				   });
+}
+
 void MainWindow::treeSearchItemActivated(QTreeWidgetItem *item, int i)
 {
 	QDesktopServices::openUrl(QUrl::fromLocalFile(item->text(1)));
@@ -281,16 +305,9 @@ void MainWindow::showSearchResultsContextMenu(const QPoint &point)
 	{
 		return;
 	}
-	QMenu menu("SearchResult", this);
-	menu.addAction("Copy filename to clipboard", [&] { QGuiApplication::clipboard()->setText(item->text(0)); });
-	menu.addAction("Copy full path to clipboard", [&] { QGuiApplication::clipboard()->setText(item->text(1)); });
-	menu.addAction("Open containing folder",
-				   [&]
-				   {
-					   QFileInfo pathinfo(item->text(1));
-					   QString dir = pathinfo.absolutePath();
-					   QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
-				   });
+	QFileInfo pathinfo(item->text(1));
+	QMenu menu("SearchResults", this);
+	createSearchResutlMenu(menu, pathinfo);
 	menu.exec(QCursor::pos());
 }
 
