@@ -198,10 +198,12 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 {
 	this->pdfSearchResults.clear();
 	ui->treeResultsList->clear();
-	ui->lblSearchResults->setText("Results: " + QString::number(results.size()) + " files");
+
+	bool hasDeleted = false;
 	for(const SearchResult &result : results)
 	{
 		QFileInfo pathInfo(result.fileData.absPath);
+
 		QString fileName = pathInfo.fileName();
 		QTreeWidgetItem *item = new QTreeWidgetItem(ui->treeResultsList);
 
@@ -211,9 +213,17 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 		item->setText(1, result.fileData.absPath);
 		item->setText(2, dt.toString(Qt::ISODate));
 		item->setText(3, this->locale().formattedDataSize(result.fileData.size));
-		if(result.fileData.absPath.endsWith(".pdf"))
+		bool exists = pathInfo.exists();
+		if(exists)
 		{
-			this->pdfSearchResults.append(result);
+			if(result.fileData.absPath.endsWith(".pdf"))
+			{
+				this->pdfSearchResults.append(result);
+			}
+		}
+		else
+		{
+			hasDeleted = true;
 		}
 	}
 	ui->treeResultsList->resizeColumnToContents(0);
@@ -228,6 +238,13 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	{
 		makePdfPreview(1);
 	}
+
+	QString statusText = "Results: " + QString::number(results.size()) + " files";
+	if(hasDeleted)
+	{
+		statusText += " WARNING: Some files don't exist anymore. No preview available for those. Index out of sync";
+	}
+	ui->lblSearchResults->setText(statusText);
 }
 
 void MainWindow::makePdfPreview(int page)
