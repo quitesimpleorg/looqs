@@ -51,7 +51,7 @@ class MainWindow : public QMainWindow
 	void showSearchResultsContextMenu(const QPoint &point);
 	void tabChanged();
 	void pdfPreviewReceived(PdfPreview preview);
-	void comboScaleChanged(QString text);
+	void comboScaleChanged(int i);
 	void spinPdfPreviewPageValueChanged(int val);
 };
 

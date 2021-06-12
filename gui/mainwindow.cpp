@@ -68,8 +68,7 @@ void MainWindow::connectSignals()
 	connect(ui->treeResultsList, &QTreeWidget::customContextMenuRequested, this,
 			&MainWindow::showSearchResultsContextMenu);
 	connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWindow::tabChanged);
-	connect(ui->comboScale, qOverload<const QString &>(&QComboBox::currentIndexChanged), this,
-			&MainWindow::comboScaleChanged);
+	connect(ui->comboScale, qOverload<int>(&QComboBox::currentIndexChanged), this, &MainWindow::comboScaleChanged);
 	connect(ui->spinPdfPreviewPage, qOverload<int>(&QSpinBox::valueChanged), this,
 			&MainWindow::spinPdfPreviewPageValueChanged);
 }
@@ -79,7 +78,7 @@ void MainWindow::spinPdfPreviewPageValueChanged(int val)
 	makePdfPreview(val);
 }
 
-void MainWindow::comboScaleChanged(QString text)
+void MainWindow::comboScaleChanged(int i)
 {
 	QSettings scaleSetting;
 	scaleSetting.setValue("currentScale", ui->comboScale->currentText());
