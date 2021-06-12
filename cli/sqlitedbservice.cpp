@@ -57,7 +57,7 @@ bool SqliteDbService::deleteFile(QString path)
 	bool result = query.exec();
 	if(!result)
 	{
-		Logger::error() << "Failed to delete file" << path << endl;
+		Logger::error() << "Failed to delete file" << path << Qt::endl;
 	}
 	return result;
 }
@@ -128,20 +128,20 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &
 
 	if(!db.transaction())
 	{
-		Logger::error() << "Failed to open transaction for " << absPath << " : " << db.lastError() << endl;
+		Logger::error() << "Failed to open transaction for " << absPath << " : " << db.lastError() << Qt::endl;
 		return DBFAIL;
 	}
 
 	if(!delQuery.exec())
 	{
-		Logger::error() << "Failed DELETE query" << delQuery.lastError() << endl;
+		Logger::error() << "Failed DELETE query" << delQuery.lastError() << Qt::endl;
 		db.rollback();
 		return DBFAIL;
 	}
 
 	if(!inserterQuery.exec())
 	{
-		Logger::error() << "Failed INSERT query" << inserterQuery.lastError() << endl;
+		Logger::error() << "Failed INSERT query" << inserterQuery.lastError() << Qt::endl;
 		db.rollback();
 		return DBFAIL;
 	}
@@ -157,7 +157,7 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &
 		if(!contentQuery.exec())
 		{
 			db.rollback();
-			Logger::error() << "Failed content insertion " << contentQuery.lastError() << endl;
+			Logger::error() << "Failed content insertion " << contentQuery.lastError() << Qt::endl;
 			return DBFAIL;
 		}
 	}
@@ -165,7 +165,7 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &
 	if(!db.commit())
 	{
 		db.rollback();
-		Logger::error() << "Failed to commit transaction for " << absPath << " : " << db.lastError() << endl;
+		Logger::error() << "Failed to commit transaction for " << absPath << " : " << db.lastError() << Qt::endl;
 		return DBFAIL;
 	}
 	return OK;

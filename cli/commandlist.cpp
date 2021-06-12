@@ -28,7 +28,7 @@ int CommandList::handle(QStringList arguments)
 
 	for(SearchResult &result : results)
 	{
-		Logger::info() << result.fileData.absPath << endl;
+		Logger::info() << result.fileData.absPath << Qt::endl;
 	}
 
 	return 0;

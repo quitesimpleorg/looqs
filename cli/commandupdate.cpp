@@ -64,7 +64,7 @@ int CommandUpdate::handle(QStringList arguments)
 					}
 					else
 					{
-						Logger::info() << "Would update" << fileData.absPath << endl;
+						Logger::info() << "Would update" << fileData.absPath << Qt::endl;
 					}
 				}
 			}
@@ -76,7 +76,8 @@ int CommandUpdate::handle(QStringList arguments)
 					{
 						if(!this->dbService->deleteFile(fileData.absPath))
 						{
-							Logger::error() << "Error: Failed to delete" << fileData.absPath << "from databas" << endl;
+							Logger::error()
+								<< "Error: Failed to delete" << fileData.absPath << "from databas" << Qt::endl;
 							if(!keepGoing)
 							{
 								return 1;
@@ -84,13 +85,13 @@ int CommandUpdate::handle(QStringList arguments)
 						}
 						if(verbose)
 						{
-							Logger::info() << "Deleted" << fileData.absPath << endl;
+							Logger::info() << "Deleted" << fileData.absPath << Qt::endl;
 						}
 					}
 					else
 					{
 
-						Logger::info() << "Would delete" << fileData.absPath << endl;
+						Logger::info() << "Would delete" << fileData.absPath << Qt::endl;
 					}
 				}
 			}
@@ -103,7 +104,7 @@ int CommandUpdate::handle(QStringList arguments)
 			if(!keepGoing)
 			{
 				Logger::error() << "Failed to update all files selected for updating. Updated" << updatedFilesCount
-								<< "out of" << shouldHaveUpdatedCount << "selected for upating" << endl;
+								<< "out of" << shouldHaveUpdatedCount << "selected for upating" << Qt::endl;
 				return 1;
 			}
 		}

@@ -59,7 +59,7 @@ int CommandAdd::handle(QStringList arguments)
 	if(processedFilesCount != numFilesCount)
 	{
 		Logger::error() << "Errors occured while trying to add files to the database. Processed " << processedFilesCount
-						<< "out of" << numFilesCount << "files" << endl;
+						<< "out of" << numFilesCount << "files" << Qt::endl;
 		return 1;
 	}
 

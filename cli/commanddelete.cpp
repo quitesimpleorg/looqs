@@ -22,7 +22,8 @@ int CommandDelete::remove(QString pattern, bool onlyDeleted, bool verbose, bool 
 			{
 				if(verbose)
 				{
-					Logger::info() << "Skipping " << file.absPath << " as the file exists on the file system" << endl;
+					Logger::info() << "Skipping " << file.absPath << " as the file exists on the file system"
+								   << Qt::endl;
 				}
 			}
 			else
@@ -33,19 +34,19 @@ int CommandDelete::remove(QString pattern, bool onlyDeleted, bool verbose, bool 
 					{
 						if(verbose)
 						{
-							Logger::info() << "Deleted" << file.absPath << endl;
+							Logger::info() << "Deleted" << file.absPath << Qt::endl;
 						}
 						++deleted;
 					}
 					else
 					{
-						Logger::error() << "Failed to delete:" << file.absPath << ", exiting." << endl;
+						Logger::error() << "Failed to delete:" << file.absPath << ", exiting." << Qt::endl;
 						return 1;
 					}
 				}
 				else
 				{
-					Logger::info() << "Would delete " << file.absPath << endl;
+					Logger::info() << "Would delete " << file.absPath << Qt::endl;
 				}
 			}
 		}
@@ -79,19 +80,19 @@ int CommandDelete::removePaths(const QStringList &paths, bool verbose, bool dryR
 				{
 					if(verbose)
 					{
-						Logger::info() << "Deleted" << absPath << endl;
+						Logger::info() << "Deleted" << absPath << Qt::endl;
 					}
 				}
 				else
 				{
-					Logger::error() << "Failed to delete:" << absPath << endl;
+					Logger::error() << "Failed to delete:" << absPath << Qt::endl;
 					result = 1;
 				}
 			}
 		}
 		else
 		{
-			Logger::error() << "No such file in database:" << absPath << endl;
+			Logger::error() << "No such file in database:" << absPath << Qt::endl;
 			result = 1;
 		}
 	}
@@ -124,7 +125,7 @@ int CommandDelete::handle(QStringList arguments)
 		int result = this->remove(pattern, deleted, verbose, dryRun);
 		if(result != 0)
 		{
-			Logger::error() << "Removal operation did not succeed" << endl;
+			Logger::error() << "Removal operation did not succeed" << Qt::endl;
 			return result;
 		}
 	}

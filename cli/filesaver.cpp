@@ -73,12 +73,12 @@ int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFile
 								  }
 								  if(verbose)
 								  {
-									  Logger::info() << "Processing " << path << endl;
+									  Logger::info() << "Processing " << path << Qt::endl;
 								  }
 								  SaveFileResult result = saverFunc(path);
 								  if(result == DBFAIL || result == PROCESSFAIL)
 								  {
-									  Logger::error() << "Failed to process " << path << endl;
+									  Logger::error() << "Failed to process " << path << Qt::endl;
 									  if(!keepGoing)
 									  {
 										  terminate = true;
@@ -92,11 +92,11 @@ int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFile
 										  if(result == SKIPPED)
 										  {
 											  Logger::info() << "Skipped" << path
-															 << "as it already exists in the database" << endl;
+															 << "as it already exists in the database" << Qt::endl;
 										  }
 										  else if(result == OK)
 										  {
-											  Logger::info() << "Added" << path << endl;
+											  Logger::info() << "Added" << path << Qt::endl;
 										  }
 									  }
 								  }
@@ -125,7 +125,7 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 		}
 		catch(LooqsGeneralException &e)
 		{
-			Logger::error() << "Error while processing" << absPath << ":" << e.message << endl;
+			Logger::error() << "Error while processing" << absPath << ":" << e.message << Qt::endl;
 			return PROCESSFAIL;
 		}
 	}
@@ -133,7 +133,7 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 	// Could happen if a file corrupted for example
 	if(pageData.isEmpty() && processor != nothingProcessor)
 	{
-		Logger::error() << "Could not get any content for " << absPath << endl;
+		Logger::error() << "Could not get any content for " << absPath << Qt::endl;
 	}
 
 	return this->dbService->saveFile(fileInfo, pageData);
