@@ -123,7 +123,7 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 				pageData = processor->process(Utils::readFile(absPath));
 			}
 		}
-		catch(QSSGeneralException &e)
+		catch(LooqsGeneralException &e)
 		{
 			Logger::error() << "Error while processing" << absPath << ":" << e.message << endl;
 			return PROCESSFAIL;

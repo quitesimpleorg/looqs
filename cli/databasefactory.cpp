@@ -16,7 +16,7 @@ QSqlDatabase DatabaseFactory::createNew()
 	if(!db.open())
 	{
 		Logger::error() << "Failed to open the database: " << this->connectionString << endl;
-		throw QSSGeneralException("Failed to create open new connection");
+		throw LooqsGeneralException("Failed to create open new connection");
 	}
 	return db;
 }
@@ -33,7 +33,7 @@ QSqlDatabase DatabaseFactory::forCurrentThread()
 	if(!db.open())
 	{
 		Logger::error() << "Failed to open the database: " << this->connectionString << endl;
-		throw QSSGeneralException("Failed to create open new connection");
+		throw LooqsGeneralException("Failed to create open new connection");
 	}
 	dbStore.setLocalData(db);
 	return db;

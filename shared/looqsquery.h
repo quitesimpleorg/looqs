@@ -1,8 +1,8 @@
-#ifndef QSSQUERY_H
-#define QSSQUERY_H
+#ifndef LOOQSQUERY_H
+#define LOOQSQUERY_H
 #include <QString>
 #include <QVector>
-#include "qssgeneralexception.h"
+#include "looqsgeneralexception.h"
 #include "token.h"
 /* Fields that can be queried or sorted */
 enum QueryField
@@ -34,7 +34,7 @@ enum QueryType
 	COMBINED = PATH_ONLY | CONTENT_ONLY
 };
 
-class QSSQuery
+class LooqsQuery
 {
   private:
 	/* Helper field to determine quertype as well as to quickly check what kind of filters etc.
@@ -54,7 +54,7 @@ class QSSQuery
 	}
 	void addSortCondition(SortCondition sc);
 	static bool checkParanthesis(QString query);
-	static QSSQuery build(QString query);
+	static LooqsQuery build(QString query);
 };
 
-#endif // QSSQUERY_H
+#endif // LOOQSQUERY_H

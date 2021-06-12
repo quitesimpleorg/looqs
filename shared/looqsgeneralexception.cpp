@@ -1,1 +1,1 @@
-#include "qssgeneralexception.h"
+#include "looqsgeneralexception.h"

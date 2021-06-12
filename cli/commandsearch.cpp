@@ -16,7 +16,7 @@ int CommandSearch::handle(QStringList arguments)
 
 	QStringList files = parser.positionalArguments();
 	QString queryStrings = files.join(' ');
-	QSSQuery query = QSSQuery::build(queryStrings);
+	LooqsQuery query = LooqsQuery::build(queryStrings);
 	bool reverse = parser.isSet("reverse");
 	if(reverse)
 	{

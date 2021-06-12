@@ -6,29 +6,29 @@
 #include <QDebug>
 #include <optional>
 #include <algorithm>
-#include "qssquery.h"
+#include "looqsquery.h"
 
-const QVector<Token> &QSSQuery::getTokens() const
+const QVector<Token> &LooqsQuery::getTokens() const
 {
 	return tokens;
 }
 
-const QVector<SortCondition> &QSSQuery::getSortConditions() const
+const QVector<SortCondition> &LooqsQuery::getSortConditions() const
 {
 	return sortConditions;
 }
 
-QueryType QSSQuery::getQueryType()
+QueryType LooqsQuery::getQueryType()
 {
 	return static_cast<QueryType>(tokensMask & COMBINED);
 }
 
-void QSSQuery::addSortCondition(SortCondition sc)
+void LooqsQuery::addSortCondition(SortCondition sc)
 {
 	this->sortConditions.append(sc);
 }
 
-bool QSSQuery::checkParanthesis(QString expression)
+bool LooqsQuery::checkParanthesis(QString expression)
 {
 	QStack<QChar> open;
 	QStack<QChar> close;
@@ -104,14 +104,14 @@ QVector<SortCondition> createSortConditions(QString sortExpression)
 		QStringList splitted = splitted_inner[i].split(" ");
 		if(splitted.length() < 1 || splitted.length() > 2)
 		{
-			throw QSSGeneralException("sort specifier must have format [field] (asc|desc)");
+			throw LooqsGeneralException("sort specifier must have format [field] (asc|desc)");
 		}
 
 		QString field = splitted[0];
 		auto queryField = fromString(field);
 		if(!queryField)
 		{
-			throw QSSGeneralException("Unknown sort field supplied");
+			throw LooqsGeneralException("Unknown sort field supplied");
 		}
 
 		SortOrder order;
@@ -128,7 +128,7 @@ QVector<SortCondition> createSortConditions(QString sortExpression)
 			}
 			else
 			{
-				throw QSSGeneralException("Unknown order specifier: " + order);
+				throw LooqsGeneralException("Unknown order specifier: " + order);
 			}
 		}
 		else
@@ -145,7 +145,7 @@ QVector<SortCondition> createSortConditions(QString sortExpression)
 	return result;
 }
 
-void QSSQuery::addToken(Token t)
+void LooqsQuery::addToken(Token t)
 {
 	tokens.append(t);
 	tokensMask |= t.type;
@@ -157,14 +157,14 @@ void QSSQuery::addToken(Token t)
  * thus, "Downloads zip" becomes essentailly "path.contains:(Downloads) AND path.contains:(zip)"
  *
  * TODO: It's a bit ugly still*/
-QSSQuery QSSQuery::build(QString expression)
+LooqsQuery LooqsQuery::build(QString expression)
 {
 	if(!checkParanthesis(expression))
 	{
-		throw QSSGeneralException("Invalid paranthesis");
+		throw LooqsGeneralException("Invalid paranthesis");
 	}
 
-	QSSQuery result;
+	LooqsQuery result;
 	// TODO: merge lonewords
 	QRegularExpression rx("((?<filtername>(\\.|\\w)+):(?<args>\\((?<innerargs>[^\\)]+)\\)|([\\w,])+)|(?<boolean>AND|OR)"
 						  "|(?<negation>!)|(?<bracket>\\(|\\))|(?<loneword>\\w+))");
@@ -185,11 +185,11 @@ QSSQuery QSSQuery::build(QString expression)
 		{
 			if(previousWasBool())
 			{
-				throw QSSGeneralException("Can't have two booleans following each other");
+				throw LooqsGeneralException("Can't have two booleans following each other");
 			}
 			if(previousWas(NEGATION))
 			{
-				throw QSSGeneralException("Can't have a negation preceeding a boolean");
+				throw LooqsGeneralException("Can't have a negation preceeding a boolean");
 			}
 			if(boolean == "AND")
 			{
@@ -204,7 +204,7 @@ QSSQuery QSSQuery::build(QString expression)
 		{
 			if(previousWas(NEGATION))
 			{
-				throw QSSGeneralException("Can't have two negations following each other");
+				throw LooqsGeneralException("Can't have two negations following each other");
 			}
 			if(!previousWasBool())
 			{
@@ -274,7 +274,7 @@ QSSQuery QSSQuery::build(QString expression)
 			{
 				if(!result.sortConditions.empty())
 				{
-					throw QSSGeneralException("Two sort statements are illegal");
+					throw LooqsGeneralException("Two sort statements are illegal");
 				}
 				// TODO: hack, since we are not a "filter", we must remove a preceeding (implicit) boolean
 				if(result.tokens.last().type & BOOL == BOOL)
@@ -286,7 +286,7 @@ QSSQuery QSSQuery::build(QString expression)
 			}
 			else
 			{
-				throw QSSGeneralException("Unknown filter provided!");
+				throw LooqsGeneralException("Unknown filter provided!");
 			}
 			result.addToken(Token(tokenType, value));
 		}
@@ -298,7 +298,7 @@ QSSQuery QSSQuery::build(QString expression)
 
 	if(!contentsearch && sortsForContent)
 	{
-		throw QSSGeneralException("We cannot sort by text if we don't search for it");
+		throw LooqsGeneralException("We cannot sort by text if we don't search for it");
 	}
 
 	return result;

@@ -12,7 +12,7 @@ bool SqliteDbService::fileExistsInDatabase(QString path, qint64 mtime)
 	query.addBindValue(mtime);
 	if(!query.exec())
 	{
-		throw QSSGeneralException("Error while trying to query for file existance: " + query.lastError().text());
+		throw LooqsGeneralException("Error while trying to query for file existance: " + query.lastError().text());
 	}
 	if(!query.next())
 	{
@@ -21,7 +21,7 @@ bool SqliteDbService::fileExistsInDatabase(QString path, qint64 mtime)
 	return query.value(0).toBool();
 }
 
-QVector<SearchResult> SqliteDbService::search(const QSSQuery &query)
+QVector<SearchResult> SqliteDbService::search(const LooqsQuery &query)
 {
 	auto connection = dbFactory->forCurrentThread();
 	SqliteSearch searcher(connection);
@@ -35,7 +35,7 @@ bool SqliteDbService::fileExistsInDatabase(QString path)
 	query.addBindValue(path);
 	if(!query.exec())
 	{
-		throw QSSGeneralException("Error while trying to query for file existance: " + query.lastError().text());
+		throw LooqsGeneralException("Error while trying to query for file existance: " + query.lastError().text());
 	}
 	if(!query.next())
 	{
@@ -82,7 +82,7 @@ int SqliteDbService::getFiles(QVector<FileData> &results, QString wildCardPatter
 	query.setForwardOnly(true);
 	if(!query.exec())
 	{
-		throw QSSGeneralException("Error while trying to retrieve files from database: " + query.lastError().text());
+		throw LooqsGeneralException("Error while trying to retrieve files from database: " + query.lastError().text());
 	}
 
 	// TODO: port this to QRegularExpression once >5.12 gets more widespread because of this bug

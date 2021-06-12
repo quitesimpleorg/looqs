@@ -1,6 +1,6 @@
 #include <QDataStream>
 #include "encodingdetector.h"
-#include <qssgeneralexception.h>
+#include <looqsgeneralexception.h>
 EncodingDetector::EncodingDetector()
 {
 }
@@ -11,7 +11,7 @@ QString EncodingDetector::detectEncoding(const QByteArray &data) const
 	if(uchardet_handle_data(detector, data.data(), data.size()) != 0)
 	{
 		uchardet_delete(detector);
-		throw QSSGeneralException("Decoder failed");
+		throw LooqsGeneralException("Decoder failed");
 	}
 	uchardet_data_end(detector);
 	QString encoding = uchardet_get_charset(detector);
@@ -30,13 +30,13 @@ QString EncodingDetector::detectEncoding(QDataStream &s) const
 		{
 			uchardet_delete(detector);
 
-			throw QSSGeneralException("Decoder failed");
+			throw LooqsGeneralException("Decoder failed");
 		}
 	}
 	if(n == -1)
 	{
 		uchardet_delete(detector);
-		throw QSSGeneralException("Read failed");
+		throw LooqsGeneralException("Read failed");
 	}
 	uchardet_data_end(detector);
 	QString encoding = uchardet_get_charset(detector);

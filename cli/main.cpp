@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	{
 		Common::ensureConfigured();
 	}
-	catch(QSSGeneralException &e)
+	catch(LooqsGeneralException &e)
 	{
 		Logger::error() << "Error: " << e.message;
 		return 1;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 		{
 			return cmd->handle(args);
 		}
-		catch(const QSSGeneralException &e)
+		catch(const LooqsGeneralException &e)
 		{
 			Logger::error() << "Exception caught, message: " << e.message << endl;
 		}

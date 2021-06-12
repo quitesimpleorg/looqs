@@ -5,7 +5,7 @@
 #include <QStringList>
 #include <QDebug>
 #include "sqlitesearch.h"
-#include "qssgeneralexception.h"
+#include "looqsgeneralexception.h"
 
 SqliteSearch::SqliteSearch(QSqlDatabase &db)
 {
@@ -46,7 +46,7 @@ QString SqliteSearch::createSortSql(const QVector<SortCondition> sortConditions)
 		QString field = fieldToColumn(sc.field);
 		if(field == "")
 		{
-			throw QSSGeneralException("Unknown sort field supplied");
+			throw LooqsGeneralException("Unknown sort field supplied");
 		}
 		if(sc.order == DESC)
 		{
@@ -119,10 +119,10 @@ QPair<QString, QVector<QString>> SqliteSearch::createSql(const Token &token)
 				"rank) ",
 				{value}};
 	}
-	throw QSSGeneralException("Unknown token passed (should not happen)");
+	throw LooqsGeneralException("Unknown token passed (should not happen)");
 }
 
-QSqlQuery SqliteSearch::makeSqlQuery(const QSSQuery &query)
+QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 {
 	QString whereSql;
 	QString joinSql;
@@ -130,7 +130,7 @@ QSqlQuery SqliteSearch::makeSqlQuery(const QSSQuery &query)
 	bool isContentSearch = query.getTokensMask() & FILTER_CONTENT == FILTER_CONTENT;
 	if(query.getTokens().isEmpty())
 	{
-		throw QSSGeneralException("Nothing to search for supplied");
+		throw LooqsGeneralException("Nothing to search for supplied");
 	}
 
 	for(const Token &token : query.getTokens())
@@ -185,7 +185,7 @@ QSqlQuery SqliteSearch::makeSqlQuery(const QSSQuery &query)
 	return dbquery;
 }
 
-QVector<SearchResult> SqliteSearch::search(const QSSQuery &query)
+QVector<SearchResult> SqliteSearch::search(const LooqsQuery &query)
 {
 	QVector<SearchResult> results;
 	QSqlQuery dbQuery = makeSqlQuery(query);
@@ -195,7 +195,7 @@ QVector<SearchResult> SqliteSearch::search(const QSSQuery &query)
 
 		qDebug() << dbQuery.lastError();
 		qDebug() << dbQuery.executedQuery();
-		throw QSSGeneralException("SQL Error: " + dbQuery.lastError().text());
+		throw LooqsGeneralException("SQL Error: " + dbQuery.lastError().text());
 	}
 
 	while(dbQuery.next())

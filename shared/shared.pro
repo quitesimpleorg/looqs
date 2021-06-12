@@ -25,16 +25,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += sqlitesearch.cpp \
-    qssgeneralexception.cpp \
-    qssquery.cpp \
-    common.cpp
+    looqsgeneralexception.cpp \
+    common.cpp \
+    looqsquery.cpp
 
 HEADERS += sqlitesearch.h \
     filedata.h \
+    looqsgeneralexception.h \
+    looqsquery.h \
     searchresult.h \
-    qssgeneralexception.h \
     token.h \
-    qssquery.h \
     common.h
 unix {
     target.path = /usr/lib

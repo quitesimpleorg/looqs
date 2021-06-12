@@ -27,7 +27,7 @@ class SqliteDbService
 	bool deleteFile(QString path);
 	bool fileExistsInDatabase(QString path);
 	bool fileExistsInDatabase(QString path, qint64 mtime);
-	QVector<SearchResult> search(const QSSQuery &query);
+	QVector<SearchResult> search(const LooqsQuery &query);
 };
 
 #endif // SQLITEDBSERVICE_H

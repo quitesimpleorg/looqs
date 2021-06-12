@@ -5,7 +5,7 @@
 #include <QByteArray>
 #include <QTextStream>
 #include <QDebug>
-#include "qssgeneralexception.h"
+#include "looqsgeneralexception.h"
 
 class Utils
 {

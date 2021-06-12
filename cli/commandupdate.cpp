@@ -15,8 +15,8 @@ int CommandUpdate::handle(QStringList arguments)
 		 {"pattern", "Only consider to update files in the index matching the pattern, e. g. */.git/*.", "pattern"},
 		 {{"d", "delete"}, "If a file does not exist anymore, delete it"},
 		 {{"c", "continue"},
-		  "Continue adding files, don't exit on first error. If this option is not given, qss will exit asap, but it's "
-		  "possible that a few files will still be processed. "
+		  "Continue adding files, don't exit on first error. If this option is not given, looqs will exit asap, but "
+		  "it's possible that a few files will still be processed. "
 		  "Set -t 1 to avoid this behavior, but processing will be slower."},
 		 {{"a", "all"}, "On error, no files should be updated, even already processed ones"},
 		 {{"t", "threads"}, "Number of threads to use.", "threads"}
@@ -35,7 +35,7 @@ int CommandUpdate::handle(QStringList arguments)
 
 	if(parser.isSet("all"))
 	{
-		throw QSSGeneralException("To be implemented");
+		throw LooqsGeneralException("To be implemented");
 	}
 	if(parser.isSet("threads"))
 	{

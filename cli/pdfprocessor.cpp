@@ -11,11 +11,11 @@ QVector<PageData> PdfProcessor::process(const QByteArray &data) const
 	QScopedPointer<Poppler::Document> doc(Poppler::Document::loadFromData(data));
 	if(doc.isNull())
 	{
-		throw QSSGeneralException("Failed to process pdf data");
+		throw LooqsGeneralException("Failed to process pdf data");
 	}
 	if(doc->isLocked())
 	{
-		throw QSSGeneralException("Doc is locked");
+		throw LooqsGeneralException("Doc is locked");
 	}
 
 	QRectF entirePage;

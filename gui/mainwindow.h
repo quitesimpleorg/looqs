@@ -9,7 +9,7 @@
 #include <QFutureWatcher>
 #include <QSqlDatabase>
 #include "pdfworker.h"
-#include "../shared/qssquery.h"
+#include "../shared/looqsquery.h"
 namespace Ui
 {
 class MainWindow;
@@ -42,7 +42,7 @@ class MainWindow : public QMainWindow
 	unsigned int processedPdfPreviews;
 	void handleSearchResults(const QVector<SearchResult> &results);
 	void handleSearchError(QString error);
-	QSSQuery currentQuery;
+	LooqsQuery currentQuery;
 	int pdfPreviewsPerPage;
 	void createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo);
   private slots:

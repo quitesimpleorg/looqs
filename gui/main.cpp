@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	{
 		Common::ensureConfigured();
 	}
-	catch(QSSGeneralException &e)
+	catch(LooqsGeneralException &e)
 	{
 		qDebug() << e.message;
 		QMessageBox::critical(nullptr, "Error", e.message);

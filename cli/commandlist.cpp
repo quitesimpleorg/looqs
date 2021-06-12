@@ -19,12 +19,12 @@ int CommandList::handle(QStringList arguments)
 	bool reverse = parser.isSet("reverse");
 	if(reverse)
 	{
-		throw QSSGeneralException("Reverse option to be implemented");
+		throw LooqsGeneralException("Reverse option to be implemented");
 	}
 
 	QStringList files = parser.positionalArguments();
 	QString queryStrings = files.join(' ');
-	auto results = dbService->search(QSSQuery::build(queryStrings));
+	auto results = dbService->search(LooqsQuery::build(queryStrings));
 
 	for(SearchResult &result : results)
 	{

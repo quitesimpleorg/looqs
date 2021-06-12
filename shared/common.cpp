@@ -7,7 +7,7 @@
 #include <QSqlError>
 #include <QTextStream>
 #include <QDebug>
-#include "qssgeneralexception.h"
+#include "looqsgeneralexception.h"
 #include "common.h"
 
 #define SETTINGS_KEY_DBPATH "dbpath"
@@ -66,13 +66,13 @@ void Common::ensureConfigured()
 		{
 			if(!dir.mkpath(dbpath))
 			{
-				throw QSSGeneralException("Failed to create dbpath directory");
+				throw LooqsGeneralException("Failed to create dbpath directory");
 			}
 		}
-		dbpath += "/qss.sqlite";
+		dbpath += "/looqs.sqlite";
 		if(!initSqliteDatabase(dbpath))
 		{
-			throw QSSGeneralException("Failed to initialize sqlite database");
+			throw LooqsGeneralException("Failed to initialize sqlite database");
 		}
 		settings.setValue(SETTINGS_KEY_FIRSTRUN, false);
 		settings.setValue(SETTINGS_KEY_DBPATH, dbpath);
@@ -83,7 +83,7 @@ void Common::ensureConfigured()
 		QString dbpath = databasePath();
 		if(!QFile::exists(dbpath))
 		{
-			throw QSSGeneralException("Database " + dbpath + " was not found");
+			throw LooqsGeneralException("Database " + dbpath + " was not found");
 		}
 	}
 }
@@ -92,7 +92,7 @@ void Common::setupAppInfo()
 {
 	QCoreApplication::setOrganizationName("quitesimple.org");
 	QCoreApplication::setOrganizationDomain("quitesimple.org");
-	QCoreApplication::setApplicationName("qss");
+	QCoreApplication::setApplicationName("looqs");
 }
 
 QString Common::databasePath()

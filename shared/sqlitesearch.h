@@ -4,17 +4,17 @@
 #include <QPair>
 #include "searchresult.h"
 #include "token.h"
-#include "../shared/qssquery.h"
+#include "../shared/looqsquery.h"
 class SqliteSearch
 {
 
   public:
 	SqliteSearch(QSqlDatabase &db);
-	QVector<SearchResult> search(const QSSQuery &query);
+	QVector<SearchResult> search(const LooqsQuery &query);
 
   private:
 	QSqlDatabase *db;
-	QSqlQuery makeSqlQuery(const QSSQuery &query);
+	QSqlQuery makeSqlQuery(const LooqsQuery &query);
 	QString fieldToColumn(QueryField field);
 	QPair<QString, QVector<QString>> createSql(const Token &token);
 	QString createSortSql(const QVector<SortCondition> sortConditions);

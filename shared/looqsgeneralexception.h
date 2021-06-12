@@ -1,13 +1,13 @@
-#ifndef QSSGENERALEXCEPTION_H
-#define QSSGENERALEXCEPTION_H
+#ifndef LOOQSGENERALEXCEPTION_H
+#define LOOQSGENERALEXCEPTION_H
 
 #include <QException>
 
-class QSSGeneralException : public QException
+class LooqsGeneralException : public QException
 {
   public:
 	QString message;
-	QSSGeneralException(QString message)
+	LooqsGeneralException(QString message)
 	{
 		this->message = message;
 	}
@@ -15,10 +15,10 @@ class QSSGeneralException : public QException
 	{
 		throw *this;
 	}
-	QSSGeneralException *clone() const override
+	LooqsGeneralException *clone() const override
 	{
-		return new QSSGeneralException(*this);
+		return new LooqsGeneralException(*this);
 	}
 };
 
-#endif // QSSGENERALEXCEPTION_H
+#endif // LOOQSGENERALEXCEPTION_H

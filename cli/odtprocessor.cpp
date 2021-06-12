@@ -5,7 +5,7 @@
 
 QVector<PageData> OdtProcessor::process(const QByteArray &data) const
 {
-	throw QSSGeneralException("Not implemented yet");
+	throw LooqsGeneralException("Not implemented yet");
 }
 
 QVector<PageData> OdtProcessor::process(QString path) const
@@ -14,12 +14,12 @@ QVector<PageData> OdtProcessor::process(QString path) const
 	zipFile.setFileName("content.xml");
 	if(!zipFile.open(QIODevice::ReadOnly))
 	{
-		throw QSSGeneralException("Error while opening file " + path);
+		throw LooqsGeneralException("Error while opening file " + path);
 	}
 	QByteArray entireContent = zipFile.readAll();
 	if(entireContent.isEmpty())
 	{
-		throw QSSGeneralException("Error while reading content.xml of " + path);
+		throw LooqsGeneralException("Error while reading content.xml of " + path);
 	}
 	TagStripperProcessor tsp;
 	return tsp.process(entireContent);
