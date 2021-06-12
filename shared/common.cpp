@@ -39,7 +39,6 @@ bool Common::initSqliteDatabase(QString path)
 	while(!stream.atEnd())
 	{
 		QString sql = stream.readLine();
-		qDebug() << sql;
 		QSqlQuery sqlQuery;
 		if(!sqlQuery.exec(sql))
 		{
