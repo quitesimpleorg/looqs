@@ -277,7 +277,7 @@ LooqsQuery LooqsQuery::build(QString expression)
 					throw LooqsGeneralException("Two sort statements are illegal");
 				}
 				// TODO: hack, since we are not a "filter", we must remove a preceeding (implicit) boolean
-				if(result.tokens.last().type & BOOL == BOOL)
+				if((result.tokens.last().type & BOOL) == BOOL)
 				{
 					result.tokens.pop_back();
 				}
@@ -292,7 +292,7 @@ LooqsQuery LooqsQuery::build(QString expression)
 		}
 	}
 
-	bool contentsearch = result.getTokensMask() & FILTER_CONTENT == FILTER_CONTENT;
+	bool contentsearch = (result.getTokensMask() & FILTER_CONTENT) == FILTER_CONTENT;
 	bool sortsForContent = std::any_of(result.sortConditions.begin(), result.sortConditions.end(),
 									   [](SortCondition c) { return c.field == CONTENT_TEXT; });
 

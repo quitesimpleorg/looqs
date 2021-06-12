@@ -127,7 +127,7 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 	QString whereSql;
 	QString joinSql;
 	QVector<QString> bindValues;
-	bool isContentSearch = query.getTokensMask() & FILTER_CONTENT == FILTER_CONTENT;
+	bool isContentSearch = (query.getTokensMask() & FILTER_CONTENT) == FILTER_CONTENT;
 	if(query.getTokens().isEmpty())
 	{
 		throw LooqsGeneralException("Nothing to search for supplied");
