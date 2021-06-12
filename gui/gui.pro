@@ -8,7 +8,7 @@ QT       += core concurrent gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++17
-TARGET = qss-gui
+TARGET = looqs-gui
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
