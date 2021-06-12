@@ -39,7 +39,7 @@ class LooqsQuery
   private:
 	/* Helper field to determine quertype as well as to quickly check what kind of filters etc.
 	 * are being used in this query*/
-	int tokensMask;
+	int tokensMask = 0;
 	QVector<Token> tokens;
 	QVector<SortCondition> sortConditions;
 	void addToken(Token t);
