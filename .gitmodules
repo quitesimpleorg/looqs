@@ -1,0 +1,3 @@
+[submodule "submodules/qssb.h"]
+	path = submodules/qssb.h
+	url = https://gitea.quitesimple.org/crtxcr/qssb.h
