@@ -10,6 +10,8 @@ enum DataSource
 	ARRAY
 };
 
+#define NOTHING_PROCESSED 4
+
 class Processor
 {
   public:

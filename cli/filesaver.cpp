@@ -1,6 +1,7 @@
 #include <QSqlError>
 #include <QDateTime>
 #include <QtConcurrentMap>
+#include <QProcess>
 #include <functional>
 #include "filesaver.h"
 #include "processor.h"
@@ -13,18 +14,6 @@
 #include "odsprocessor.h"
 #include "utils.h"
 #include "logger.h"
-static DefaultTextProcessor *defaultTextProcessor = new DefaultTextProcessor();
-static TagStripperProcessor *tagStripperProcessor = new TagStripperProcessor();
-static NothingProcessor *nothingProcessor = new NothingProcessor();
-static OdtProcessor *odtProcessor = new OdtProcessor();
-static OdsProcessor *odsProcessor = new OdsProcessor();
-
-static QMap<QString, Processor *> processors{
-	{"pdf", new PdfProcessor()},	{"txt", defaultTextProcessor}, {"md", defaultTextProcessor},
-	{"py", defaultTextProcessor},	{"xml", nothingProcessor},	   {"html", tagStripperProcessor},
-	{"java", defaultTextProcessor}, {"js", defaultTextProcessor},  {"cpp", defaultTextProcessor},
-	{"c", defaultTextProcessor},	{"sql", defaultTextProcessor}, {"odt", odtProcessor},
-	{"ods", odsProcessor}};
 
 FileSaver::FileSaver(SqliteDbService &dbService)
 {
@@ -106,32 +95,47 @@ int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFile
 
 SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 {
-	Processor *processor = processors.value(fileInfo.suffix(), nothingProcessor);
 	QVector<PageData> pageData;
 	QString absPath = fileInfo.absoluteFilePath();
 
+	int status = -1;
 	if(fileInfo.isFile())
 	{
-		try
+		QProcess process;
+		QStringList args;
+		args << "process" << absPath;
+		process.setProcessChannelMode(QProcess::ForwardedErrorChannel);
+		process.start("/proc/self/exe", args);
+		process.waitForStarted();
+		process.waitForFinished();
+
+		/* TODO: This is suboptimal as it eats lots of mem
+		 * but avoids a weird QDataStream/QProcess behaviour
+		 * where it thinks the process has ended when it has not...
+		 *
+		 * Also, there seem to be issues with reads not being blocked, so
+		 * the only reliable way appears to be waiting until the process
+		 * finishes.
+		 */
+		QDataStream in(process.readAllStandardOutput());
+		while(!in.atEnd())
 		{
-			if(processor->PREFERED_DATA_SOURCE == FILEPATH)
-			{
-				pageData = processor->process(absPath);
-			}
-			else
-			{
-				pageData = processor->process(Utils::readFile(absPath));
-			}
+			PageData pd;
+			in >> pd;
+			pageData.append(pd);
 		}
-		catch(LooqsGeneralException &e)
+		status = process.exitCode();
+		if(status != 0)
 		{
-			Logger::error() << "Error while processing" << absPath << ":" << e.message << Qt::endl;
+			Logger::error() << "Error while processing" << absPath << ":"
+							<< "Exit code " << status << Qt::endl;
+
 			return PROCESSFAIL;
 		}
 	}
 
 	// Could happen if a file corrupted for example
-	if(pageData.isEmpty() && processor != nothingProcessor)
+	if(pageData.isEmpty() && status != NOTHING_PROCESSED)
 	{
 		Logger::error() << "Could not get any content for " << absPath << Qt::endl;
 	}

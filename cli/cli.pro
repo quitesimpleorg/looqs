@@ -18,10 +18,12 @@ LIBS += -luchardet -lpoppler-qt5 -lquazip5
 SOURCES += \
         main.cpp \
     encodingdetector.cpp \
+    pagedata.cpp \
     processor.cpp \
     pdfprocessor.cpp \
     defaulttextprocessor.cpp \
     commandadd.cpp \
+    sandboxedprocessor.cpp \
     tagstripperprocessor.cpp \
     nothingprocessor.cpp \
     odtprocessor.cpp \
@@ -44,6 +46,7 @@ HEADERS += \
     defaulttextprocessor.h \
     command.h \
     commandadd.h \
+    sandboxedprocessor.h \
     tagstripperprocessor.h \
     nothingprocessor.h \
     odtprocessor.h \

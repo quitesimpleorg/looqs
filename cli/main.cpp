@@ -24,6 +24,7 @@
 #include "commandsearch.h"
 #include "databasefactory.h"
 #include "logger.h"
+#include "sandboxedprocessor.h"
 #include "../shared/common.h"
 
 void printUsage(QString argv0)
@@ -59,6 +60,7 @@ int main(int argc, char *argv[])
 	QCoreApplication app(argc, argv);
 	QStringList args = app.arguments();
 	QString argv0 = args.takeFirst();
+
 	if(args.length() < 1)
 	{
 		printUsage(argv0);
@@ -74,11 +76,24 @@ int main(int argc, char *argv[])
 		Logger::error() << "Error: " << e.message;
 		return 1;
 	}
+	qRegisterMetaType<PageData>();
 
 	QString connectionString = Common::databasePath();
 	DatabaseFactory dbFactory(connectionString);
 	SqliteDbService dbService(dbFactory);
 	QString commandName = args.first();
+	if(commandName == "process")
+	{
+		if(args.length() < 1)
+		{
+			qDebug() << "Filename is required";
+			return 1;
+		}
+
+		QString file = args.at(1);
+		SandboxedProcessor processor(file);
+		return processor.process();
+	}
 	Command *cmd = commandFromName(commandName, dbService);
 	if(cmd != nullptr)
 	{
