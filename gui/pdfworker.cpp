@@ -103,6 +103,5 @@ QFuture<PdfPreview> PdfWorker::generatePreviews(const QVector<SearchResult> path
 	double scaleX = QGuiApplication::primaryScreen()->physicalDotsPerInchX() * scalefactor;
 	double scaleY = QGuiApplication::primaryScreen()->physicalDotsPerInchY() * scalefactor;
 
-	QSettings setting;
 	return QtConcurrent::mapped(previews, Renderer(scaleX, scaleY, wordsToHighlight));
 }
