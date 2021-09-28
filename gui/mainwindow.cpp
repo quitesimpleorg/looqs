@@ -18,10 +18,11 @@
 #include "../shared/looqsgeneralexception.h"
 #include "../shared/common.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent, IPCClient &client) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
 	setWindowTitle(QCoreApplication::applicationName());
+	this->ipcClient = &client;
 	QSettings settings;
 
 	db = QSqlDatabase::addDatabase("QSQLITE");
@@ -136,29 +137,7 @@ void MainWindow::pdfPreviewReceived(PdfPreview preview)
 		label->setPixmap(QPixmap::fromImage(preview.previewImage));
 		label->setToolTip(preview.documentPath);
 		ui->scrollAreaWidgetContents->layout()->addWidget(label);
-		connect(label, &ClickLabel::leftClick,
-				[docPath, previewPage]()
-				{
-					QSettings settings;
-					QString command = settings.value("pdfviewer").toString();
-					if(command != "" && command.contains("%p") && command.contains("%f"))
-					{
-						QStringList splitted = command.split(" ");
-						if(splitted.size() > 1)
-						{
-							QString cmd = splitted[0];
-							QStringList args = splitted.mid(1);
-							args.replaceInStrings("%f", docPath);
-							args.replaceInStrings("%p", QString::number(previewPage));
-
-							QProcess::startDetached(cmd, args);
-						}
-					}
-					else
-					{
-						QDesktopServices::openUrl(QUrl::fromLocalFile(docPath));
-					}
-				});
+		connect(label, &ClickLabel::leftClick, [this, docPath, previewPage]() { ipcDocOpen(docPath, previewPage); });
 		connect(label, &ClickLabel::rightClick,
 				[this, docPath, previewPage]()
 				{
@@ -301,17 +280,27 @@ void MainWindow::createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo)
 				   [&fileInfo] { QGuiApplication::clipboard()->setText(fileInfo.fileName()); });
 	menu.addAction("Copy full path to clipboard",
 				   [&fileInfo] { QGuiApplication::clipboard()->setText(fileInfo.absoluteFilePath()); });
-	menu.addAction("Open containing folder",
-				   [&fileInfo]
-				   {
-					   QString dir = fileInfo.absolutePath();
-					   QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
-				   });
+	menu.addAction("Open containing folder", [this, &fileInfo] { this->ipcFileOpen(fileInfo.absolutePath()); });
+}
+
+void MainWindow::ipcDocOpen(QString path, int num)
+{
+	QStringList args;
+	args << path;
+	args << QString::number(num);
+	this->ipcClient->sendCommand(DocOpen, args);
+}
+
+void MainWindow::ipcFileOpen(QString path)
+{
+	QStringList args;
+	args << path;
+	this->ipcClient->sendCommand(FileOpen, args);
 }
 
 void MainWindow::treeSearchItemActivated(QTreeWidgetItem *item, int i)
 {
-	QDesktopServices::openUrl(QUrl::fromLocalFile(item->text(1)));
+	ipcFileOpen(item->text(1));
 }
 
 void MainWindow::showSearchResultsContextMenu(const QPoint &point)

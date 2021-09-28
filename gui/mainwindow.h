@@ -8,8 +8,10 @@
 #include <QKeyEvent>
 #include <QFutureWatcher>
 #include <QSqlDatabase>
+#include <QLocalSocket>
 #include "pdfworker.h"
 #include "../shared/looqsquery.h"
+#include "ipcclient.h"
 namespace Ui
 {
 class MainWindow;
@@ -20,7 +22,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
   public:
-	explicit MainWindow(QWidget *parent = 0);
+	explicit MainWindow(QWidget *parent, IPCClient &client);
 	~MainWindow();
   signals:
 	void beginSearch(const QString &query);
@@ -28,6 +30,7 @@ class MainWindow : public QMainWindow
 
   private:
 	Ui::MainWindow *ui;
+	IPCClient *ipcClient;
 	QFileIconProvider iconProvider;
 	bool pdfDirty;
 	QSqlDatabase db;
@@ -45,6 +48,9 @@ class MainWindow : public QMainWindow
 	LooqsQuery currentQuery;
 	int pdfPreviewsPerPage;
 	void createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo);
+	void ipcDocOpen(QString path, int num);
+	void ipcFileOpen(QString path);
+
   private slots:
 	void lineEditReturnPressed();
 	void treeSearchItemActivated(QTreeWidgetItem *item, int i);
