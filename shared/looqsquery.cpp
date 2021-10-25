@@ -128,7 +128,7 @@ QVector<SortCondition> createSortConditions(QString sortExpression)
 			}
 			else
 			{
-				throw LooqsGeneralException("Unknown order specifier: " + order);
+				throw LooqsGeneralException("Unknown order specifier: " + orderstr);
 			}
 		}
 		else
