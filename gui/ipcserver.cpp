@@ -73,7 +73,7 @@ void IpcServer::spawnerNewConnection()
 				stream << "invalid";
 				return;
 			}
-			docOpen(args[0], args[2].toInt());
+			docOpen(args[0], args[1].toInt());
 		}
 		if(command == FileOpen)
 		{
