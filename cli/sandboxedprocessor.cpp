@@ -8,7 +8,7 @@
 #include "nothingprocessor.h"
 #include "odtprocessor.h"
 #include "odsprocessor.h"
-#include "../submodules/qssb.h/qssb.h"
+#include "../submodules/exile.h/exile.h"
 #include "logger.h"
 
 static DefaultTextProcessor *defaultTextProcessor = new DefaultTextProcessor();
@@ -26,26 +26,26 @@ static QMap<QString, Processor *> processors{
 
 void SandboxedProcessor::enableSandbox(QString readablePath)
 {
-	struct qssb_policy *policy = qssb_init_policy();
+	struct exile_policy *policy = exile_init_policy();
 
-	policy->namespace_options = QSSB_UNSHARE_NETWORK | QSSB_UNSHARE_USER;
+	policy->namespace_options = EXILE_UNSHARE_NETWORK | EXILE_UNSHARE_USER;
 
 	if(!readablePath.isEmpty())
 	{
 		std::string readablePathLocation = readablePath.toStdString();
-		qssb_append_path_policy(policy, QSSB_FS_ALLOW_READ, readablePathLocation.c_str());
+		exile_append_path_policy(policy, EXILE_FS_ALLOW_ALL_READ, readablePathLocation.c_str());
 	}
 	else
 	{
 		policy->no_fs = 1;
 	}
-	int ret = qssb_enable_policy(policy);
+	int ret = exile_enable_policy(policy);
 	if(ret != 0)
 	{
 		qDebug() << "Failed to establish sandbox: " << ret;
 		exit(EXIT_FAILURE);
 	}
-	qssb_free_policy(policy);
+	exile_free_policy(policy);
 }
 
 void SandboxedProcessor::printResults(const QVector<PageData> &pageData)

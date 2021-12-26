@@ -8,7 +8,7 @@
 #include "searchresult.h"
 #include "pdfpreview.h"
 #include "../shared/common.h"
-#include "../submodules/qssb.h/qssb.h"
+#include "../submodules/exile.h/exile.h"
 #include "ipcserver.h"
 
 int main(int argc, char *argv[])
@@ -41,25 +41,23 @@ int main(int argc, char *argv[])
 		QMessageBox::critical(nullptr, "Error", errorMsg);
 	}
 
-	struct qssb_policy *policy = qssb_init_policy();
+	struct exile_policy *policy = exile_init_policy();
 	std::string appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation).toStdString();
 	std::string cacheDataLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation).toStdString();
 	std::string sockPath = socketPath.toStdString();
-	policy->namespace_options = QSSB_UNSHARE_NETWORK | QSSB_UNSHARE_USER;
+	policy->namespace_options = EXILE_UNSHARE_NETWORK | EXILE_UNSHARE_USER;
 
-	qssb_append_path_policy(policy, QSSB_FS_ALLOW_READ | QSSB_FS_ALLOW_REMOVE_FILE, "/");
-	qssb_append_path_policy(policy, QSSB_FS_ALLOW_READ | QSSB_FS_ALLOW_REMOVE_FILE | QSSB_FS_ALLOW_WRITE,
-							appDataLocation.c_str());
-	qssb_append_path_policy(policy, QSSB_FS_ALLOW_READ | QSSB_FS_ALLOW_REMOVE_FILE | QSSB_FS_ALLOW_WRITE,
-							cacheDataLocation.c_str());
+	exile_append_path_policy(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_REMOVE_FILE, "/");
+	exile_append_path_policy(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE, appDataLocation.c_str());
+	exile_append_path_policy(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE, cacheDataLocation.c_str());
 
-	int ret = qssb_enable_policy(policy);
+	int ret = exile_enable_policy(policy);
 	if(ret != 0)
 	{
 		qDebug() << "Failed to establish sandbox";
 		return 1;
 	}
-	qssb_free_policy(policy);
+	exile_free_policy(policy);
 
 	Common::setupAppInfo();
 	QApplication a(argc, argv);
