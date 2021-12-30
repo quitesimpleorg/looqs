@@ -45,7 +45,7 @@ class MainWindow : public QMainWindow
 	unsigned int processedPdfPreviews;
 	void handleSearchResults(const QVector<SearchResult> &results);
 	void handleSearchError(QString error);
-	LooqsQuery currentQuery;
+	LooqsQuery contentSearchQuery;
 	int pdfPreviewsPerPage;
 	void createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo);
 	void ipcDocOpen(QString path, int num);

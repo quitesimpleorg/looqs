@@ -24,7 +24,7 @@ int CommandList::handle(QStringList arguments)
 
 	QStringList files = parser.positionalArguments();
 	QString queryStrings = files.join(' ');
-	auto results = dbService->search(LooqsQuery::build(queryStrings));
+	auto results = dbService->search(LooqsQuery::build(queryStrings, TokenType::FILTER_PATH_CONTAINS, false));
 
 	for(SearchResult &result : results)
 	{

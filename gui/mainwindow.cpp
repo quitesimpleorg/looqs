@@ -166,8 +166,13 @@ void MainWindow::lineEditReturnPressed()
 		[&, q]()
 		{
 			SqliteSearch searcher(db);
-			this->currentQuery = LooqsQuery::build(q);
-			return searcher.search(this->currentQuery);
+			this->contentSearchQuery = LooqsQuery::build(q, TokenType::FILTER_CONTENT_CONTAINS, true);
+
+			LooqsQuery filesQuery = LooqsQuery::build(q, TokenType::FILTER_PATH_CONTAINS, false);
+			QVector<SearchResult> results;
+			results.append(searcher.search(filesQuery));
+			results.append(searcher.search(this->contentSearchQuery));
+			return results;
 		});
 	searchWatcher.setFuture(searchFuture);
 }
@@ -243,7 +248,7 @@ void MainWindow::makePdfPreview(int page)
 
 	QVector<QString> wordsToHighlight;
 	QRegularExpression extractor(R"#("([^"]*)"|(\w+))#");
-	for(const Token &token : this->currentQuery.getTokens())
+	for(const Token &token : this->contentSearchQuery.getTokens())
 	{
 		if(token.type == FILTER_CONTENT_CONTAINS)
 		{

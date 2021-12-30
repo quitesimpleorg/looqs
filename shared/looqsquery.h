@@ -54,7 +54,7 @@ class LooqsQuery
 	}
 	void addSortCondition(SortCondition sc);
 	static bool checkParanthesis(QString query);
-	static LooqsQuery build(QString query);
+	static LooqsQuery build(QString query, TokenType loneWordsTokenType, bool mergeLoneWords);
 };
 
 #endif // LOOQSQUERY_H

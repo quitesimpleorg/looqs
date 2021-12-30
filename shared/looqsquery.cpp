@@ -157,15 +157,15 @@ void LooqsQuery::addToken(Token t)
  * thus, "Downloads zip" becomes essentailly "path.contains:(Downloads) AND path.contains:(zip)"
  *
  * TODO: It's a bit ugly still*/
-LooqsQuery LooqsQuery::build(QString expression)
+LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, bool mergeLoneWords)
 {
 	if(!checkParanthesis(expression))
 	{
 		throw LooqsGeneralException("Invalid paranthesis");
 	}
 
+	QStringList loneWords;
 	LooqsQuery result;
-	// TODO: merge lonewords
 	QRegularExpression rx("((?<filtername>(\\.|\\w)+):(?<args>\\((?<innerargs>[^\\)]+)\\)|([\\w,])+)|(?<boolean>AND|OR)"
 						  "|(?<negation>!)|(?<bracket>\\(|\\))|(?<loneword>\\w+))");
 	QRegularExpressionMatchIterator i = rx.globalMatch(expression);
@@ -233,7 +233,14 @@ LooqsQuery LooqsQuery::build(QString expression)
 
 		if(loneword != "")
 		{
-			result.addToken(Token(FILTER_PATH_CONTAINS, loneword));
+			if(mergeLoneWords)
+			{
+				loneWords.append(loneword);
+			}
+			else
+			{
+				result.addToken(Token(loneWordsTokenType, loneword));
+			}
 		}
 
 		if(filtername != "")
@@ -290,6 +297,11 @@ LooqsQuery LooqsQuery::build(QString expression)
 			}
 			result.addToken(Token(tokenType, value));
 		}
+	}
+
+	if(mergeLoneWords)
+	{
+		result.addToken(Token(loneWordsTokenType, loneWords.join(' ')));
 	}
 
 	bool contentsearch = (result.getTokensMask() & FILTER_CONTENT) == FILTER_CONTENT;
