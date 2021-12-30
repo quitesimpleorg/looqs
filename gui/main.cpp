@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
 	QString socketPath = "/tmp/looqs-spawner";
 	if(argc > 1)
 	{
+		Common::setupAppInfo();
 		QApplication a(argc, argv);
 		QString arg = argv[1];
 		if(arg == "ipc")

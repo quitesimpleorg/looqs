@@ -27,13 +27,21 @@ static QMap<QString, Processor *> processors{
 void SandboxedProcessor::enableSandbox(QString readablePath)
 {
 	struct exile_policy *policy = exile_init_policy();
-
+	if(policy == NULL)
+	{
+		qCritical() << "Could not init exile";
+		exit(EXIT_FAILURE);
+	}
 	policy->namespace_options = EXILE_UNSHARE_NETWORK | EXILE_UNSHARE_USER;
 
 	if(!readablePath.isEmpty())
 	{
 		std::string readablePathLocation = readablePath.toStdString();
-		exile_append_path_policy(policy, EXILE_FS_ALLOW_ALL_READ, readablePathLocation.c_str());
+		if(exile_append_path_policy(policy, EXILE_FS_ALLOW_ALL_READ, readablePathLocation.c_str()) != 0)
+		{
+			qCritical() << "Failed to add path policies";
+			exit(EXIT_FAILURE);
+		}
 	}
 	else
 	{
