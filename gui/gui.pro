@@ -27,18 +27,27 @@ SOURCES += \
     ipcserver.cpp \
         main.cpp \
         mainwindow.cpp \
-      pdfworker.cpp \
-      pdfpreview.cpp \
-      clicklabel.cpp
+      clicklabel.cpp \
+    previewgenerator.cpp \
+    previewgeneratormapfunctor.cpp \
+    previewgeneratorpdf.cpp \
+    previewresult.cpp \
+    previewresultpdf.cpp \
+    previewworker.cpp
 
 HEADERS += \
     ipc.h \
     ipcclient.h \
     ipcserver.h \
         mainwindow.h \
-    pdfworker.h \
-    pdfpreview.h \
-    clicklabel.h
+    clicklabel.h \
+    previewgenerator.h \
+    previewgeneratormapfunctor.h \
+    previewgeneratorpdf.h \
+    previewresult.h \
+    previewresultpdf.h \
+    previewworker.h \
+    renderconfig.h
 
 FORMS += \
         mainwindow.ui

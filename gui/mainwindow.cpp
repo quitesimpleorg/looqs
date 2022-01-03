@@ -36,11 +36,11 @@ MainWindow::MainWindow(QWidget *parent, IPCClient &client) : QMainWindow(parent)
 	ui->treeResultsList->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 	ui->tabWidget->setCurrentIndex(0);
 	ui->statusBar->addWidget(ui->lblSearchResults);
-	ui->statusBar->addWidget(ui->pdfProcessBar);
-	ui->pdfProcessBar->hide();
+	ui->statusBar->addWidget(ui->previewProcessBar);
+	ui->previewProcessBar->hide();
 	ui->comboScale->setCurrentText(settings.value("currentScale").toString());
-	pdfPreviewsPerPage = settings.value("pdfPreviewsPerPage", 20).toInt();
-	ui->spinPdfPreviewPage->setMinimum(1);
+	previewsPerPage = settings.value("previewsPerPage", 20).toInt();
+	ui->spinPreviewPage->setMinimum(1);
 }
 
 void MainWindow::connectSignals()
@@ -60,32 +60,31 @@ void MainWindow::connectSignals()
 					handleSearchError(e.message);
 				}
 			});
-
-	connect(&pdfWorkerWatcher, &QFutureWatcher<PdfPreview>::resultReadyAt, this,
-			[&](int index) { pdfPreviewReceived(pdfWorkerWatcher.resultAt(index)); });
-	connect(&pdfWorkerWatcher, &QFutureWatcher<PdfPreview>::progressValueChanged, ui->pdfProcessBar,
-			&QProgressBar::setValue);
+	connect(&previewWorkerWatcher, &QFutureWatcher<QSharedPointer<PreviewResult>>::resultReadyAt, this,
+			[&](int index) { previewReceived(previewWorkerWatcher.resultAt(index)); });
+	connect(&previewWorkerWatcher, &QFutureWatcher<QSharedPointer<PreviewResult>>::progressValueChanged,
+			ui->previewProcessBar, &QProgressBar::setValue);
 	connect(ui->treeResultsList, &QTreeWidget::itemActivated, this, &MainWindow::treeSearchItemActivated);
 	connect(ui->treeResultsList, &QTreeWidget::customContextMenuRequested, this,
 			&MainWindow::showSearchResultsContextMenu);
 	connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWindow::tabChanged);
 	connect(ui->comboScale, qOverload<int>(&QComboBox::currentIndexChanged), this, &MainWindow::comboScaleChanged);
-	connect(ui->spinPdfPreviewPage, qOverload<int>(&QSpinBox::valueChanged), this,
-			&MainWindow::spinPdfPreviewPageValueChanged);
+	connect(ui->spinPreviewPage, qOverload<int>(&QSpinBox::valueChanged), this,
+			&MainWindow::spinPreviewPageValueChanged);
 }
 
-void MainWindow::spinPdfPreviewPageValueChanged(int val)
+void MainWindow::spinPreviewPageValueChanged(int val)
 {
-	makePdfPreview(val);
+	makePreviews(val);
 }
 
 void MainWindow::comboScaleChanged(int i)
 {
 	QSettings scaleSetting;
 	scaleSetting.setValue("currentScale", ui->comboScale->currentText());
-	makePdfPreview(ui->spinPdfPreviewPage->value());
+	makePreviews(ui->spinPreviewPage->value());
 }
-bool MainWindow::pdfTabActive()
+bool MainWindow::previewTabActive()
 {
 	return ui->tabWidget->currentIndex() == 1;
 }
@@ -113,29 +112,28 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::tabChanged()
 {
-	if(pdfTabActive())
+	if(previewTabActive())
 	{
-		if(pdfDirty)
+		if(previewDirty)
 		{
-			makePdfPreview(ui->spinPdfPreviewPage->value());
+			makePreviews(ui->spinPreviewPage->value());
 		}
-		ui->pdfProcessBar->show();
+		ui->previewProcessBar->show();
 	}
 	else
 	{
-		ui->pdfProcessBar->hide();
+		ui->previewProcessBar->hide();
 	}
 }
 
-void MainWindow::pdfPreviewReceived(PdfPreview preview)
+void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview)
 {
-	if(preview.hasPreviewImage())
+	if(preview->hasPreview())
 	{
-		ClickLabel *label = new ClickLabel();
-		QString docPath = preview.documentPath;
-		auto previewPage = preview.page;
-		label->setPixmap(QPixmap::fromImage(preview.previewImage));
-		label->setToolTip(preview.documentPath);
+		QString docPath = preview->getDocumentPath();
+		auto previewPage = preview->getPage();
+
+		ClickLabel *label = dynamic_cast<ClickLabel *>(preview->createPreviewWidget());
 		ui->scrollAreaWidgetContents->layout()->addWidget(label);
 		connect(label, &ClickLabel::leftClick, [this, docPath, previewPage]() { ipcDocOpen(docPath, previewPage); });
 		connect(label, &ClickLabel::rightClick,
@@ -179,7 +177,7 @@ void MainWindow::lineEditReturnPressed()
 
 void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 {
-	this->pdfSearchResults.clear();
+	this->previewableSearchResults.clear();
 	ui->treeResultsList->clear();
 
 	bool hasDeleted = false;
@@ -201,7 +199,7 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 		{
 			if(result.fileData.absPath.endsWith(".pdf"))
 			{
-				this->pdfSearchResults.append(result);
+				this->previewableSearchResults.append(result);
 			}
 		}
 		else
@@ -211,15 +209,15 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	}
 	ui->treeResultsList->resizeColumnToContents(0);
 	ui->treeResultsList->resizeColumnToContents(1);
-	pdfDirty = !this->pdfSearchResults.empty();
+	previewDirty = !this->previewableSearchResults.empty();
 
-	int numpages = ceil(static_cast<double>(this->pdfSearchResults.size()) / pdfPreviewsPerPage);
-	ui->spinPdfPreviewPage->setMinimum(1);
-	ui->spinPdfPreviewPage->setMaximum(numpages);
-	ui->spinPdfPreviewPage->setValue(1);
-	if(pdfTabActive() && pdfDirty)
+	int numpages = ceil(static_cast<double>(this->previewableSearchResults.size()) / previewsPerPage);
+	ui->spinPreviewPage->setMinimum(1);
+	ui->spinPreviewPage->setMaximum(numpages);
+	ui->spinPreviewPage->setValue(1);
+	if(previewTabActive() && previewDirty)
 	{
-		makePdfPreview(1);
+		makePreviews(1);
 	}
 
 	QString statusText = "Results: " + QString::number(results.size()) + " files";
@@ -230,18 +228,18 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	ui->lblSearchResults->setText(statusText);
 }
 
-void MainWindow::makePdfPreview(int page)
+void MainWindow::makePreviews(int page)
 {
 
-	this->pdfWorkerWatcher.cancel();
-	this->pdfWorkerWatcher.waitForFinished();
+	this->previewWorkerWatcher.cancel();
+	this->previewWorkerWatcher.waitForFinished();
 
 	QCoreApplication::processEvents(); // Maybe not necessary anymore, depends on whether it's possible that a slot is
 									   // still to be fired.
 	qDeleteAll(ui->scrollAreaWidgetContents->children());
 
 	ui->scrollAreaWidgetContents->setLayout(new QHBoxLayout());
-	ui->pdfProcessBar->setMaximum(this->pdfSearchResults.size());
+	ui->previewProcessBar->setMaximum(this->previewableSearchResults.size());
 	processedPdfPreviews = 0;
 	QString scaleText = ui->comboScale->currentText();
 	scaleText.chop(1);
@@ -265,13 +263,13 @@ void MainWindow::makePdfPreview(int page)
 			}
 		}
 	}
-	PdfWorker worker;
-	int end = pdfPreviewsPerPage;
-	int begin = page * pdfPreviewsPerPage - pdfPreviewsPerPage;
-	this->pdfWorkerWatcher.setFuture(
-		worker.generatePreviews(this->pdfSearchResults.mid(begin, end), wordsToHighlight, scaleText.toInt() / 100.));
-	ui->pdfProcessBar->setMaximum(this->pdfWorkerWatcher.progressMaximum());
-	ui->pdfProcessBar->setMinimum(this->pdfWorkerWatcher.progressMinimum());
+	PreviewWorker worker;
+	int end = previewsPerPage;
+	int begin = page * previewsPerPage - previewsPerPage;
+	this->previewWorkerWatcher.setFuture(worker.generatePreviews(this->previewableSearchResults.mid(begin, end),
+																 wordsToHighlight, scaleText.toInt() / 100.));
+	ui->previewProcessBar->setMaximum(this->previewWorkerWatcher.progressMaximum());
+	ui->previewProcessBar->setMinimum(this->previewWorkerWatcher.progressMinimum());
 }
 
 void MainWindow::handleSearchError(QString error)

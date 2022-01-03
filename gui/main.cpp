@@ -6,7 +6,7 @@
 
 #include "mainwindow.h"
 #include "searchresult.h"
-#include "pdfpreview.h"
+#include "previewresultpdf.h"
 #include "../shared/common.h"
 #include "../submodules/exile.h/exile.h"
 #include "ipcserver.h"
@@ -96,8 +96,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	qRegisterMetaType<QVector<SearchResult>>("QVector<SearchResult>");
-	qRegisterMetaType<QVector<PdfPreview>>("QVector<PdfPreview>");
-	qRegisterMetaType<PdfPreview>("PdfPreview");
+	qRegisterMetaType<QVector<PreviewResultPdf>>("QVector<PreviewResultPdf>");
+	qRegisterMetaType<PreviewResultPdf>("PreviewResultPdf");
 
 	IPCClient client{socketPath};
 	MainWindow w{0, client};
