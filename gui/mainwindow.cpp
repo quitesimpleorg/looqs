@@ -164,12 +164,22 @@ void MainWindow::lineEditReturnPressed()
 		[&, q]()
 		{
 			SqliteSearch searcher(db);
+			QVector<SearchResult> results;
 			this->contentSearchQuery = LooqsQuery::build(q, TokenType::FILTER_CONTENT_CONTAINS, true);
 
-			LooqsQuery filesQuery = LooqsQuery::build(q, TokenType::FILTER_PATH_CONTAINS, false);
-			QVector<SearchResult> results;
-			results.append(searcher.search(filesQuery));
-			results.append(searcher.search(this->contentSearchQuery));
+			/* We can have a path search in contentsearch too (if given explicitly), so no need to do it twice.
+				Make sure path results are listed first. */
+			bool addContentSearch = this->contentSearchQuery.hasContentSearch();
+			bool addPathSearch = !this->contentSearchQuery.hasPathSearch() || !addContentSearch;
+			if(addPathSearch)
+			{
+				LooqsQuery filesQuery = LooqsQuery::build(q, TokenType::FILTER_PATH_CONTAINS, false);
+				results.append(searcher.search(filesQuery));
+			}
+			if(addContentSearch)
+			{
+				results.append(searcher.search(this->contentSearchQuery));
+			}
 			return results;
 		});
 	searchWatcher.setFuture(searchFuture);
