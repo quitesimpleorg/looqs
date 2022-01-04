@@ -4,6 +4,7 @@
 #include <QStandardPaths>
 #include <QProcess>
 #include <QDir>
+#include <QCommandLineParser>
 
 #include "mainwindow.h"
 #include "searchresult.h"
@@ -65,21 +66,22 @@ int main(int argc, char *argv[])
 	QString socketPath = "/tmp/looqs-spawner";
 	if(argc > 1)
 	{
-		Common::setupAppInfo();
-		QApplication a(argc, argv);
 		QString arg = argv[1];
 		if(arg == "ipc")
 		{
+			Common::setupAppInfo();
+			QApplication a(argc, argv);
+
 			IpcServer *ipcserver = new IpcServer();
-			qDebug() << "Launching ipc";
+			qDebug() << "Launching IPC Server";
 			if(!ipcserver->startSpawner(socketPath))
 			{
 				qCritical() << "Error failed to spawn";
 				return 1;
 			}
-			qDebug() << "Launched";
+			qDebug() << "Launched IPC Server";
+			return a.exec();
 		}
-		return a.exec();
 	}
 	QProcess process;
 	QStringList args;
@@ -91,7 +93,25 @@ int main(int argc, char *argv[])
 		QMessageBox::critical(nullptr, "Error", errorMsg);
 	}
 	Common::setupAppInfo();
-	enableSandbox(socketPath);
+	QCommandLineParser parser;
+	parser.addOption({{"s", "no-sandbox"}, "Disable sandboxing"});
+	QStringList appArgs;
+	for(int i = 0; i < argc; i++)
+	{
+		appArgs.append(argv[i]);
+	}
+	parser.parse(appArgs);
+
+	if(!parser.isSet("no-sandbox"))
+	{
+		enableSandbox(socketPath);
+		qInfo() << "Sandbox: on";
+	}
+	else
+	{
+		qInfo() << "Sandbox: off";
+	}
+	// Keep this post sandbox, afterwards does not work (suspect due to threads, but unconfirmed)
 	QApplication a(argc, argv);
 	try
 	{
