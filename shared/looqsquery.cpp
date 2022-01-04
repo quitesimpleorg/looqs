@@ -251,6 +251,10 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 			{
 				value = m.captured("args");
 			}
+			if(value == "")
+			{
+				throw LooqsGeneralException("value cannot be empty for filters");
+			}
 
 			if(filtername == "path.contains")
 			{
@@ -301,7 +305,11 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 
 	if(mergeLoneWords)
 	{
-		result.addToken(Token(loneWordsTokenType, loneWords.join(' ')));
+		QString mergedLoneWords = loneWords.join(' ');
+		if(!mergedLoneWords.isEmpty())
+		{
+			result.addToken(Token(loneWordsTokenType, mergedLoneWords));
+		}
 	}
 
 	bool contentsearch = (result.getTokensMask() & FILTER_CONTENT) == FILTER_CONTENT;
