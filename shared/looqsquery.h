@@ -52,6 +52,9 @@ class LooqsQuery
 	{
 		return tokensMask;
 	}
+	bool hasContentSearch();
+	bool hasPathSearch();
+
 	void addSortCondition(SortCondition sc);
 	static bool checkParanthesis(QString query);
 	static LooqsQuery build(QString query, TokenType loneWordsTokenType, bool mergeLoneWords);

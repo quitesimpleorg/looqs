@@ -23,6 +23,16 @@ QueryType LooqsQuery::getQueryType()
 	return static_cast<QueryType>(tokensMask & COMBINED);
 }
 
+bool LooqsQuery::hasContentSearch()
+{
+	return (this->getTokensMask() & FILTER_CONTENT) == FILTER_CONTENT;
+}
+
+bool LooqsQuery::hasPathSearch()
+{
+	return (this->getTokensMask() & FILTER_PATH) == FILTER_PATH;
+}
+
 void LooqsQuery::addSortCondition(SortCondition sc)
 {
 	this->sortConditions.append(sc);
@@ -312,7 +322,7 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 		}
 	}
 
-	bool contentsearch = (result.getTokensMask() & FILTER_CONTENT) == FILTER_CONTENT;
+	bool contentsearch = result.hasContentSearch();
 	bool sortsForContent = std::any_of(result.sortConditions.begin(), result.sortConditions.end(),
 									   [](SortCondition c) { return c.field == CONTENT_TEXT; });
 
