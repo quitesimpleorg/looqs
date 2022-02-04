@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=looqs
+Exec=/usr/bin/looqs-gui
+Terminal=false
+Type=Application
+Icon=looqs
+StartupWMClass=looqs
+Comment=FTS desktop search with previews
+Categories=Qt;Utility;
