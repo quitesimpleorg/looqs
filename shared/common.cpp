@@ -9,13 +9,16 @@
 #include <QDebug>
 #include "looqsgeneralexception.h"
 #include "common.h"
+#include "dbmigrator.h"
+#include "databasefactory.h"
+#include "logger.h"
 
 #define SETTINGS_KEY_DBPATH "dbpath"
 #define SETTINGS_KEY_FIRSTRUN "firstrun"
 
 inline void initResources()
 {
-	Q_INIT_RESOURCE(create);
+	Q_INIT_RESOURCE(migrations);
 }
 
 bool Common::initSqliteDatabase(QString path)
@@ -28,28 +31,9 @@ bool Common::initSqliteDatabase(QString path)
 		return false;
 	}
 	initResources();
-	QFile file(":./create.sql");
-	if(!file.open(QIODevice::ReadOnly))
-	{
-		qDebug() << "Failed to load SQL creation script from embedded resource";
-		return false;
-	}
-	QTextStream stream(&file);
-	db.transaction();
-	while(!stream.atEnd())
-	{
-		QString sql = stream.readLine();
-		QSqlQuery sqlQuery;
-		if(!sqlQuery.exec(sql))
-		{
-			qDebug() << "Failed to execute sql statement while initializing database: " << sqlQuery.lastError();
-			db.rollback();
-			return false;
-		}
-	}
-	db.commit();
+	DBMigrator migrator{db};
+	migrator.performMigrations();
 	db.close();
-	file.close();
 	return true;
 }
 
@@ -83,6 +67,21 @@ void Common::ensureConfigured()
 		if(!QFile::exists(dbpath))
 		{
 			throw LooqsGeneralException("Database " + dbpath + " was not found");
+		}
+		DatabaseFactory factory{dbpath};
+		auto db = factory.forCurrentThread();
+		DBMigrator migrator{db};
+		if(migrator.migrationNeeded())
+		{
+			QFile out;
+			out.open(stderr, QIODevice::WriteOnly);
+			Logger migrationLogger{&out};
+			migrationLogger << "Database is being upgraded, please be patient..." << Qt::endl;
+			QObject::connect(&migrator, &DBMigrator::migrationDone,
+							 [&migrationLogger](uint32_t migration)
+							 { migrationLogger << "Progress: Successfully migrated to: " << migration << Qt::endl; });
+			migrator.performMigrations();
+			migrationLogger << "Database upgraded successfully" << Qt::endl;
 		}
 	}
 }
