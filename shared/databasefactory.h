@@ -2,7 +2,6 @@
 #define DATABASEFACTORY_H
 #include <QSqlDatabase>
 #include <QThreadStorage>
-#include "utils.h"
 class DatabaseFactory
 {
   private:

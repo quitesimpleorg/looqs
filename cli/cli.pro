@@ -32,9 +32,7 @@ SOURCES += \
     commanddelete.cpp \
     commandupdate.cpp \
     filesaver.cpp \
-    databasefactory.cpp \
     sqlitedbservice.cpp \
-    logger.cpp \
     commandsearch.cpp \
     commandlist.cpp
 
@@ -55,9 +53,7 @@ HEADERS += \
     commanddelete.h \
     commandupdate.h \
     filesaver.h \
-    databasefactory.h \
     sqlitedbservice.h \
-    logger.h \
     commandsearch.h \
     commandlist.h
 INCLUDEPATH += /usr/include/poppler/qt5/ /usr/include/quazip5

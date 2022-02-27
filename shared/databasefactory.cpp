@@ -1,6 +1,7 @@
 #include <QThread>
 #include "databasefactory.h"
 #include "logger.h"
+#include "looqsgeneralexception.h"
 DatabaseFactory::DatabaseFactory(QString connectionString)
 {
 	this->connectionString = connectionString;
