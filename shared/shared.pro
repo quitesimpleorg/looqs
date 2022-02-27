@@ -27,12 +27,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += sqlitesearch.cpp \
+    databasefactory.cpp \
+    dbmigrator.cpp \
+    logger.cpp \
     looqsgeneralexception.cpp \
     common.cpp \
     looqsquery.cpp
 
 HEADERS += sqlitesearch.h \
+    databasefactory.h \
+    dbmigrator.h \
     filedata.h \
+    logger.h \
     looqsgeneralexception.h \
     looqsquery.h \
     searchresult.h \
@@ -42,4 +48,4 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
-RESOURCES = create.qrc
+RESOURCES = migrations/migrations.qrc
