@@ -4,9 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       += sql
 
 QT       -= gui
+QT       += sql concurrent
 
 TARGET = shared
 TEMPLATE = lib
@@ -14,6 +14,7 @@ CONFIG += staticlib
 CONFIG += c++17
 
 INCLUDEPATH += $$PWD/../sandbox/exile.h/
+INCLUDEPATH += /usr/include/poppler/qt5/ /usr/include/quazip5
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -29,21 +30,47 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += sqlitesearch.cpp \
     databasefactory.cpp \
     dbmigrator.cpp \
+    defaulttextprocessor.cpp \
+    encodingdetector.cpp \
+    filesaver.cpp \
     logger.cpp \
     looqsgeneralexception.cpp \
     common.cpp \
-    looqsquery.cpp
+    looqsquery.cpp \
+    nothingprocessor.cpp \
+    odsprocessor.cpp \
+    odtprocessor.cpp \
+    pagedata.cpp \
+    pdfprocessor.cpp \
+    processor.cpp \
+    sandboxedprocessor.cpp \
+    sqlitedbservice.cpp \
+    tagstripperprocessor.cpp \
+    utils.cpp
 
 HEADERS += sqlitesearch.h \
     databasefactory.h \
     dbmigrator.h \
+    defaulttextprocessor.h \
+    encodingdetector.h \
     filedata.h \
+    filesaver.h \
     logger.h \
     looqsgeneralexception.h \
     looqsquery.h \
+    nothingprocessor.h \
+    odsprocessor.h \
+    odtprocessor.h \
+    pagedata.h \
+    pdfprocessor.h \
+    processor.h \
+    sandboxedprocessor.h \
     searchresult.h \
+    sqlitedbservice.h \
+    tagstripperprocessor.h \
     token.h \
-    common.h
+    common.h \
+    utils.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

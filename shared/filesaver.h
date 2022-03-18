@@ -2,7 +2,6 @@
 #define FILESAVER_H
 #include <QSqlDatabase>
 #include <QFileInfo>
-#include "command.h"
 #include "pagedata.h"
 #include "filedata.h"
 #include "sqlitedbservice.h"

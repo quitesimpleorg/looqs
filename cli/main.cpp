@@ -5,9 +5,6 @@
 #include <QDataStream>
 #include <QDebug>
 #include <QProcessEnvironment>
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QSqlError>
 #include <QMap>
 #include <QDebug>
 #include <QSettings>

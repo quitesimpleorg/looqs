@@ -1,7 +1,5 @@
 #include <QFileInfo>
 #include <QDebug>
-#include <QSqlQuery>
-#include <QSqlError>
 #include <QDateTime>
 #include <QMap>
 #include <QTextStream>

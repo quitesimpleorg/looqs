@@ -6,7 +6,6 @@
 #include "filesaver.h"
 #include "processor.h"
 #include "pdfprocessor.h"
-#include "commandadd.h"
 #include "defaulttextprocessor.h"
 #include "tagstripperprocessor.h"
 #include "nothingprocessor.h"

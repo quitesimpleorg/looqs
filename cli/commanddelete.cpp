@@ -3,7 +3,6 @@
 #include <QFileInfo>
 #include <QDebug>
 #include <QRegularExpression>
-#include <QSqlError>
 #include "commanddelete.h"
 #include "logger.h"
 

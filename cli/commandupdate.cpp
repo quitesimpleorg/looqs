@@ -2,7 +2,6 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QThreadPool>
-#include <QtConcurrentRun>
 #include "commandupdate.h"
 #include "logger.h"
 

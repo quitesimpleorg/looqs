@@ -14,55 +14,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-LIBS += -luchardet -lpoppler-qt5 -lquazip5
 SOURCES += \
         main.cpp \
-    encodingdetector.cpp \
-    pagedata.cpp \
-    processor.cpp \
-    pdfprocessor.cpp \
-    defaulttextprocessor.cpp \
     commandadd.cpp \
-    sandboxedprocessor.cpp \
-    tagstripperprocessor.cpp \
-    nothingprocessor.cpp \
-    odtprocessor.cpp \
-    utils.cpp \
-    odsprocessor.cpp \
     commanddelete.cpp \
     commandupdate.cpp \
-    filesaver.cpp \
-    sqlitedbservice.cpp \
     commandsearch.cpp \
     commandlist.cpp
 
 HEADERS += \
-    encodingdetector.h \
-    processor.h \
-    pagedata.h \
-    pdfprocessor.h \
-    defaulttextprocessor.h \
     command.h \
     commandadd.h \
-    sandboxedprocessor.h \
-    tagstripperprocessor.h \
-    nothingprocessor.h \
-    odtprocessor.h \
-    utils.h \
-    odsprocessor.h \
     commanddelete.h \
     commandupdate.h \
-    filesaver.h \
-    sqlitedbservice.h \
     commandsearch.h \
     commandlist.h
-INCLUDEPATH += /usr/include/poppler/qt5/ /usr/include/quazip5
-
-
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../shared/release/ -lshared
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../shared/debug/ -lshared
 else:unix: LIBS += -L$$OUT_PWD/../shared/ -lshared
+
+LIBS += -luchardet -lpoppler-qt5 -lquazip5
 
 INCLUDEPATH += $$PWD/../shared
 DEPENDPATH += $$PWD/../shared

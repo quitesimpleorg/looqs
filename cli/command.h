@@ -1,8 +1,6 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 #include <QStringList>
-#include <QSqlDatabase>
-#include <QSqlQuery>
 #include <QThreadStorage>
 #include <QVariant>
 #include "utils.h"
