@@ -98,6 +98,12 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 	QString absPath = fileInfo.absoluteFilePath();
 
 	int status = -1;
+
+	if(!fileInfo.exists())
+	{
+		return NOTFOUND;
+	}
+
 	if(fileInfo.isFile())
 	{
 		QProcess process;
@@ -124,9 +130,9 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 			pageData.append(pd);
 		}
 		status = process.exitCode();
-		if(status != 0)
+		if(status != 0 && status != NOTHING_PROCESSED)
 		{
-			Logger::error() << "Error while processing" << absPath << ":"
+			Logger::error() << "FileSaver::saveFile(): Error while processing" << absPath << ":"
 							<< "Exit code " << status << Qt::endl;
 
 			return PROCESSFAIL;
