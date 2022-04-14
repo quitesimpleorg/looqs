@@ -11,12 +11,10 @@ class FileSaver
   private:
 	SqliteDbService *dbService;
 
-  protected:
-	SaveFileResult addFile(QString path);
-	SaveFileResult updateFile(QString path);
-
   public:
 	FileSaver(SqliteDbService &dbService);
+	SaveFileResult addFile(QString path);
+	SaveFileResult updateFile(QString path);
 	SaveFileResult saveFile(const QFileInfo &fileInfo);
 	int processFiles(const QVector<QString> paths, std::function<SaveFileResult(QString path)> saverFunc,
 					 bool keepGoing, bool verbose);
