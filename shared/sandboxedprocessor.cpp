@@ -37,7 +37,7 @@ void SandboxedProcessor::enableSandbox(QString readablePath)
 	if(!readablePath.isEmpty())
 	{
 		std::string readablePathLocation = readablePath.toStdString();
-		if(exile_append_path_policy(policy, EXILE_FS_ALLOW_ALL_READ, readablePathLocation.c_str()) != 0)
+		if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ, readablePathLocation.c_str()) != 0)
 		{
 			qCritical() << "Failed to add path policies";
 			exit(EXIT_FAILURE);
@@ -102,7 +102,7 @@ int SandboxedProcessor::process()
 	}
 	catch(LooqsGeneralException &e)
 	{
-		Logger::error() << "Error while processing" << absPath << ":" << e.message << Qt::endl;
+		Logger::error() << "SandboxedProcessor: Error while processing" << absPath << ":" << e.message << Qt::endl;
 		return 3 /* PROCESSFAIL */;
 	}
 

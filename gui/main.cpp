@@ -35,20 +35,20 @@ void enableSandbox(QString socketPath)
 						   EXILE_SYSCALL_VOW_PROT_EXEC | EXILE_SYSCALL_VOW_PROC | EXILE_SYSCALL_VOW_SHM |
 						   EXILE_SYSCALL_VOW_FSNOTIFY | EXILE_SYSCALL_VOW_IOCTL;
 
-	if(exile_append_path_policy(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_REMOVE_FILE, "/") != 0)
+	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_REMOVE_FILE, "/") != 0)
 	{
 		qCritical() << "Failed to append a path to the path policy";
 		exit(EXIT_FAILURE);
 	}
 
-	if(exile_append_path_policy(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE, appDataLocation.c_str()) !=
-	   0)
+	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE,
+								  appDataLocation.c_str()) != 0)
 	{
 		qCritical() << "Failed to append a path to the path policy";
 		exit(EXIT_FAILURE);
 	}
-	if(exile_append_path_policy(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE,
-								cacheDataLocation.c_str()) != 0)
+	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE,
+								  cacheDataLocation.c_str()) != 0)
 	{
 		qCritical() << "Failed to append a path to the path policy";
 		exit(EXIT_FAILURE);
