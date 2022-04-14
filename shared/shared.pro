@@ -28,11 +28,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += sqlitesearch.cpp \
+    concurrentqueue.cpp \
     databasefactory.cpp \
     dbmigrator.cpp \
     defaulttextprocessor.cpp \
+    dirscanworker.cpp \
     encodingdetector.cpp \
     filesaver.cpp \
+    filescanworker.cpp \
+    indexer.cpp \
     logger.cpp \
     looqsgeneralexception.cpp \
     common.cpp \
@@ -41,20 +45,26 @@ SOURCES += sqlitesearch.cpp \
     odsprocessor.cpp \
     odtprocessor.cpp \
     pagedata.cpp \
+    paralleldirscanner.cpp \
     pdfprocessor.cpp \
     processor.cpp \
     sandboxedprocessor.cpp \
     sqlitedbservice.cpp \
     tagstripperprocessor.cpp \
-    utils.cpp
+    utils.cpp \
+    ../submodules/exile.h/exile.c
 
 HEADERS += sqlitesearch.h \
+    concurrentqueue.h \
     databasefactory.h \
     dbmigrator.h \
     defaulttextprocessor.h \
+    dirscanworker.h \
     encodingdetector.h \
     filedata.h \
     filesaver.h \
+    filescanworker.h \
+    indexer.h \
     logger.h \
     looqsgeneralexception.h \
     looqsquery.h \
@@ -62,6 +72,7 @@ HEADERS += sqlitesearch.h \
     odsprocessor.h \
     odtprocessor.h \
     pagedata.h \
+    paralleldirscanner.h \
     pdfprocessor.h \
     processor.h \
     sandboxedprocessor.h \
