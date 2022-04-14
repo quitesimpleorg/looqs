@@ -10,6 +10,7 @@
 #include "searchresult.h"
 #include "previewresultpdf.h"
 #include "../shared/common.h"
+#include "../shared/sandboxedprocessor.h"
 #include "../submodules/exile.h/exile.h"
 #include "ipcserver.h"
 
@@ -82,6 +83,22 @@ int main(int argc, char *argv[])
 			qDebug() << "Launched IPC Server";
 			return a.exec();
 		}
+		if(arg == "process")
+		{
+			Common::setupAppInfo();
+			QApplication a(argc, argv);
+
+			QStringList args = a.arguments();
+			if(args.length() < 1)
+			{
+				qDebug() << "Filename is required";
+				return 1;
+			}
+
+			QString file = args.at(1);
+			SandboxedProcessor processor(file);
+			return processor.process();
+		}
 	}
 	QProcess process;
 	QStringList args;
@@ -126,6 +143,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<QVector<SearchResult>>("QVector<SearchResult>");
 	qRegisterMetaType<QVector<PreviewResultPdf>>("QVector<PreviewResultPdf>");
 	qRegisterMetaType<PreviewResultPdf>("PreviewResultPdf");
+	qRegisterMetaType<FileScanResult>("FileScanResult");
 
 	IPCClient client{socketPath};
 	MainWindow w{0, client};

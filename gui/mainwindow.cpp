@@ -25,13 +25,13 @@ MainWindow::MainWindow(QWidget *parent, IPCClient &client) : QMainWindow(parent)
 	this->ipcClient = &client;
 	QSettings settings;
 
-	db = QSqlDatabase::addDatabase("QSQLITE");
-	db.setDatabaseName(Common::databasePath());
-	if(!db.open())
-	{
-		qDebug() << "failed to open database";
-		throw std::runtime_error("Failed to open database");
-	}
+	this->dbFactory = new DatabaseFactory(Common::databasePath());
+
+	db = this->dbFactory->forCurrentThread();
+	this->dbService = new SqliteDbService(*this->dbFactory);
+
+	indexer = new Indexer(*(this->dbService));
+	indexer->setParent(this);
 	connectSignals();
 	ui->treeResultsList->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 	ui->tabWidget->setCurrentIndex(0);
@@ -71,11 +71,72 @@ void MainWindow::connectSignals()
 	connect(ui->comboScale, qOverload<int>(&QComboBox::currentIndexChanged), this, &MainWindow::comboScaleChanged);
 	connect(ui->spinPreviewPage, qOverload<int>(&QSpinBox::valueChanged), this,
 			&MainWindow::spinPreviewPageValueChanged);
+
+	connect(ui->btnAddPath, &QPushButton::clicked, this,
+			[&]
+			{
+				this->ui->lstPaths->addItem(this->ui->txtPathScanAdd->text());
+				this->ui->txtPathScanAdd->clear();
+			});
+	connect(ui->txtPathScanAdd, &QLineEdit::returnPressed, this,
+			[&]
+			{
+				this->ui->lstPaths->addItem(this->ui->txtPathScanAdd->text());
+				this->ui->txtPathScanAdd->clear();
+			});
+	connect(ui->btnStartIndexing, &QPushButton::clicked, this, &MainWindow::startIndexing);
+
+	connect(this->indexer, &Indexer::pathsCountChanged, this,
+			[&](int number)
+			{
+				ui->lblSearchResults->setText("Found paths: " + QString::number(number));
+				ui->lblPathsFoundValue->setText(QString::number(number));
+				ui->previewProcessBar->setMaximum(number);
+			});
+	connect(this->indexer, &Indexer::indexProgress, this,
+
+			[&](int number, unsigned int added, unsigned int skipped, unsigned int failed, unsigned int totalCount)
+			{
+				ui->lblSearchResults->setText("Processed " + QString::number(number) + " files");
+				ui->previewProcessBar->setValue(number);
+				ui->previewProcessBar->setMaximum(totalCount);
+				ui->lblAddedValue->setText(QString::number(added));
+				ui->lblSkippedValue->setText(QString::number(skipped));
+				ui->lblFailedValue->setText(QString::number(failed));
+			});
+
+	connect(this->indexer, &Indexer::finished, this, &MainWindow::finishIndexing);
 }
 
 void MainWindow::spinPreviewPageValueChanged(int val)
 {
 	makePreviews(val);
+}
+
+void MainWindow::startIndexing()
+{
+	ui->txtPathScanAdd->setEnabled(false);
+	ui->txtSearch->setEnabled(false);
+	ui->previewProcessBar->setValue(0);
+
+	QVector<QString> paths;
+	for(int i = 0; i < ui->lstPaths->count(); i++)
+	{
+		paths.append(ui->lstPaths->item(i)->text());
+	}
+	this->indexer->setTargetPaths(paths);
+	this->indexer->beginIndexing();
+}
+
+void MainWindow::finishIndexing()
+{
+	IndexResult result = this->indexer->getResult();
+
+	ui->lblSearchResults->setText("Indexing finished");
+	ui->previewProcessBar->setValue(ui->previewProcessBar->maximum());
+	ui->lblFailedValue->setText(QString::number(result.erroredPaths));
+	ui->lblSkippedValue->setText(QString::number(result.skippedPaths));
+	ui->lblAddedValue->setText(QString::number(result.addedPaths));
 }
 
 void MainWindow::comboScaleChanged(int i)
@@ -84,9 +145,15 @@ void MainWindow::comboScaleChanged(int i)
 	scaleSetting.setValue("currentScale", ui->comboScale->currentText());
 	makePreviews(ui->spinPreviewPage->value());
 }
+
 bool MainWindow::previewTabActive()
 {
 	return ui->tabWidget->currentIndex() == 1;
+}
+
+bool MainWindow::indexerTabActive()
+{
+	return ui->tabWidget->currentIndex() == 2;
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -112,7 +179,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::tabChanged()
 {
-	if(previewTabActive())
+	if(previewTabActive() || indexerTabActive())
 	{
 		if(previewDirty)
 		{
@@ -120,6 +187,7 @@ void MainWindow::tabChanged()
 		}
 		ui->previewProcessBar->show();
 	}
+
 	else
 	{
 		ui->previewProcessBar->hide();

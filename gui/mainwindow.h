@@ -12,6 +12,7 @@
 #include "previewworker.h"
 #include "../shared/looqsquery.h"
 #include "ipcclient.h"
+#include "indexer.h"
 namespace Ui
 {
 class MainWindow;
@@ -29,8 +30,11 @@ class MainWindow : public QMainWindow
 	void startPdfPreviewGeneration(QVector<SearchResult> paths, double scalefactor);
 
   private:
+	DatabaseFactory *dbFactory;
+	SqliteDbService *dbService;
 	Ui::MainWindow *ui;
 	IPCClient *ipcClient;
+	Indexer *indexer;
 	QFileIconProvider iconProvider;
 	bool previewDirty;
 	QSqlDatabase db;
@@ -41,6 +45,7 @@ class MainWindow : public QMainWindow
 	void connectSignals();
 	void makePreviews(int page);
 	bool previewTabActive();
+	bool indexerTabActive();
 	void keyPressEvent(QKeyEvent *event) override;
 	unsigned int processedPdfPreviews;
 	void handleSearchResults(const QVector<SearchResult> &results);
@@ -59,6 +64,8 @@ class MainWindow : public QMainWindow
 	void previewReceived(QSharedPointer<PreviewResult> preview);
 	void comboScaleChanged(int i);
 	void spinPreviewPageValueChanged(int val);
+	void startIndexing();
+	void finishIndexing();
 };
 
 #endif // MAINWINDOW_H

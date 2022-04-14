@@ -53,12 +53,14 @@ FORMS += \
         mainwindow.ui
 
 INCLUDEPATH += /usr/include/poppler/qt5/
-LIBS += -lpoppler-qt5
+
 QT += widgets sql
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../shared/release/ -lshared
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../shared/debug/ -lshared
 else:unix: LIBS += -L$$OUT_PWD/../shared/ -lshared
+
+LIBS += -luchardet -lpoppler-qt5 -lquazip5
 
 INCLUDEPATH += $$PWD/../shared
 DEPENDPATH += $$PWD/../shared
