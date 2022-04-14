@@ -12,7 +12,8 @@ enum SaveFileResult
 	OK,
 	SKIPPED,
 	DBFAIL,
-	PROCESSFAIL
+	PROCESSFAIL,
+	NOTFOUND
 };
 
 class SqliteDbService
