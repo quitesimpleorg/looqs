@@ -3,3 +3,12 @@
 #include <QDebug>
 #include "command.h"
 #include "looqsgeneralexception.h"
+
+void Command::execute()
+{
+	int result = handle(arguments);
+	if(autoFinish)
+	{
+		emit finishedCmd(result);
+	}
+}

@@ -11,6 +11,28 @@
 #include "commandadd.h"
 #include "logger.h"
 
+void CommandAdd::indexerFinished()
+{
+	IndexResult result = indexer->getResult();
+
+	Logger::info() << "Total: " << result.total() << Qt::endl;
+	Logger::info() << "Added: " << result.addedPaths << Qt::endl;
+	Logger::info() << "Skipped: " << result.skippedPaths << Qt::endl;
+	auto failedPathsCount = result.erroredPaths;
+	Logger::info() << "Failed: " << failedPathsCount << Qt::endl;
+	if(failedPathsCount > 0)
+	{
+		Logger::info() << "Failed paths: " << Qt::endl;
+		for(QString paths : result.failedPaths())
+		{
+			Logger::info() << paths << Qt::endl;
+		}
+	}
+
+	/* TODO maybe not 0 if keepGoing not given */
+	emit finishedCmd(0);
+}
+
 int CommandAdd::handle(QStringList arguments)
 {
 	QCommandLineParser parser;
@@ -51,15 +73,21 @@ int CommandAdd::handle(QStringList arguments)
 		}
 	}
 
-	FileSaver saver(*this->dbService);
-	int numFilesCount = files.size();
-	int processedFilesCount = saver.addFiles(files.toVector(), keepGoing, verbose);
-	if(processedFilesCount != numFilesCount)
-	{
-		Logger::error() << "Errors occured while trying to add files to the database. Processed " << processedFilesCount
-						<< "out of" << numFilesCount << "files" << Qt::endl;
-		return 1;
-	}
+	indexer = new Indexer(*this->dbService);
+	indexer->setTargetPaths(files.toVector());
+
+	connect(indexer, &Indexer::pathsCountChanged, this,
+			[](int pathsCount) { Logger::info() << "Found paths: " << pathsCount << Qt::endl; });
+
+	connect(indexer, &Indexer::indexProgress, this,
+			[](int pathsCount, unsigned int added, unsigned int skipped, unsigned int failed, unsigned int totalCount)
+			{ Logger::info() << "Processed files: " << totalCount << Qt::endl; });
+	connect(indexer, &Indexer::finished, this, &CommandAdd::indexerFinished);
+
+	/* TODO: keepGoing, verbose */
+
+	this->autoFinish = false;
+	indexer->beginIndexing();
 
 	return 0;
 }

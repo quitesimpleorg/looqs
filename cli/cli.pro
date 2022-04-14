@@ -20,7 +20,8 @@ SOURCES += \
     commanddelete.cpp \
     commandupdate.cpp \
     commandsearch.cpp \
-    commandlist.cpp
+    commandlist.cpp \
+    command.cpp
 
 HEADERS += \
     command.h \

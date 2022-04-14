@@ -9,6 +9,8 @@
 #include <QDebug>
 #include <QSettings>
 #include <functional>
+#include <QTimer>
+
 #include <exception>
 #include "encodingdetector.h"
 #include "pdfprocessor.h"
@@ -23,6 +25,7 @@
 #include "logger.h"
 #include "sandboxedprocessor.h"
 #include "../shared/common.h"
+#include "../shared/filescanworker.h"
 
 void printUsage(QString argv0)
 {
@@ -74,6 +77,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	qRegisterMetaType<PageData>();
+	qRegisterMetaType<FileScanResult>("FileScanResult");
 
 	QString connectionString = Common::databasePath();
 	DatabaseFactory dbFactory(connectionString);
@@ -96,7 +100,9 @@ int main(int argc, char *argv[])
 	{
 		try
 		{
-			return cmd->handle(args);
+			QObject::connect(cmd, &Command::finishedCmd, [](int retval) { QCoreApplication::exit(retval); });
+			cmd->setArguments(args);
+			QTimer::singleShot(0, cmd, &Command::execute);
 		}
 		catch(const LooqsGeneralException &e)
 		{
@@ -107,5 +113,6 @@ int main(int argc, char *argv[])
 	{
 		Logger::error() << "Unknown command " << commandName << Qt::endl;
 	}
-	return 1;
+
+	return app.exec();
 }
