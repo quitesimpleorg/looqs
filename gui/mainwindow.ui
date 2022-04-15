@@ -190,7 +190,10 @@
             <widget class="QListWidget" name="lstPaths"/>
            </item>
            <item row="1" column="3">
-            <widget class="QToolButton" name="toolButton">
+            <widget class="QToolButton" name="btnDeletePath">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Delete</string>
              </property>

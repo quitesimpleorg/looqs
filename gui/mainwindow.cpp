@@ -114,6 +114,12 @@ void MainWindow::connectSignals()
 			});
 
 	connect(this->indexer, &Indexer::finished, this, &MainWindow::finishIndexing);
+
+	connect(ui->lstPaths->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+			[&](const QItemSelection &selected, const QItemSelection &deselected)
+			{ ui->btnDeletePath->setEnabled(this->ui->lstPaths->selectedItems().count() > 0); });
+
+	connect(ui->btnDeletePath, &QPushButton::clicked, this, [&] { qDeleteAll(ui->lstPaths->selectedItems()); });
 }
 
 void MainWindow::spinPreviewPageValueChanged(int val)
