@@ -1,10 +1,12 @@
 #include "filescanworker.h"
 #include "logger.h"
-FileScanWorker::FileScanWorker(SqliteDbService &db, ConcurrentQueue<QString> &queue, int batchsize)
+FileScanWorker::FileScanWorker(SqliteDbService &db, ConcurrentQueue<QString> &queue, int batchsize,
+							   std::atomic<bool> &stopToken)
 {
 	this->dbService = &db;
 	this->queue = &queue;
 	this->batchsize = batchsize;
+	this->stopToken = &stopToken;
 }
 
 void FileScanWorker::run()
@@ -24,6 +26,11 @@ void FileScanWorker::run()
 			sfr = PROCESSFAIL; // well...
 		}
 		emit result({path, sfr});
+		if(stopToken->load(std::memory_order_relaxed)) // TODO: relaxed should suffice here, but recheck
+		{
+			emit finished();
+			return;
+		}
 	}
 	emit finished();
 }

@@ -16,9 +16,10 @@ class FileScanWorker : public QObject, public QRunnable
 	SqliteDbService *dbService;
 	ConcurrentQueue<QString> *queue;
 	int batchsize;
+	std::atomic<bool> *stopToken;
 
   public:
-	FileScanWorker(SqliteDbService &db, ConcurrentQueue<QString> &queue, int batchsize);
+	FileScanWorker(SqliteDbService &db, ConcurrentQueue<QString> &queue, int batchsize, std::atomic<bool> &stopToken);
 	void run() override;
   signals:
 	void result(FileScanResult);

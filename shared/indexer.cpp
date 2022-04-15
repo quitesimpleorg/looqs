@@ -34,6 +34,7 @@ void Indexer::beginIndexing()
 
 	this->dirScanner->scan();
 
+	this->workerCancellationToken.store(false, std::memory_order_seq_cst);
 	launchWorker(this->filePathTargetsQueue, this->filePathTargetsQueue.remaining());
 }
 
@@ -47,6 +48,12 @@ void Indexer::setTargetPaths(QVector<QString> pathsToScan)
 	this->pathsToScan = pathsToScan;
 }
 
+void Indexer::requestCancellation()
+{
+	this->dirScanner->cancel();
+	this->workerCancellationToken.store(true, std::memory_order_release);
+}
+
 IndexResult Indexer::getResult()
 {
 	return this->currentIndexResult;
@@ -55,11 +62,15 @@ IndexResult Indexer::getResult()
 void Indexer::dirScanFinished()
 {
 	Logger::info() << "Dir scan finished";
+	if(!isRunning())
+	{
+		emit finished();
+	}
 }
 
 void Indexer::launchWorker(ConcurrentQueue<QString> &queue, int batchsize)
 {
-	FileScanWorker *runnable = new FileScanWorker(*this->db, queue, batchsize);
+	FileScanWorker *runnable = new FileScanWorker(*this->db, queue, batchsize, this->workerCancellationToken);
 	connect(runnable, &FileScanWorker::result, this, &Indexer::processFileScanResult);
 	connect(runnable, &FileScanWorker::finished, this, &Indexer::processFinishedWorker);
 	++this->runningWorkers;
@@ -107,10 +118,14 @@ void Indexer::processFileScanResult(FileScanResult result)
 	}
 }
 
+bool Indexer::isRunning()
+{
+	return this->runningWorkers > 0 || this->dirScanner->isRunning();
+}
 void Indexer::processFinishedWorker()
 {
 	--this->runningWorkers;
-	if(this->runningWorkers == 0 && !this->dirScanner->isRunning())
+	if(!isRunning())
 	{
 		emit finished();
 	}

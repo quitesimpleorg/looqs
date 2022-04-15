@@ -3,7 +3,6 @@
 #include <QList>
 #include <QMutex>
 #include <QSemaphore>
-
 #define QUEUE_SIZE 10000
 template <class T> class ConcurrentQueue : protected QList<T>
 {

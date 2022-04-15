@@ -51,20 +51,24 @@ class Indexer : public QObject
 
 	QVector<QString> pathsToScan;
 	QSharedPointer<ParallelDirScanner> dirScanner;
-	QSharedPointer<FileScanWorker> fileScanner;
 
 	QStringList ignorePattern;
 
 	/* Those path pointing to files not directories */
 	ConcurrentQueue<QString> filePathTargetsQueue;
 
+	std::atomic<bool> workerCancellationToken;
 	IndexResult currentIndexResult;
 	void launchWorker(ConcurrentQueue<QString> &queue, int batchsize);
 
   public:
+	bool isRunning();
+
 	void beginIndexing();
 	void setIgnorePattern(QStringList ignorePattern);
 	void setTargetPaths(QVector<QString> pathsToScan);
+
+	void requestCancellation();
 
 	Indexer(SqliteDbService &db);
 	IndexResult getResult();

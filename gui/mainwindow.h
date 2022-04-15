@@ -66,6 +66,7 @@ class MainWindow : public QMainWindow
 	void spinPreviewPageValueChanged(int val);
 	void startIndexing();
 	void finishIndexing();
+	void addPathToIndex();
 };
 
 #endif // MAINWINDOW_H

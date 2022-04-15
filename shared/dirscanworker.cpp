@@ -33,6 +33,9 @@ void DirScanWorker::run()
 			{
 				if(this->stopToken->load(std::memory_order_relaxed))
 				{
+					Logger::info() << "Received cancel request" << Qt::endl;
+					this->results.clear();
+					emit finished();
 					return;
 				}
 

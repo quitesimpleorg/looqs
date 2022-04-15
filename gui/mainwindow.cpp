@@ -129,6 +129,16 @@ void MainWindow::spinPreviewPageValueChanged(int val)
 
 void MainWindow::startIndexing()
 {
+	if(this->indexer->isRunning())
+	{
+		ui->btnStartIndexing->setEnabled(false);
+		ui->btnStartIndexing->setText("Start indexing");
+		this->indexer->requestCancellation();
+		return;
+	}
+
+	ui->previewsTab->setEnabled(false);
+	ui->resultsTab->setEnabled(false);
 	ui->txtPathScanAdd->setEnabled(false);
 	ui->txtSearch->setEnabled(false);
 	ui->previewProcessBar->setValue(0);
@@ -140,6 +150,7 @@ void MainWindow::startIndexing()
 	}
 	this->indexer->setTargetPaths(paths);
 	this->indexer->beginIndexing();
+	ui->btnStartIndexing->setText("Stop indexing");
 }
 
 void MainWindow::finishIndexing()
@@ -151,6 +162,8 @@ void MainWindow::finishIndexing()
 	ui->lblFailedValue->setText(QString::number(result.erroredPaths));
 	ui->lblSkippedValue->setText(QString::number(result.skippedPaths));
 	ui->lblAddedValue->setText(QString::number(result.addedPaths));
+	ui->btnStartIndexing->setEnabled(true);
+	ui->btnStartIndexing->setText("Start indexing");
 }
 
 void MainWindow::comboScaleChanged(int i)

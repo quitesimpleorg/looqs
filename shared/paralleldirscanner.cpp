@@ -31,13 +31,14 @@ void ParallelDirScanner::setPaths(QVector<QString> paths)
 
 void ParallelDirScanner::cancel()
 {
-	this->stopToken.store(true, std::memory_order_relaxed);
+	this->stopToken.store(true, std::memory_order_seq_cst);
 }
 
 void ParallelDirScanner::handleWorkersProgress(unsigned int progress)
 {
 	this->processedPaths += progress;
-	emit this->progress(progress, this->processedPaths);
+	if(!this->stopToken.load(std::memory_order_seq_cst))
+		emit this->progress(progress, this->processedPaths);
 }
 
 void ParallelDirScanner::handleWorkersFinish()
@@ -45,7 +46,7 @@ void ParallelDirScanner::handleWorkersFinish()
 	Logger::info() << "Worker finished";
 	// no mutexes required due to queued connection
 	++finishedWorkers;
-	if(finishedWorkers == getThreadsNum())
+	if(this->stopToken.load(std::memory_order_seq_cst) || finishedWorkers == getThreadsNum())
 	{
 		running = false;
 		emit scanComplete();
