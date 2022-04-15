@@ -42,6 +42,9 @@ MainWindow::MainWindow(QWidget *parent, IPCClient &client) : QMainWindow(parent)
 	ui->comboScale->setCurrentText(settings.value("currentScale").toString());
 	previewsPerPage = settings.value("previewsPerPage", 20).toInt();
 	ui->spinPreviewPage->setMinimum(1);
+
+	QStringList indexPaths = settings.value("indexPaths").toStringList();
+	ui->lstPaths->addItems(indexPaths);
 }
 
 void MainWindow::addPathToIndex()
@@ -144,12 +147,17 @@ void MainWindow::startIndexing()
 	ui->previewProcessBar->setValue(0);
 
 	QVector<QString> paths;
+	QStringList pathSettingsValue;
 	for(int i = 0; i < ui->lstPaths->count(); i++)
 	{
-		paths.append(ui->lstPaths->item(i)->text());
+		QString path = ui->lstPaths->item(i)->text();
+		paths.append(path);
+		pathSettingsValue.append(path);
 	}
 	this->indexer->setTargetPaths(paths);
 	this->indexer->beginIndexing();
+	QSettings settings;
+	settings.setValue("indexPaths", pathSettingsValue);
 	ui->btnStartIndexing->setText("Stop indexing");
 }
 
