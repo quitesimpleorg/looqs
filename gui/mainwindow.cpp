@@ -11,6 +11,7 @@
 #include <QProcess>
 #include <QComboBox>
 #include <QtConcurrent/QtConcurrent>
+#include <QMessageBox>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "clicklabel.h"
@@ -43,6 +44,23 @@ MainWindow::MainWindow(QWidget *parent, IPCClient &client) : QMainWindow(parent)
 	ui->spinPreviewPage->setMinimum(1);
 }
 
+void MainWindow::addPathToIndex()
+{
+	QString path = this->ui->txtPathScanAdd->text();
+	QFileInfo fileInfo{path};
+	if(!fileInfo.exists(path))
+	{
+		QMessageBox::critical(this, "Invalid path", "Path does not seem to exist");
+		return;
+	}
+	if(!fileInfo.isReadable())
+	{
+		QMessageBox::critical(this, "Invalid path", "Path cannot be read");
+		return;
+	}
+	this->ui->lstPaths->addItem(path);
+	this->ui->txtPathScanAdd->clear();
+}
 void MainWindow::connectSignals()
 {
 	connect(ui->txtSearch, &QLineEdit::returnPressed, this, &MainWindow::lineEditReturnPressed);
@@ -72,18 +90,8 @@ void MainWindow::connectSignals()
 	connect(ui->spinPreviewPage, qOverload<int>(&QSpinBox::valueChanged), this,
 			&MainWindow::spinPreviewPageValueChanged);
 
-	connect(ui->btnAddPath, &QPushButton::clicked, this,
-			[&]
-			{
-				this->ui->lstPaths->addItem(this->ui->txtPathScanAdd->text());
-				this->ui->txtPathScanAdd->clear();
-			});
-	connect(ui->txtPathScanAdd, &QLineEdit::returnPressed, this,
-			[&]
-			{
-				this->ui->lstPaths->addItem(this->ui->txtPathScanAdd->text());
-				this->ui->txtPathScanAdd->clear();
-			});
+	connect(ui->btnAddPath, &QPushButton::clicked, this, &MainWindow::addPathToIndex);
+	connect(ui->txtPathScanAdd, &QLineEdit::returnPressed, this, &MainWindow::addPathToIndex);
 	connect(ui->btnStartIndexing, &QPushButton::clicked, this, &MainWindow::startIndexing);
 
 	connect(this->indexer, &Indexer::pathsCountChanged, this,
