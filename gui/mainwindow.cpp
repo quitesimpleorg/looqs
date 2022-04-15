@@ -164,6 +164,10 @@ void MainWindow::finishIndexing()
 	ui->lblAddedValue->setText(QString::number(result.addedPaths));
 	ui->btnStartIndexing->setEnabled(true);
 	ui->btnStartIndexing->setText("Start indexing");
+	ui->previewsTab->setEnabled(true);
+	ui->resultsTab->setEnabled(true);
+	ui->txtPathScanAdd->setEnabled(true);
+	ui->txtSearch->setEnabled(true);
 }
 
 void MainWindow::comboScaleChanged(int i)
