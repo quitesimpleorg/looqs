@@ -133,7 +133,8 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 		throw LooqsGeneralException("Nothing to search for supplied");
 	}
 
-	for(const Token &token : query.getTokens())
+	auto tokens = query.getTokens();
+	for(const Token &token : tokens)
 	{
 		if(token.type == FILTER_CONTENT_CONTAINS)
 		{
@@ -155,7 +156,11 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 	{
 		if(sortSql.isEmpty())
 		{
-			sortSql = "ORDER BY rank";
+			if(std::find_if(tokens.begin(), tokens.end(),
+							[](const Token &t) -> bool { return t.type == FILTER_CONTENT_CONTAINS; }) != tokens.end())
+			{
+				sortSql = "ORDER BY rank";
+			}
 		}
 		prepSql =
 			"SELECT file.path AS path, group_concat(content.page) AS pages, file.mtime AS mtime, file.size AS size, "
