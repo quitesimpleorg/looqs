@@ -85,6 +85,12 @@ void MainWindow::connectSignals()
 			[&](int index) { previewReceived(previewWorkerWatcher.resultAt(index)); });
 	connect(&previewWorkerWatcher, &QFutureWatcher<QSharedPointer<PreviewResult>>::progressValueChanged,
 			ui->previewProcessBar, &QProgressBar::setValue);
+	connect(&previewWorkerWatcher, &QFutureWatcher<QSharedPointer<PreviewResult>>::started, this,
+			[&] { ui->indexerTab->setEnabled(false); });
+
+	connect(&previewWorkerWatcher, &QFutureWatcher<QSharedPointer<PreviewResult>>::finished, this,
+			[&] { ui->indexerTab->setEnabled(true); });
+
 	connect(ui->treeResultsList, &QTreeWidget::itemActivated, this, &MainWindow::treeSearchItemActivated);
 	connect(ui->treeResultsList, &QTreeWidget::customContextMenuRequested, this,
 			&MainWindow::showSearchResultsContextMenu);
@@ -145,6 +151,7 @@ void MainWindow::startIndexing()
 	ui->txtPathScanAdd->setEnabled(false);
 	ui->txtSearch->setEnabled(false);
 	ui->previewProcessBar->setValue(0);
+	ui->previewProcessBar->setVisible(true);
 
 	QVector<QString> paths;
 	QStringList pathSettingsValue;
@@ -218,18 +225,23 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::tabChanged()
 {
-	if(previewTabActive() || indexerTabActive())
+	if(ui->tabWidget->currentIndex() == 0)
+	{
+		ui->previewProcessBar->hide();
+	}
+	else
+	{
+		if(ui->previewProcessBar->value() > 0)
+		{
+			ui->previewProcessBar->show();
+		}
+	}
+	if(previewTabActive())
 	{
 		if(previewDirty)
 		{
 			makePreviews(ui->spinPreviewPage->value());
 		}
-		ui->previewProcessBar->show();
-	}
-
-	else
-	{
-		ui->previewProcessBar->hide();
 	}
 }
 
@@ -265,6 +277,7 @@ void MainWindow::lineEditReturnPressed()
 		return;
 	}
 	// TODO: validate q;
+	ui->treeResultsList->clear();
 	ui->lblSearchResults->setText("Searching...");
 	this->ui->txtSearch->setEnabled(false);
 	QFuture<QVector<SearchResult>> searchFuture = QtConcurrent::run(
@@ -387,6 +400,7 @@ void MainWindow::makePreviews(int page)
 																 wordsToHighlight, scaleText.toInt() / 100.));
 	ui->previewProcessBar->setMaximum(this->previewWorkerWatcher.progressMaximum());
 	ui->previewProcessBar->setMinimum(this->previewWorkerWatcher.progressMinimum());
+	ui->previewProcessBar->setVisible(this->previewableSearchResults.size() > 0);
 }
 
 void MainWindow::handleSearchError(QString error)
