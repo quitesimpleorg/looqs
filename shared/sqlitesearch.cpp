@@ -133,12 +133,17 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 		throw LooqsGeneralException("Nothing to search for supplied");
 	}
 
+	bool ftsAlreadyJoined = false;
 	auto tokens = query.getTokens();
 	for(const Token &token : tokens)
 	{
 		if(token.type == FILTER_CONTENT_CONTAINS)
 		{
-			joinSql += " INNER JOIN content_fts ON content.id = content_fts.ROWID ";
+			if(!ftsAlreadyJoined)
+			{
+				joinSql += " INNER JOIN content_fts ON content.id = content_fts.ROWID ";
+				ftsAlreadyJoined = true;
+			}
 			whereSql += " content_fts.content MATCH ? ";
 			bindValues.append(token.value);
 		}
