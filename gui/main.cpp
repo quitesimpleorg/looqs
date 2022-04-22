@@ -31,11 +31,7 @@ void enableSandbox(QString socketPath)
 
 	std::string sockPath = socketPath.toStdString();
 	policy->namespace_options = EXILE_UNSHARE_NETWORK | EXILE_UNSHARE_USER;
-	policy->vow_promises = EXILE_SYSCALL_VOW_THREAD | EXILE_SYSCALL_VOW_CPATH | EXILE_SYSCALL_VOW_WPATH |
-						   EXILE_SYSCALL_VOW_RPATH | EXILE_SYSCALL_VOW_UNIX | EXILE_SYSCALL_VOW_STDIO |
-						   EXILE_SYSCALL_VOW_PROT_EXEC | EXILE_SYSCALL_VOW_PROC | EXILE_SYSCALL_VOW_SHM |
-						   EXILE_SYSCALL_VOW_FSNOTIFY | EXILE_SYSCALL_VOW_IOCTL;
-
+	policy->vow_promises = exile_vows_from_str("thread cpath wpath rpath unix stdio prot_exec proc shm fsnotify ioctl clone");
 	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_REMOVE_FILE, "/") != 0)
 	{
 		qCritical() << "Failed to append a path to the path policy";
