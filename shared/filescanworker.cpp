@@ -20,7 +20,7 @@ void FileScanWorker::run()
 		{
 			sfr = saver.addFile(path);
 		}
-		catch(std::runtime_error &e)
+		catch(std::exception &e)
 		{
 			Logger::error() << e.what();
 			sfr = PROCESSFAIL; // well...
