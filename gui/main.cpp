@@ -28,11 +28,13 @@ void enableSandbox(QString socketPath)
 
 	std::string appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation).toStdString();
 	std::string cacheDataLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation).toStdString();
+	std::string configDataLocation = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation).toStdString();
 
 	std::string sockPath = socketPath.toStdString();
+	std::string dbPath = QFileInfo(Common::databasePath()).absolutePath().toStdString();
+	std::string mySelf = QFileInfo("/proc/self/exe").symLinkTarget().toStdString();
 	policy->namespace_options = EXILE_UNSHARE_NETWORK | EXILE_UNSHARE_USER;
-	policy->vow_promises = exile_vows_from_str("thread cpath wpath rpath unix stdio prot_exec proc shm fsnotify ioctl clone");
-	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_REMOVE_FILE, "/") != 0)
+	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ, "/") != 0)
 	{
 		qCritical() << "Failed to append a path to the path policy";
 		exit(EXIT_FAILURE);
@@ -41,13 +43,32 @@ void enableSandbox(QString socketPath)
 	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE,
 								  appDataLocation.c_str()) != 0)
 	{
-		qCritical() << "Failed to append a path to the path policy";
+		qCritical() << "Failed to append appDataLocation path to the path policy";
 		exit(EXIT_FAILURE);
 	}
 	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE,
 								  cacheDataLocation.c_str()) != 0)
 	{
-		qCritical() << "Failed to append a path to the path policy";
+		qCritical() << "Failed to append cacheDataLocation path to the path policy";
+		exit(EXIT_FAILURE);
+	}
+	if(exile_append_path_policies(policy,
+								  EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_REMOVE_FILE | EXILE_FS_ALLOW_ALL_WRITE,
+								  dbPath.c_str()) != 0)
+	{
+		qCritical() << "Failed to append dbPath path to the path policy";
+		exit(EXIT_FAILURE);
+	}
+	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_EXEC, mySelf.c_str(), "/lib64",
+								  "/lib") != 0)
+	{
+		qCritical() << "Failed to append mySelf path to the path policy";
+		exit(EXIT_FAILURE);
+	}
+	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE,
+								  configDataLocation.c_str()) != 0)
+	{
+		qCritical() << "Failed to append configDataLocation path to the path policy";
 		exit(EXIT_FAILURE);
 	}
 	int ret = exile_enable_policy(policy);
