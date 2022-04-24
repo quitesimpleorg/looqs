@@ -4,6 +4,7 @@
 enum IPCCommand
 {
 	DocOpen,
-	FileOpen
+	FileOpen,
+	AddFile,
 };
 #endif // IPC_H

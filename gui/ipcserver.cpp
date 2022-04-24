@@ -6,9 +6,15 @@
 #include <QLocalSocket>
 #include <QDataStream>
 #include "ipcserver.h"
+#include "common.h"
+#include "databasefactory.h"
+#include "../shared/logger.h"
 
 IpcServer::IpcServer()
 {
+	this->dbFactory = QSharedPointer<DatabaseFactory>(new DatabaseFactory(Common::databasePath()));
+	this->dbService = QSharedPointer<SqliteDbService>(new SqliteDbService(*this->dbFactory.get()));
+	this->fileSaver = QSharedPointer<FileSaver>(new FileSaver(*this->dbService.get()));
 	connect(&this->spawningServer, &QLocalServer::newConnection, this, &IpcServer::spawnerNewConnection);
 }
 
@@ -20,9 +26,10 @@ bool IpcServer::startSpawner(QString socketPath)
 
 bool IpcServer::docOpen(QString path, int pagenum)
 {
+
 	QSettings settings;
 	QString command = settings.value("pdfviewer").toString();
-	if(command != "" && command.contains("%p") && command.contains("%f"))
+	if(path.endsWith(".pdf") && command != "" && command.contains("%p") && command.contains("%f"))
 	{
 		QStringList splitted = command.split(" ");
 		if(splitted.size() > 1)
@@ -45,6 +52,19 @@ bool IpcServer::docOpen(QString path, int pagenum)
 bool IpcServer::fileOpen(QString path)
 {
 	return QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+}
+
+SaveFileResult IpcServer::addFile(QString file)
+{
+	try
+	{
+		return this->fileSaver->addFile(file);
+	}
+	catch(std::exception &e)
+	{
+		Logger::error() << e.what() << Qt::endl;
+		return PROCESSFAIL;
+	}
 }
 
 void IpcServer::spawnerNewConnection()
