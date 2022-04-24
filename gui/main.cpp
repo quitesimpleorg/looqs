@@ -33,7 +33,7 @@ void enableSandbox(QString socketPath)
 	std::string sockPath = socketPath.toStdString();
 	std::string dbPath = QFileInfo(Common::databasePath()).absolutePath().toStdString();
 	std::string mySelf = QFileInfo("/proc/self/exe").symLinkTarget().toStdString();
-	policy->namespace_options = EXILE_UNSHARE_NETWORK | EXILE_UNSHARE_USER;
+	policy->namespace_options = EXILE_UNSHARE_USER;
 	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ, "/") != 0)
 	{
 		qCritical() << "Failed to append a path to the path policy";
