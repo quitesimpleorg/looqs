@@ -81,7 +81,7 @@ int CommandAdd::handle(QStringList arguments)
 
 	connect(indexer, &Indexer::indexProgress, this,
 			[](int pathsCount, unsigned int added, unsigned int skipped, unsigned int failed, unsigned int totalCount)
-			{ Logger::info() << "Processed files: " << totalCount << Qt::endl; });
+			{ Logger::info() << "Processed files: " << pathsCount << Qt::endl; });
 	connect(indexer, &Indexer::finished, this, &CommandAdd::indexerFinished);
 
 	/* TODO: keepGoing, verbose */
