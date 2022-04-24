@@ -14,15 +14,11 @@ class PreviewGeneratorMapFunctor
 		LAST_DUMMY
 	};
 	RenderConfig renderConfig;
-	PreviewGenerator *generator[LAST_DUMMY];
-	PreviewGenerator *getGenerator(QString filePath);
 
   public:
 	typedef QSharedPointer<PreviewResult> result_type;
 
 	PreviewGeneratorMapFunctor();
-
-	~PreviewGeneratorMapFunctor();
 
 	void setRenderConfig(RenderConfig config);
 
