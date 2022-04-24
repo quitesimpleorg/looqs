@@ -12,7 +12,7 @@ static QThreadStorage<QSqlDatabase> dbStore;
 QSqlDatabase DatabaseFactory::createNew()
 {
 	static int counter = 0;
-	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "QSS" + QString::number(counter++));
+	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "LOOQS" + QString::number(counter++));
 	db.setDatabaseName(this->connectionString);
 	if(!db.open())
 	{
@@ -29,7 +29,7 @@ QSqlDatabase DatabaseFactory::forCurrentThread()
 		return dbStore.localData();
 	}
 	QSqlDatabase db =
-		QSqlDatabase::addDatabase("QSQLITE", "QSS" + QString::number((quint64)QThread::currentThread(), 16));
+		QSqlDatabase::addDatabase("QSQLITE", "LOOQS" + QString::number((quint64)QThread::currentThread(), 16));
 	db.setDatabaseName(this->connectionString);
 	if(!db.open())
 	{

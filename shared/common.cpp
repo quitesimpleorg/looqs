@@ -96,7 +96,7 @@ void Common::setupAppInfo()
 
 QString Common::databasePath()
 {
-	QString env = QProcessEnvironment::systemEnvironment().value("QSS_DB_OVERRIDE");
+	QString env = QProcessEnvironment::systemEnvironment().value("LOOQS_DB_OVERRIDE");
 	if(env == "")
 	{
 		QSettings settings;
