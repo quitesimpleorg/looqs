@@ -106,12 +106,14 @@ int main(int argc, char *argv[])
 		}
 		catch(const LooqsGeneralException &e)
 		{
-			Logger::error() << "Exception caught, message: " << e.message << Qt::endl;
+			Logger::error() << "Exception caught, message:" << e.message << Qt::endl;
+			return 1;
 		}
 	}
 	else
 	{
-		Logger::error() << "Unknown command " << commandName << Qt::endl;
+		Logger::error() << "Unknown command:" << commandName << Qt::endl;
+		return 1;
 	}
 
 	return app.exec();
