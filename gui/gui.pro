@@ -31,8 +31,10 @@ SOURCES += \
     previewgenerator.cpp \
     previewgeneratormapfunctor.cpp \
     previewgeneratorpdf.cpp \
+    previewgeneratorplaintext.cpp \
     previewresult.cpp \
     previewresultpdf.cpp \
+    previewresultplaintext.cpp \
     previewworker.cpp
 
 HEADERS += \
@@ -44,8 +46,10 @@ HEADERS += \
     previewgenerator.h \
     previewgeneratormapfunctor.h \
     previewgeneratorpdf.h \
+    previewgeneratorplaintext.h \
     previewresult.h \
     previewresultpdf.h \
+    previewresultplaintext.h \
     previewworker.h \
     renderconfig.h
 
