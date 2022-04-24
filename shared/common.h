@@ -6,6 +6,7 @@ namespace Common
 {
 void setupAppInfo();
 QString databasePath();
+QString ipcSocketPath();
 bool initSqliteDatabase(QString path);
 void ensureConfigured();
 } // namespace Common

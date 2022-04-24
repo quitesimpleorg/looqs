@@ -15,6 +15,7 @@
 
 #define SETTINGS_KEY_DBPATH "dbpath"
 #define SETTINGS_KEY_FIRSTRUN "firstrun"
+#define SETTINGS_KEY_IPCSOCKETPATH "ipcsocketpath"
 
 inline void initResources()
 {
@@ -102,4 +103,10 @@ QString Common::databasePath()
 		return settings.value(SETTINGS_KEY_DBPATH).toString();
 	}
 	return env;
+}
+
+QString Common::ipcSocketPath()
+{
+	QSettings settings;
+	return settings.value(SETTINGS_KEY_IPCSOCKETPATH, "/tmp/looqs-spawner").toString();
 }
