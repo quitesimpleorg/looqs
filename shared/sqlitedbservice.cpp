@@ -7,7 +7,8 @@
 #include "logger.h"
 bool SqliteDbService::fileExistsInDatabase(QString path, qint64 mtime)
 {
-	auto query = QSqlQuery("SELECT 1 FROM file WHERE path = ? and mtime = ?", dbFactory->forCurrentThread());
+	auto query = QSqlQuery(dbFactory->forCurrentThread());
+	query.prepare("SELECT 1 FROM file WHERE path = ? and mtime = ?");
 	query.addBindValue(path);
 	query.addBindValue(mtime);
 	if(!query.exec())
