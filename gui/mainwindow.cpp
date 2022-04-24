@@ -327,7 +327,7 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 		bool exists = pathInfo.exists();
 		if(exists)
 		{
-			if(result.fileData.absPath.endsWith(".pdf"))
+			if(PreviewGenerator::get(pathInfo) != nullptr)
 			{
 				this->previewableSearchResults.append(result);
 			}
