@@ -136,20 +136,18 @@ int main(int argc, char *argv[])
 	}
 	parser.parse(appArgs);
 
-	if(!parser.isSet("no-sandbox"))
-	{
-		enableSandbox(socketPath);
-		qInfo() << "Sandbox: on";
-	}
-	else
-	{
-		qInfo() << "Sandbox: off";
-	}
-	// Keep this post sandbox, afterwards does not work (suspect due to threads, but unconfirmed)
-	QApplication a(argc, argv);
 	try
 	{
 		Common::ensureConfigured();
+		if(!parser.isSet("no-sandbox"))
+		{
+			enableSandbox(socketPath);
+			qInfo() << "Sandbox: on";
+		}
+		else
+		{
+			qInfo() << "Sandbox: off";
+		}
 	}
 	catch(LooqsGeneralException &e)
 	{
@@ -157,6 +155,9 @@ int main(int argc, char *argv[])
 		QMessageBox::critical(nullptr, "Error", e.message);
 		return 1;
 	}
+	// Keep this post sandbox, afterwards does not work (suspect due to threads, but unconfirmed)
+	QApplication a(argc, argv);
+
 	qRegisterMetaType<QVector<SearchResult>>("QVector<SearchResult>");
 	qRegisterMetaType<QVector<PreviewResultPdf>>("QVector<PreviewResultPdf>");
 	qRegisterMetaType<PreviewResultPdf>("PreviewResultPdf");
