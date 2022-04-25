@@ -108,6 +108,7 @@ int CommandUpdate::handle(QStringList arguments)
 			}
 		}
 		offset += limit;
+		files.clear();
 		processedRows = this->dbService->getFiles(files, pattern, offset, limit);
 	}
 
