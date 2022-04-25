@@ -16,6 +16,7 @@
 #define SETTINGS_KEY_DBPATH "dbpath"
 #define SETTINGS_KEY_FIRSTRUN "firstrun"
 #define SETTINGS_KEY_IPCSOCKETPATH "ipcsocketpath"
+#define SETTINGS_KEY_PDFVIEWER "pdfviewer"
 
 inline void initResources()
 {
@@ -38,6 +39,52 @@ bool Common::initSqliteDatabase(QString path)
 	return true;
 }
 
+QString Common::findInPath(QString needle)
+{
+	QStringList results;
+	QString pathVar = QProcessEnvironment::systemEnvironment().value("PATH", "/usr/bin/:/bin/:");
+	QStringList paths = pathVar.split(":");
+	for(const QString &path : paths)
+	{
+		// TODO: can pass ../ but so be it for now.
+
+		QFileInfo info{path + "/" + needle};
+		if(info.exists())
+		{
+			return info.absoluteFilePath();
+		}
+	}
+	return "";
+}
+
+void Common::setPdfViewer()
+{
+	QString value;
+
+	/* TODO: well, we should query this probably from xdg*/
+	QString okularPath = findInPath("okular");
+	QString evincePath = findInPath("evince");
+	QString qpdfviewPath = findInPath("qpdfview");
+
+	if(okularPath != "")
+	{
+		value = okularPath + " %f -p %p";
+	}
+	else if(evincePath != "")
+	{
+		value = evincePath + "-i %p %f";
+	}
+	else if(qpdfviewPath != "")
+	{
+		value = qpdfviewPath + "%f#%p";
+	}
+
+	QSettings settings;
+	if(value != "")
+	{
+		settings.setValue(SETTINGS_KEY_PDFVIEWER, value);
+	}
+}
 void Common::ensureConfigured()
 {
 	QSettings settings;
@@ -58,8 +105,10 @@ void Common::ensureConfigured()
 		{
 			throw LooqsGeneralException("Failed to initialize sqlite database");
 		}
+
 		settings.setValue(SETTINGS_KEY_FIRSTRUN, false);
 		settings.setValue(SETTINGS_KEY_DBPATH, dbpath);
+		setPdfViewer();
 	}
 	else
 	{
