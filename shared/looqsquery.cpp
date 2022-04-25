@@ -177,7 +177,7 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 	QStringList loneWords;
 	LooqsQuery result;
 	QRegularExpression rx("((?<filtername>(\\.|\\w)+):(?<args>\\((?<innerargs>[^\\)]+)\\)|([\\w,])+)|(?<boolean>AND|OR)"
-						  "|(?<negation>!)|(?<bracket>\\(|\\))|(?<loneword>\\w+))");
+						  "|(?<negation>!)|(?<bracket>\\(|\\))|(?<loneword>[\"\\w]+))");
 	QRegularExpressionMatchIterator i = rx.globalMatch(expression);
 	auto previousWasBool = [&result] { return !result.tokens.empty() && ((result.tokens.last().type & BOOL) == BOOL); };
 	auto previousWas = [&result](TokenType t) { return !result.tokens.empty() && (result.tokens.last().type == t); };
