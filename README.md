@@ -17,7 +17,7 @@ The screenshots in this section may occasionally be slightly outdated, but they 
 ## Current status
 Last version: 2022-0X-XX, v0.1
 
-Please see [Changelog](CHANGELOG.md) for a human readable list of changes. 
+Please see [Changelog](CHANGELOG.md) for a human readable list of changes.
 
 
 ## Goals and principles
@@ -31,7 +31,7 @@ Please see [Changelog](CHANGELOG.md) for a human readable list of changes.
 Linux (on amd64) is currently the main focus. Currently, I don't plan on supporting anything else and the sandboxing architecture does not make it likely. I suppose a version without sandboxing might be conceivable for other platforms, but I have no plans or resources to actively target anything but Linux at this point.
 
 ### Licence
-GPLv3. 
+GPLv3.
 
 ### Contributing
 Fow now, github issues and pull-requests are preferred, but you can also just email
@@ -49,10 +49,11 @@ qmake
 make
 ```
 
+The GUI is located in `gui/looqs-gui`, the binary for the CLI is in `cli/looqs`
 
 
 ## Documentation
-Please see [Usage.md](USAGE.md) for the user manual. 
+Please see [USAGE.md](USAGE.md) for the user manual.
 
 ## Packages
 Coming soon™
