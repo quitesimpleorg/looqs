@@ -43,7 +43,6 @@ void ParallelDirScanner::handleWorkersProgress(unsigned int progress)
 
 void ParallelDirScanner::handleWorkersFinish()
 {
-	Logger::info() << "Worker finished";
 	// no mutexes required due to queued connection
 	++finishedWorkers;
 	if(this->stopToken.load(std::memory_order_seq_cst) || finishedWorkers == getThreadsNum())
@@ -65,7 +64,6 @@ unsigned int ParallelDirScanner::getThreadsNum() const
 
 void ParallelDirScanner::scan()
 {
-	Logger::info() << "I am scanning";
 	this->stopToken.store(false, std::memory_order_relaxed);
 	this->finishedWorkers = 0;
 	this->processedPaths = 0;
