@@ -157,6 +157,7 @@ int main(int argc, char *argv[])
 	}
 	// Keep this post sandbox, afterwards does not work (suspect due to threads, but unconfirmed)
 	QApplication a(argc, argv);
+	a.setWindowIcon(QIcon(":/icon.svg"));
 
 	qRegisterMetaType<QVector<SearchResult>>("QVector<SearchResult>");
 	qRegisterMetaType<QVector<PreviewResultPdf>>("QVector<PreviewResultPdf>");
