@@ -12,6 +12,7 @@
 #include <QComboBox>
 #include <QtConcurrent/QtConcurrent>
 #include <QMessageBox>
+#include <QFileDialog>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "clicklabel.h"
@@ -129,6 +130,21 @@ void MainWindow::connectSignals()
 			{ ui->btnDeletePath->setEnabled(this->ui->lstPaths->selectedItems().count() > 0); });
 
 	connect(ui->btnDeletePath, &QPushButton::clicked, this, [&] { qDeleteAll(ui->lstPaths->selectedItems()); });
+	connect(ui->btnChoosePath, &QPushButton::clicked, this,
+			[&]
+			{
+				QFileDialog dialog(nullptr);
+				dialog.setFileMode(QFileDialog::Directory);
+				dialog.setOptions(QFileDialog::ShowDirsOnly);
+				if(dialog.exec())
+				{
+					auto paths = dialog.selectedFiles();
+					if(paths.size() == 1)
+					{
+						ui->lstPaths->addItem(paths[0]);
+					}
+				}
+			});
 }
 
 void MainWindow::spinPreviewPageValueChanged(int val)
