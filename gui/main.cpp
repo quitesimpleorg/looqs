@@ -14,63 +14,16 @@
 #include "../submodules/exile.h/exile.h"
 #include "ipcserver.h"
 
-void enableSandbox(QString socketPath)
+void enableSandbox()
 {
-	struct exile_policy *policy = exile_init_policy();
+	struct exile_policy *policy = exile_create_policy();
 	if(policy == NULL)
 	{
 		qCritical() << "Failed to init policy for sandbox";
 		exit(EXIT_FAILURE);
 	}
-	QDir dir;
-	dir.mkpath(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
-	dir.mkpath(QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
-
-	std::string appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation).toStdString();
-	std::string cacheDataLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation).toStdString();
-	std::string configDataLocation = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation).toStdString();
-
-	std::string sockPath = socketPath.toStdString();
-	std::string dbPath = QFileInfo(Common::databasePath()).absolutePath().toStdString();
-	std::string mySelf = QFileInfo("/proc/self/exe").symLinkTarget().toStdString();
-	policy->namespace_options = EXILE_UNSHARE_USER;
-	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ, "/") != 0)
-	{
-		qCritical() << "Failed to append a path to the path policy";
-		exit(EXIT_FAILURE);
-	}
-
-	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE,
-								  appDataLocation.c_str()) != 0)
-	{
-		qCritical() << "Failed to append appDataLocation path to the path policy";
-		exit(EXIT_FAILURE);
-	}
-	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE,
-								  cacheDataLocation.c_str()) != 0)
-	{
-		qCritical() << "Failed to append cacheDataLocation path to the path policy";
-		exit(EXIT_FAILURE);
-	}
-	if(exile_append_path_policies(policy,
-								  EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_REMOVE_FILE | EXILE_FS_ALLOW_ALL_WRITE,
-								  dbPath.c_str()) != 0)
-	{
-		qCritical() << "Failed to append dbPath path to the path policy";
-		exit(EXIT_FAILURE);
-	}
-	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_EXEC, mySelf.c_str(), "/lib64",
-								  "/lib") != 0)
-	{
-		qCritical() << "Failed to append mySelf path to the path policy";
-		exit(EXIT_FAILURE);
-	}
-	if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE,
-								  configDataLocation.c_str()) != 0)
-	{
-		qCritical() << "Failed to append configDataLocation path to the path policy";
-		exit(EXIT_FAILURE);
-	}
+	policy->namespace_options = 0;
+	policy->no_new_privs = 1;
 	int ret = exile_enable_policy(policy);
 	if(ret != 0)
 	{
@@ -141,7 +94,7 @@ int main(int argc, char *argv[])
 		Common::ensureConfigured();
 		if(!parser.isSet("no-sandbox"))
 		{
-			enableSandbox(socketPath);
+			enableSandbox();
 			qInfo() << "Sandbox: on";
 		}
 		else
@@ -167,6 +120,5 @@ int main(int argc, char *argv[])
 	IPCClient client{socketPath};
 	MainWindow w{0, client};
 	w.showMaximized();
-
 	return a.exec();
 }
