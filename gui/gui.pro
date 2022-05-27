@@ -23,7 +23,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ipcclient.cpp \
+    ipcpreviewclient.cpp \
+    ipcpreviewworker.cpp \
     ipcserver.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -35,11 +36,13 @@ SOURCES += \
     previewresult.cpp \
     previewresultpdf.cpp \
     previewresultplaintext.cpp \
-    previewworker.cpp
+    renderconfig.cpp \
+    rendertarget.cpp
 
 HEADERS += \
     ipc.h \
-    ipcclient.h \
+    ipcpreviewclient.h \
+    ipcpreviewworker.h \
     ipcserver.h \
         mainwindow.h \
     clicklabel.h \
@@ -50,8 +53,8 @@ HEADERS += \
     previewresult.h \
     previewresultpdf.h \
     previewresultplaintext.h \
-    previewworker.h \
-    renderconfig.h
+    renderconfig.h \
+    rendertarget.h
 
 FORMS += \
         mainwindow.ui
