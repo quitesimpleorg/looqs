@@ -3,8 +3,13 @@
 
 enum IPCCommand
 {
-	DocOpen,
-	FileOpen,
-	AddFile,
+	GeneratePreviews = 23,
+	StopGeneratePreviews,
 };
+
+enum IPCReply
+{
+	FinishedGeneratePreviews,
+};
+
 #endif // IPC_H

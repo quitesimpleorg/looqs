@@ -9,6 +9,9 @@
 #include "common.h"
 #include "databasefactory.h"
 #include "../shared/logger.h"
+#include "renderconfig.h"
+#include "rendertarget.h"
+#include "ipcpreviewworker.h"
 
 IpcServer::IpcServer()
 {
@@ -23,22 +26,34 @@ bool IpcServer::startSpawner(QString socketPath)
 
 void IpcServer::spawnerNewConnection()
 {
-	QScopedPointer<QLocalSocket> socket{this->spawningServer.nextPendingConnection()};
-	if(!socket.isNull())
+	QLocalSocket *socket = this->spawningServer.nextPendingConnection();
+	connect(socket, &QLocalSocket::disconnected, socket, &QLocalSocket::deleteLater);
+	if(socket != nullptr)
 	{
 		if(!socket->waitForReadyRead())
 		{
 			return;
 		}
-		QDataStream stream(socket.get());
+		QDataStream stream(socket);
 		IPCCommand command;
 		stream >> command;
 		if(command == GeneratePreviews)
 		{
+			IPCPreviewWorker *worker = new IPCPreviewWorker();
 			RenderConfig renderConfig;
 			QVector<RenderTarget> targets;
-			stream >> renderConfig;
-			stream >> targets;
+
+			do
+			{
+				/* TODO: this is not entirely robust */
+				socket->waitForReadyRead(100);
+				stream.startTransaction();
+				stream >> renderConfig >> targets;
+			} while(!stream.commitTransaction() && socket->state() == QLocalSocket::ConnectedState);
+
+			stream << targets.count();
+			socket->flush();
+			worker->start(renderConfig, targets, socket);
 		}
 	}
 }
