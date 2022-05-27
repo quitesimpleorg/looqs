@@ -2,8 +2,9 @@
 #define PREVIEWGENERATORMAPFUNCTOR_H
 
 #include "renderconfig.h"
-#include "previewgenerator.h"
+#include "rendertarget.h"
 
+#include "previewgenerator.h"
 class PreviewGeneratorMapFunctor
 {
 
@@ -16,13 +17,13 @@ class PreviewGeneratorMapFunctor
 	RenderConfig renderConfig;
 
   public:
-	typedef QSharedPointer<PreviewResult> result_type;
+	typedef QByteArray result_type;
 
 	PreviewGeneratorMapFunctor();
 
 	void setRenderConfig(RenderConfig config);
 
-	QSharedPointer<PreviewResult> operator()(const QSharedPointer<PreviewResult> &renderResult);
+	QByteArray operator()(const RenderTarget &renderTarget);
 };
 
 #endif // PREVIEWGENERATORMAPFUNCTOR_H

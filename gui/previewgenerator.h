@@ -9,7 +9,7 @@
 class PreviewGenerator
 {
   public:
-	virtual PreviewResult *generate(RenderConfig config, QString documentPath, unsigned int page) = 0;
+	virtual QSharedPointer<PreviewResult> generate(RenderConfig config, QString documentPath, unsigned int page) = 0;
 	virtual ~PreviewGenerator()
 	{
 	}

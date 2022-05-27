@@ -1,6 +1,5 @@
 #include <QMutexLocker>
 #include <QPainter>
-
 #include "previewgeneratorpdf.h"
 
 static QMutex cacheMutex;
@@ -24,18 +23,18 @@ Poppler::Document *PreviewGeneratorPdf::document(QString path)
 	return result;
 }
 
-PreviewResult *PreviewGeneratorPdf::generate(RenderConfig config, QString documentPath, unsigned int page)
+QSharedPointer<PreviewResult> PreviewGeneratorPdf::generate(RenderConfig config, QString documentPath,
+															unsigned int page)
 {
 	PreviewResultPdf *result = new PreviewResultPdf(documentPath, page);
-
 	Poppler::Document *doc = document(documentPath);
 	if(doc == nullptr)
 	{
-		return result;
+		return QSharedPointer<PreviewResult>(result);
 	}
 	if(doc->isLocked())
 	{
-		return result;
+		return QSharedPointer<PreviewResult>(result);
 	}
 	int p = (int)page - 1;
 	if(p < 0)
@@ -55,5 +54,5 @@ PreviewResult *PreviewGeneratorPdf::generate(RenderConfig config, QString docume
 		}
 	}
 	result->previewImage = img;
-	return result;
+	return QSharedPointer<PreviewResult>(result);
 }

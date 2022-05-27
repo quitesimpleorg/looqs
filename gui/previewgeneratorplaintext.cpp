@@ -3,13 +3,14 @@
 #include "previewgeneratorplaintext.h"
 #include "previewresultplaintext.h"
 
-PreviewResult *PreviewGeneratorPlainText::generate(RenderConfig config, QString documentPath, unsigned int page)
+QSharedPointer<PreviewResult> PreviewGeneratorPlainText::generate(RenderConfig config, QString documentPath,
+																  unsigned int page)
 {
 	PreviewResultPlainText *result = new PreviewResultPlainText(documentPath, page);
 	QFile file(documentPath);
 	if(!file.open(QFile::ReadOnly | QFile::Text))
 	{
-		return result;
+		return QSharedPointer<PreviewResultPlainText>(result);
 	}
 	QTextStream in(&file);
 
@@ -77,5 +78,5 @@ PreviewResult *PreviewGeneratorPlainText::generate(RenderConfig config, QString 
 	header += "<hr>";
 
 	result->setText(header + resulText.replace("\n", "<br>"));
-	return result;
+	return QSharedPointer<PreviewResultPlainText>(result);
 }

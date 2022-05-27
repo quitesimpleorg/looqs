@@ -6,7 +6,7 @@ class PreviewGeneratorPlainText : public PreviewGenerator
 {
   public:
 	using PreviewGenerator::PreviewGenerator;
-	PreviewResult *generate(RenderConfig config, QString documentPath, unsigned int page);
+	QSharedPointer<PreviewResult> generate(RenderConfig config, QString documentPath, unsigned int page);
 };
 
 #endif // PREVIEWGENERATORPLAINTEXT_H

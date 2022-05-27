@@ -13,7 +13,7 @@ class PreviewGeneratorPdf : public PreviewGenerator
   public:
 	using PreviewGenerator::PreviewGenerator;
 
-	PreviewResult *generate(RenderConfig config, QString documentPath, unsigned int page);
+	QSharedPointer<PreviewResult> generate(RenderConfig config, QString documentPath, unsigned int page);
 
 	~PreviewGeneratorPdf()
 	{

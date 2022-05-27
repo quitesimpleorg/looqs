@@ -10,16 +10,15 @@ void PreviewGeneratorMapFunctor::setRenderConfig(RenderConfig config)
 	this->renderConfig = config;
 }
 
-QSharedPointer<PreviewResult> PreviewGeneratorMapFunctor::operator()(const QSharedPointer<PreviewResult> &renderResult)
+QByteArray PreviewGeneratorMapFunctor::operator()(const RenderTarget &renderTarget)
 {
-	QFileInfo info{renderResult->getDocumentPath()};
+	QFileInfo info{renderTarget.path};
 	PreviewGenerator *previewGenerator = PreviewGenerator::get(info);
 	if(previewGenerator == nullptr)
 	{
-		return QSharedPointer<PreviewResult>();
+		return QByteArray{};
 	}
-	auto preview =
-		previewGenerator->generate(this->renderConfig, renderResult->getDocumentPath(), renderResult->getPage());
+	auto preview = previewGenerator->generate(this->renderConfig, renderTarget.path, renderTarget.page);
 
-	return QSharedPointer<PreviewResult>(preview);
+	return preview->serialize();
 }
