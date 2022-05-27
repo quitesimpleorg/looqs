@@ -13,18 +13,33 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QScreen>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "clicklabel.h"
 #include "../shared/sqlitesearch.h"
 #include "../shared/looqsgeneralexception.h"
 #include "../shared/common.h"
+#include "ipcpreviewclient.h"
+#include "previewgenerator.h"
 
-MainWindow::MainWindow(QWidget *parent, IPCClient &client) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent, QString socketPath) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
 	setWindowTitle(QCoreApplication::applicationName());
-	this->ipcClient = &client;
+	this->ipcPreviewClient.moveToThread(&this->ipcClientThread);
+	this->ipcPreviewClient.setSocketPath(socketPath);
+
+	connect(&ipcPreviewClient, &IPCPreviewClient::previewReceived, this, &MainWindow::previewReceived,
+			Qt::QueuedConnection);
+	connect(&ipcPreviewClient, &IPCPreviewClient::finished, this,
+			[&] { this->ui->previewProcessBar->setValue(this->ui->previewProcessBar->maximum()); });
+
+	connect(this, &MainWindow::startIpcPreviews, &ipcPreviewClient, &IPCPreviewClient::startGeneration,
+			Qt::QueuedConnection);
+	connect(this, &MainWindow::stopIpcPreviews, &ipcPreviewClient, &IPCPreviewClient::stopGeneration,
+			Qt::QueuedConnection);
+	this->ipcClientThread.start();
 	QSettings settings;
 
 	this->dbFactory = new DatabaseFactory(Common::databasePath());
@@ -82,16 +97,6 @@ void MainWindow::connectSignals()
 					handleSearchError(e.message);
 				}
 			});
-	connect(&previewWorkerWatcher, &QFutureWatcher<QSharedPointer<PreviewResult>>::resultReadyAt, this,
-			[&](int index) { previewReceived(previewWorkerWatcher.resultAt(index)); });
-	connect(&previewWorkerWatcher, &QFutureWatcher<QSharedPointer<PreviewResult>>::progressValueChanged,
-			ui->previewProcessBar, &QProgressBar::setValue);
-	connect(&previewWorkerWatcher, &QFutureWatcher<QSharedPointer<PreviewResult>>::started, this,
-			[&] { ui->indexerTab->setEnabled(false); });
-
-	connect(&previewWorkerWatcher, &QFutureWatcher<QSharedPointer<PreviewResult>>::finished, this,
-			[&] { ui->indexerTab->setEnabled(true); });
-
 	connect(ui->treeResultsList, &QTreeWidget::itemActivated, this, &MainWindow::treeSearchItemActivated);
 	connect(ui->treeResultsList, &QTreeWidget::customContextMenuRequested, this,
 			&MainWindow::showSearchResultsContextMenu);
@@ -261,9 +266,14 @@ void MainWindow::tabChanged()
 	}
 }
 
-void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview)
+void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned int previewGeneration)
 {
-	if(preview->hasPreview())
+	if(previewGeneration < this->currentPreviewGeneration)
+	{
+		return;
+	}
+	this->ui->previewProcessBar->setValue(this->ui->previewProcessBar->value() + 1);
+	if(!preview.isNull() && preview->hasPreview())
 	{
 		QString docPath = preview->getDocumentPath();
 		auto previewPage = preview->getPage();
@@ -376,12 +386,10 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 
 void MainWindow::makePreviews(int page)
 {
-
-	this->previewWorkerWatcher.cancel();
-	this->previewWorkerWatcher.waitForFinished();
-
-	QCoreApplication::processEvents(); // Maybe not necessary anymore, depends on whether it's possible that a slot is
-									   // still to be fired.
+	if(this->previewableSearchResults.empty())
+	{
+		return;
+	}
 	qDeleteAll(ui->scrollAreaWidgetContents->children());
 
 	ui->scrollAreaWidgetContents->setLayout(new QHBoxLayout());
@@ -409,14 +417,32 @@ void MainWindow::makePreviews(int page)
 			}
 		}
 	}
-	PreviewWorker worker;
 	int end = previewsPerPage;
 	int begin = page * previewsPerPage - previewsPerPage;
-	this->previewWorkerWatcher.setFuture(worker.generatePreviews(this->previewableSearchResults.mid(begin, end),
-																 wordsToHighlight, scaleText.toInt() / 100.));
-	ui->previewProcessBar->setMaximum(this->previewWorkerWatcher.progressMaximum());
-	ui->previewProcessBar->setMinimum(this->previewWorkerWatcher.progressMinimum());
+
+	RenderConfig renderConfig;
+	renderConfig.scaleX = QGuiApplication::primaryScreen()->physicalDotsPerInchX() * (scaleText.toInt() / 100.);
+	renderConfig.scaleY = QGuiApplication::primaryScreen()->physicalDotsPerInchY() * (scaleText.toInt() / 100.);
+	renderConfig.wordsToHighlight = wordsToHighlight;
+
+	QVector<RenderTarget> targets;
+	for(SearchResult &sr : this->previewableSearchResults.mid(begin, end))
+	{
+		RenderTarget renderTarget;
+		renderTarget.path = sr.fileData.absPath;
+
+		for(unsigned int pagenum : sr.pages)
+		{
+			renderTarget.page = (int)pagenum;
+			targets.append(renderTarget);
+		}
+	}
+	ui->previewProcessBar->setMaximum(targets.count());
+	ui->previewProcessBar->setMinimum(0);
+	ui->previewProcessBar->setValue(0);
 	ui->previewProcessBar->setVisible(this->previewableSearchResults.size() > 0);
+	++this->currentPreviewGeneration;
+	emit startIpcPreviews(renderConfig, targets);
 }
 
 void MainWindow::handleSearchError(QString error)
@@ -438,14 +464,14 @@ void MainWindow::ipcDocOpen(QString path, int num)
 	QStringList args;
 	args << path;
 	args << QString::number(num);
-	this->ipcClient->sendCommand(DocOpen, args);
+	// this->ipcClient->sendCommand(DocOpen, args);
 }
 
 void MainWindow::ipcFileOpen(QString path)
 {
 	QStringList args;
 	args << path;
-	this->ipcClient->sendCommand(FileOpen, args);
+	// this->ipcClient->sendCommand(FileOpen, args);
 }
 
 void MainWindow::treeSearchItemActivated(QTreeWidgetItem *item, int i)

@@ -116,9 +116,10 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<QVector<PreviewResultPdf>>("QVector<PreviewResultPdf>");
 	qRegisterMetaType<PreviewResultPdf>("PreviewResultPdf");
 	qRegisterMetaType<FileScanResult>("FileScanResult");
-
-	IPCClient client{socketPath};
-	MainWindow w{0, client};
+	qRegisterMetaType<RenderConfig>("RenderConfig");
+	qRegisterMetaType<QVector<RenderTarget>>("QVector<RenderTarget>");
+	qRegisterMetaType<QSharedPointer<PreviewResult>>("QSharedPointer<PreviewResult>");
+	MainWindow w{0, socketPath};
 	w.showMaximized();
 	return a.exec();
 }

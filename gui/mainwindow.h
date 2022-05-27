@@ -9,9 +9,8 @@
 #include <QFutureWatcher>
 #include <QSqlDatabase>
 #include <QLocalSocket>
-#include "previewworker.h"
 #include "../shared/looqsquery.h"
-#include "ipcclient.h"
+#include "ipcpreviewclient.h"
 #include "indexer.h"
 namespace Ui
 {
@@ -23,7 +22,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
   public:
-	explicit MainWindow(QWidget *parent, IPCClient &client);
+	explicit MainWindow(QWidget *parent, QString socketPath);
 	~MainWindow();
   signals:
 	void beginSearch(const QString &query);
@@ -33,13 +32,14 @@ class MainWindow : public QMainWindow
 	DatabaseFactory *dbFactory;
 	SqliteDbService *dbService;
 	Ui::MainWindow *ui;
-	IPCClient *ipcClient;
+	IPCPreviewClient ipcPreviewClient;
+	QThread ipcClientThread;
+
 	Indexer *indexer;
 	QFileIconProvider iconProvider;
 	bool previewDirty;
 	QSqlDatabase db;
 	QFutureWatcher<QVector<SearchResult>> searchWatcher;
-	QFutureWatcher<QSharedPointer<PreviewResult>> previewWorkerWatcher;
 	void add(QString path, unsigned int page);
 	QVector<SearchResult> previewableSearchResults;
 	void connectSignals();
@@ -55,18 +55,22 @@ class MainWindow : public QMainWindow
 	void createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo);
 	void ipcDocOpen(QString path, int num);
 	void ipcFileOpen(QString path);
-
+	unsigned int currentPreviewGeneration = 1;
   private slots:
 	void lineEditReturnPressed();
 	void treeSearchItemActivated(QTreeWidgetItem *item, int i);
 	void showSearchResultsContextMenu(const QPoint &point);
 	void tabChanged();
-	void previewReceived(QSharedPointer<PreviewResult> preview);
+	void previewReceived(QSharedPointer<PreviewResult> preview, unsigned int previewGeneration);
 	void comboScaleChanged(int i);
 	void spinPreviewPageValueChanged(int val);
 	void startIndexing();
 	void finishIndexing();
 	void addPathToIndex();
+
+  signals:
+	void startIpcPreviews(RenderConfig config, const QVector<RenderTarget> &targets);
+	void stopIpcPreviews();
 };
 
 #endif // MAINWINDOW_H
