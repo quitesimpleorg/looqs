@@ -73,7 +73,10 @@ int main(int argc, char *argv[])
 	QProcess process;
 	QStringList args;
 	args << "ipc";
-	if(!process.startDetached("/proc/self/exe", args))
+	process.setProcessChannelMode(QProcess::ForwardedChannels);
+
+	process.start("/proc/self/exe", args);
+	if(!process.waitForStarted(5000))
 	{
 		QString errorMsg = "Failed to start IPC server";
 		qDebug() << errorMsg;
@@ -108,9 +111,9 @@ int main(int argc, char *argv[])
 		QMessageBox::critical(nullptr, "Error", e.message);
 		return 1;
 	}
-	// Keep this post sandbox, afterwards does not work (suspect due to threads, but unconfirmed)
 	QApplication a(argc, argv);
 	a.setWindowIcon(QIcon(":/icon.svg"));
+	QObject::connect(&a, &QApplication::aboutToQuit, &process, &QProcess::kill);
 
 	qRegisterMetaType<QVector<SearchResult>>("QVector<SearchResult>");
 	qRegisterMetaType<QVector<PreviewResultPdf>>("QVector<PreviewResultPdf>");
