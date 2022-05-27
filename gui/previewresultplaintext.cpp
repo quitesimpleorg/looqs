@@ -28,3 +28,27 @@ void PreviewResultPlainText::setText(QString text)
 {
 	this->text = text;
 }
+
+QByteArray PreviewResultPlainText::serialize() const
+{
+	QByteArray result;
+	QDataStream stream{&result, QIODevice::WriteOnly};
+	PreviewResultType type = PreviewResultType::PlainText;
+	stream << type << this->documentPath << this->page << this->text;
+	return result;
+}
+
+QSharedPointer<PreviewResultPlainText> PreviewResultPlainText::deserialize(QByteArray &ba)
+{
+	PreviewResultPlainText *result = new PreviewResultPlainText();
+	PreviewResultType type;
+
+	QDataStream stream{&ba, QIODevice::ReadOnly};
+	stream >> type;
+	if(type != PreviewResultType::PlainText)
+	{
+		throw std::runtime_error("Invalid byte array: Not a pdf preview");
+	}
+	stream >> result->documentPath >> result->page >> result->text;
+	return QSharedPointer<PreviewResultPlainText>(result);
+}

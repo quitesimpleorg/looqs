@@ -12,6 +12,10 @@ class PreviewResultPdf : public PreviewResult
 
 	QWidget *createPreviewWidget() override;
 	bool hasPreview() override;
+
+	QByteArray serialize() const;
+
+	static QSharedPointer<PreviewResultPdf> deserialize(QByteArray &ba);
 };
 
 #endif // PREVIEWRESULTPDF_H

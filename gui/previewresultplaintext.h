@@ -15,6 +15,9 @@ class PreviewResultPlainText : public PreviewResult
 	bool hasPreview() override;
 
 	void setText(QString text);
+
+	QByteArray serialize() const;
+	static QSharedPointer<PreviewResultPlainText> deserialize(QByteArray &ba);
 };
 
 #endif // PREVIEWRESULTPLAINTEXT_H

@@ -1,5 +1,4 @@
 #include "previewresult.h"
-
 PreviewResult::PreviewResult()
 {
 }
@@ -32,4 +31,12 @@ QString PreviewResult::getDocumentPath() const
 unsigned int PreviewResult::getPage() const
 {
 	return this->page;
+}
+
+QByteArray PreviewResult::serialize() const
+{
+	QByteArray result;
+	QDataStream stream{&result, QIODevice::WriteOnly};
+	stream << 0 << this->documentPath << this->page;
+	return result;
 }

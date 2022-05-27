@@ -2,6 +2,12 @@
 #define PREVIEWRESULT_H
 #include "clicklabel.h"
 
+enum PreviewResultType
+{
+	PDF = 1,
+	PlainText
+};
+
 class PreviewResult
 {
   protected:
@@ -17,6 +23,7 @@ class PreviewResult
 	virtual bool hasPreview();
 	QString getDocumentPath() const;
 	unsigned int getPage() const;
+	virtual QByteArray serialize() const;
 };
 
 #endif // PREVIEWRESULT_H
