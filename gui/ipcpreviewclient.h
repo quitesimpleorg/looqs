@@ -31,6 +31,7 @@ class IPCPreviewClient : public QObject
   signals:
 	void previewReceived(QSharedPointer<PreviewResult> previewResult, unsigned int currentPreviewGeneration);
 	void finished();
+	void error(QString);
 };
 
 #endif // IPCPREVIEWCLIENT_H

@@ -34,6 +34,12 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath) : QMainWindow(parent
 			Qt::QueuedConnection);
 	connect(&ipcPreviewClient, &IPCPreviewClient::finished, this,
 			[&] { this->ui->previewProcessBar->setValue(this->ui->previewProcessBar->maximum()); });
+	connect(&ipcPreviewClient, &IPCPreviewClient::error, this,
+			[this](QString msg)
+			{
+				qCritical() << msg << Qt::endl;
+				QMessageBox::critical(this, "IPC error", msg);
+			});
 
 	connect(this, &MainWindow::startIpcPreviews, &ipcPreviewClient, &IPCPreviewClient::startGeneration,
 			Qt::QueuedConnection);

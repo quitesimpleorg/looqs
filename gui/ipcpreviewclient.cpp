@@ -61,7 +61,8 @@ void IPCPreviewClient::start(RenderConfig config, const QVector<RenderTarget> &t
 
 	if(!connect() || !socket->isOpen())
 	{
-		// TODO: ERROR
+		emit error("Could not connect to IPC worker");
+		return;
 	}
 
 	if(socket->isOpen() && socket->isWritable())
@@ -88,7 +89,8 @@ void IPCPreviewClient::start(RenderConfig config, const QVector<RenderTarget> &t
 		}
 		else
 		{
-			// TODO: ERROR
+			emit error("Error while trying to process previews: " + socket->errorString());
+			return;
 		}
 
 		int processed = 0;
@@ -107,7 +109,7 @@ void IPCPreviewClient::start(RenderConfig config, const QVector<RenderTarget> &t
 		}
 		if(processed != targets.count())
 		{
-			// TODO: ERROR
+			emit error("IPC worker didn't send enough previews. This is a bug, please report");
 		}
 	}
 	socket->disconnectFromServer();
@@ -118,7 +120,8 @@ void IPCPreviewClient::stopGeneration()
 {
 	if(!connect() || !socket->isOpen())
 	{
-		// TODO: ERROR
+		emit error("Could not connect to IPC worker");
+		return;
 	}
 	QDataStream stream(socket);
 	stream << StopGeneratePreviews;
