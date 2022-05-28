@@ -15,6 +15,10 @@ class IPCPreviewWorker : public QObject
   public:
 	IPCPreviewWorker();
 	void start(RenderConfig config, const QVector<RenderTarget> &targets, QLocalSocket *peer);
+	void stop();
+  signals:
+	void previewGenerated(QByteArray);
+	void finished();
 };
 
 #endif // IPCPREVIEWWORKER_H

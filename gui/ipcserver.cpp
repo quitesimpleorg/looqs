@@ -15,7 +15,11 @@
 
 IpcServer::IpcServer()
 {
+	/* Only 1, we are doing work for the GUI, not a service for general availability */
+	this->spawningServer.setMaxPendingConnections(1);
 	connect(&this->spawningServer, &QLocalServer::newConnection, this, &IpcServer::spawnerNewConnection);
+	connect(&this->previewWorker, &IPCPreviewWorker::previewGenerated, this, &IpcServer::handlePreviewGenerated);
+	connect(&this->previewWorker, &IPCPreviewWorker::finished, this, [this] { this->currentSocket->flush(); });
 }
 
 bool IpcServer::startSpawner(QString socketPath)
@@ -28,6 +32,7 @@ void IpcServer::spawnerNewConnection()
 {
 	QLocalSocket *socket = this->spawningServer.nextPendingConnection();
 	connect(socket, &QLocalSocket::disconnected, socket, &QLocalSocket::deleteLater);
+	this->currentSocket = socket;
 	if(socket != nullptr)
 	{
 		if(!socket->waitForReadyRead())
@@ -39,10 +44,8 @@ void IpcServer::spawnerNewConnection()
 		stream >> command;
 		if(command == GeneratePreviews)
 		{
-			IPCPreviewWorker *worker = new IPCPreviewWorker();
 			RenderConfig renderConfig;
 			QVector<RenderTarget> targets;
-
 			do
 			{
 				/* TODO: this is not entirely robust */
@@ -53,7 +56,18 @@ void IpcServer::spawnerNewConnection()
 
 			stream << targets.count();
 			socket->flush();
-			worker->start(renderConfig, targets, socket);
+			previewWorker.start(renderConfig, targets, socket);
+		}
+		if(command == StopGeneratePreviews)
+		{
+			previewWorker.stop();
 		}
 	}
+}
+
+void IpcServer::handlePreviewGenerated(QByteArray ba)
+{
+	QDataStream stream{this->currentSocket};
+	stream << ba;
+	this->currentSocket->flush();
 }

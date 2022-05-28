@@ -3,29 +3,24 @@
 #include "previewgeneratormapfunctor.h"
 IPCPreviewWorker::IPCPreviewWorker()
 {
+	this->connect(&previewWorkerWatcher, &QFutureWatcher<QByteArray>::resultReadyAt, this,
+				  [this](int index) { emit previewGenerated(previewWorkerWatcher.resultAt(index)); });
+	connect(&previewWorkerWatcher, &QFutureWatcher<QByteArray>::finished, this, [this] { emit finished(); });
 }
 
 void IPCPreviewWorker::start(RenderConfig config, const QVector<RenderTarget> &targets, QLocalSocket *peer)
 {
-	connect(&previewWorkerWatcher, &QFutureWatcher<QByteArray>::resultReadyAt, this,
-			[peer, this](int index)
-			{
-				QDataStream stream{peer};
-				stream << previewWorkerWatcher.resultAt(index);
-				peer->flush();
-			});
-	connect(&previewWorkerWatcher, &QFutureWatcher<QByteArray>::finished, this,
-			[peer]
-			{
-				/* TODO /
 
-				/*peer->waitForBytesWritten();
-				peer->disconnectFromServer();
-				peer->deleteLater();*/
-			});
-
+	stop();
+	/* TODO: memleak */
 	auto mapFunctor = new PreviewGeneratorMapFunctor();
 	mapFunctor->setRenderConfig(config);
 
 	previewWorkerWatcher.setFuture(QtConcurrent::mapped(targets, *mapFunctor));
+}
+
+void IPCPreviewWorker::stop()
+{
+	previewWorkerWatcher.cancel();
+	previewWorkerWatcher.waitForFinished();
 }
