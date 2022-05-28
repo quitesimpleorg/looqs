@@ -53,8 +53,8 @@ class MainWindow : public QMainWindow
 	LooqsQuery contentSearchQuery;
 	int previewsPerPage;
 	void createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo);
-	void ipcDocOpen(QString path, int num);
-	void ipcFileOpen(QString path);
+	void openDocument(QString path, int num);
+	void openFile(QString path);
 	unsigned int currentPreviewGeneration = 1;
   private slots:
 	void lineEditReturnPressed();

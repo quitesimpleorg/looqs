@@ -280,7 +280,7 @@ void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned
 
 		ClickLabel *label = dynamic_cast<ClickLabel *>(preview->createPreviewWidget());
 		ui->scrollAreaWidgetContents->layout()->addWidget(label);
-		connect(label, &ClickLabel::leftClick, [this, docPath, previewPage]() { ipcDocOpen(docPath, previewPage); });
+		connect(label, &ClickLabel::leftClick, [this, docPath, previewPage]() { openDocument(docPath, previewPage); });
 		connect(label, &ClickLabel::rightClick,
 				[this, docPath, previewPage]()
 				{
@@ -456,27 +456,39 @@ void MainWindow::createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo)
 				   [&fileInfo] { QGuiApplication::clipboard()->setText(fileInfo.fileName()); });
 	menu.addAction("Copy full path to clipboard",
 				   [&fileInfo] { QGuiApplication::clipboard()->setText(fileInfo.absoluteFilePath()); });
-	menu.addAction("Open containing folder", [this, &fileInfo] { this->ipcFileOpen(fileInfo.absolutePath()); });
+	menu.addAction("Open containing folder", [this, &fileInfo] { this->openFile(fileInfo.absolutePath()); });
 }
 
-void MainWindow::ipcDocOpen(QString path, int num)
+void MainWindow::openDocument(QString path, int num)
 {
-	QStringList args;
-	args << path;
-	args << QString::number(num);
-	// this->ipcClient->sendCommand(DocOpen, args);
+	QSettings settings;
+	QString command = settings.value("pdfviewer").toString();
+	if(path.endsWith(".pdf") && command != "" && command.contains("%p") && command.contains("%f"))
+	{
+		QStringList splitted = command.split(" ");
+		if(splitted.size() > 1)
+		{
+			QString cmd = splitted[0];
+			QStringList args = splitted.mid(1);
+			args.replaceInStrings("%f", path);
+			args.replaceInStrings("%p", QString::number(num));
+			QProcess::startDetached(cmd, args);
+		}
+	}
+	else
+	{
+		QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+	}
 }
 
-void MainWindow::ipcFileOpen(QString path)
+void MainWindow::openFile(QString path)
 {
-	QStringList args;
-	args << path;
-	// this->ipcClient->sendCommand(FileOpen, args);
+	QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }
 
 void MainWindow::treeSearchItemActivated(QTreeWidgetItem *item, int i)
 {
-	ipcFileOpen(item->text(1));
+	openFile(item->text(1));
 }
 
 void MainWindow::showSearchResultsContextMenu(const QPoint &point)
