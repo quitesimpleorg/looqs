@@ -84,7 +84,8 @@ void IPCPreviewClient::start(RenderConfig config, const QVector<RenderTarget> &t
 			} while(!stream.commitTransaction() && socket->state() == QLocalSocket::ConnectedState);
 			if(numTarget != targets.count())
 			{
-				throw std::runtime_error("Server reports less targets than it should");
+				emit error("IPC Error: Server reports less targets than it should");
+				return;
 			}
 		}
 		else
