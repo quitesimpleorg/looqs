@@ -156,6 +156,9 @@ QString Common::databasePath()
 
 QString Common::ipcSocketPath()
 {
-	QSettings settings;
-	return settings.value(SETTINGS_KEY_IPCSOCKETPATH, "/tmp/looqs-spawner").toString();
+	return "/tmp/.looqs/looqs-ipc-socket";
+
+	/* May not a good idea to set it in the settings and probably nobody would ever bother to change it anyway */
+	// QSettings settings;
+	// return settings.value(SETTINGS_KEY_IPCSOCKETPATH, "/tmp/.looqs/looqs-ipc-socket").toString();
 }

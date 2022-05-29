@@ -5,6 +5,7 @@
 #include <QProcess>
 #include <QDir>
 #include <QCommandLineParser>
+#include <QFileInfo>
 
 #include "mainwindow.h"
 #include "searchresult.h"
@@ -33,7 +34,7 @@ void enableSandbox()
 	exile_free_policy(policy);
 }
 
-void enableIpcSandbox(QString socketPath)
+void enableIpcSandbox()
 {
 	struct exile_policy *policy = exile_create_policy();
 	if(policy == NULL)
@@ -46,8 +47,13 @@ void enableIpcSandbox(QString socketPath)
 	policy->drop_caps = 1;
 	policy->vow_promises = exile_vows_from_str("thread cpath wpath rpath unix stdio prot_exec proc shm fsnotify ioctl");
 
+	QString ipcSocketPath = Common::ipcSocketPath();
+	QFileInfo info{ipcSocketPath};
+	QString ipcSocketPathDir = info.absolutePath();
+	std::string stdIpcSocketPath = ipcSocketPathDir.toStdString();
+
 	exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ, "/");
-	exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE, "/tmp");
+	exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE, stdIpcSocketPath.c_str());
 	int ret = exile_enable_policy(policy);
 	if(ret != 0)
 	{
@@ -59,14 +65,14 @@ void enableIpcSandbox(QString socketPath)
 
 int main(int argc, char *argv[])
 {
-	QString socketPath = "/tmp/looqs-spawner";
+	QString socketPath = Common::ipcSocketPath();
 	if(argc > 1)
 	{
 		QString arg = argv[1];
 		if(arg == "ipc")
 		{
 			Common::setupAppInfo();
-			enableIpcSandbox(socketPath);
+			enableIpcSandbox();
 			QApplication a(argc, argv);
 
 			IpcServer *ipcserver = new IpcServer();
@@ -96,6 +102,17 @@ int main(int argc, char *argv[])
 			return processor.process();
 		}
 	}
+	QString ipcSocketPath = Common::ipcSocketPath();
+	QFileInfo info{ipcSocketPath};
+	QString ipcSocketPathDir = info.absolutePath();
+
+	QDir dir;
+	if(!dir.mkpath(ipcSocketPathDir))
+	{
+		qCritical() << "Failed to create dir for ipc socket" << Qt::endl;
+		exit(EXIT_FAILURE);
+	}
+
 	QProcess process;
 	QStringList args;
 	args << "ipc";
