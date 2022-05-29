@@ -17,6 +17,7 @@
 #define SETTINGS_KEY_FIRSTRUN "firstrun"
 #define SETTINGS_KEY_IPCSOCKETPATH "ipcsocketpath"
 #define SETTINGS_KEY_PDFVIEWER "pdfviewer"
+#define SETTINGS_KEY_EXCLUDEDPATHS "excludedpaths"
 
 inline void initResources()
 {
@@ -161,4 +162,19 @@ QString Common::ipcSocketPath()
 	/* May not a good idea to set it in the settings and probably nobody would ever bother to change it anyway */
 	// QSettings settings;
 	// return settings.value(SETTINGS_KEY_IPCSOCKETPATH, "/tmp/.looqs/looqs-ipc-socket").toString();
+}
+
+static QStringList excludedPaths = {"/proc", "/sys", "/dev", "/tmp", "/var/run", "/run"};
+
+QStringList Common::excludedPaths()
+{
+	static int ran = false;
+	if(!ran)
+	{
+		QSettings settings;
+		QStringList userExcludedPaths = settings.value(SETTINGS_KEY_EXCLUDEDPATHS).toStringList();
+		ran = true;
+		::excludedPaths.append(userExcludedPaths);
+	}
+	return ::excludedPaths;
 }

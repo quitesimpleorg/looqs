@@ -23,6 +23,7 @@ SaveFileResult FileSaver::addFile(QString path)
 {
 	QFileInfo info(path);
 	QString absPath = info.absoluteFilePath();
+
 	auto mtime = info.lastModified().toSecsSinceEpoch();
 	if(this->dbService->fileExistsInDatabase(absPath, mtime))
 	{
@@ -95,7 +96,7 @@ int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFile
 SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 {
 	QVector<PageData> pageData;
-	QString absPath = fileInfo.absoluteFilePath();
+	QString canonicalPath = fileInfo.canonicalFilePath();
 
 	int status = -1;
 
@@ -106,9 +107,17 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 
 	if(fileInfo.isFile())
 	{
+		for(QString &excludedPath : this->excludedPaths)
+		{
+			if(canonicalPath.startsWith(excludedPath))
+			{
+				return SKIPPED;
+			}
+		}
+
 		QProcess process;
 		QStringList args;
-		args << "process" << absPath;
+		args << "process" << canonicalPath;
 		process.setProcessChannelMode(QProcess::ForwardedErrorChannel);
 		process.start("/proc/self/exe", args);
 		process.waitForStarted();
@@ -132,7 +141,7 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 		status = process.exitCode();
 		if(status != 0 && status != NOTHING_PROCESSED)
 		{
-			Logger::error() << "FileSaver::saveFile(): Error while processing" << absPath << ":"
+			Logger::error() << "FileSaver::saveFile(): Error while processing" << canonicalPath << ":"
 							<< "Exit code " << status << Qt::endl;
 
 			return PROCESSFAIL;
@@ -142,7 +151,7 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 	// Could happen if a file corrupted for example
 	if(pageData.isEmpty() && status != NOTHING_PROCESSED)
 	{
-		Logger::error() << "Could not get any content for " << absPath << Qt::endl;
+		Logger::error() << "Could not get any content for " << canonicalPath << Qt::endl;
 	}
 
 	return this->dbService->saveFile(fileInfo, pageData);

@@ -5,11 +5,12 @@
 #include "pagedata.h"
 #include "filedata.h"
 #include "sqlitedbservice.h"
-
+#include "common.h"
 class FileSaver
 {
   private:
 	SqliteDbService *dbService;
+	QStringList excludedPaths = Common::excludedPaths();
 
   public:
 	FileSaver(SqliteDbService &dbService);
@@ -20,8 +21,6 @@ class FileSaver
 					 bool keepGoing, bool verbose);
 	int addFiles(const QVector<QString> paths, bool keepGoing, bool verbose);
 	int updateFiles(const QVector<QString> paths, bool keepGoing, bool verbose);
-
-	;
 };
 
 #endif // FILESAVER_H
