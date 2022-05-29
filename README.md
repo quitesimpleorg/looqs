@@ -4,6 +4,8 @@ search terms have been found, as shown in the screenshots below.
 
 
 ## Screenshots
+The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state.
+
 ### List
 ![Screenshot looqs results](https://garage.quitesimple.org/assets/looqs/opearting_systems_looqs.png)
 
