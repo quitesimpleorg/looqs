@@ -33,7 +33,11 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath) : QMainWindow(parent
 	connect(&ipcPreviewClient, &IPCPreviewClient::previewReceived, this, &MainWindow::previewReceived,
 			Qt::QueuedConnection);
 	connect(&ipcPreviewClient, &IPCPreviewClient::finished, this,
-			[&] { this->ui->previewProcessBar->setValue(this->ui->previewProcessBar->maximum()); });
+			[&]
+			{
+				this->ui->previewProcessBar->setValue(this->ui->previewProcessBar->maximum());
+				this->ui->spinPreviewPage->setEnabled(true);
+			});
 	connect(&ipcPreviewClient, &IPCPreviewClient::error, this,
 			[this](QString msg)
 			{
@@ -459,6 +463,7 @@ void MainWindow::makePreviews(int page)
 	ui->previewProcessBar->setValue(0);
 	ui->previewProcessBar->setVisible(this->previewableSearchResults.size() > 0);
 	++this->currentPreviewGeneration;
+	this->ui->spinPreviewPage->setEnabled(false);
 	emit startIpcPreviews(renderConfig, targets);
 }
 
