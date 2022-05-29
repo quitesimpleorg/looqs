@@ -27,7 +27,7 @@
        <enum>QTabWidget::South</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="resultsTab">
        <attribute name="title">
@@ -152,6 +152,13 @@
             </property>
             <property name="showGroupSeparator" stdset="0">
              <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblTotalPreviewPagesCount">
+            <property name="text">
+             <string/>
             </property>
            </widget>
           </item>

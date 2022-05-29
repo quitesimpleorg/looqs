@@ -453,6 +453,7 @@ void MainWindow::makePreviews(int page)
 	ui->spinPreviewPage->setMaximum(numpages);
 	targets = targets.mid(begin, end);
 
+	ui->lblTotalPreviewPagesCount->setText(QString::number(numpages));
 	ui->previewProcessBar->setMaximum(targets.count());
 	ui->previewProcessBar->setMinimum(0);
 	ui->previewProcessBar->setValue(0);
