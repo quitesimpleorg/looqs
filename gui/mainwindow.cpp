@@ -67,6 +67,9 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath) : QMainWindow(parent
 
 	QStringList indexPaths = settings.value("indexPaths").toStringList();
 	ui->lstPaths->addItems(indexPaths);
+
+	ui->spinPreviewPage->setValue(1);
+	ui->spinPreviewPage->setMinimum(1);
 }
 
 void MainWindow::addPathToIndex()
@@ -373,10 +376,8 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	ui->treeResultsList->resizeColumnToContents(1);
 	previewDirty = !this->previewableSearchResults.empty();
 
-	int numpages = ceil(static_cast<double>(this->previewableSearchResults.size()) / previewsPerPage);
-	ui->spinPreviewPage->setMinimum(1);
-	ui->spinPreviewPage->setMaximum(numpages);
 	ui->spinPreviewPage->setValue(1);
+
 	if(previewTabActive() && previewDirty)
 	{
 		makePreviews(1);
@@ -425,6 +426,11 @@ void MainWindow::makePreviews(int page)
 	}
 	int end = previewsPerPage;
 	int begin = page * previewsPerPage - previewsPerPage;
+	if(begin < 0)
+	{
+		// Should not happen actually
+		begin = 0;
+	}
 
 	RenderConfig renderConfig;
 	renderConfig.scaleX = QGuiApplication::primaryScreen()->physicalDotsPerInchX() * (scaleText.toInt() / 100.);
@@ -432,7 +438,7 @@ void MainWindow::makePreviews(int page)
 	renderConfig.wordsToHighlight = wordsToHighlight;
 
 	QVector<RenderTarget> targets;
-	for(SearchResult &sr : this->previewableSearchResults.mid(begin, end))
+	for(SearchResult &sr : this->previewableSearchResults)
 	{
 		RenderTarget renderTarget;
 		renderTarget.path = sr.fileData.absPath;
@@ -443,6 +449,10 @@ void MainWindow::makePreviews(int page)
 			targets.append(renderTarget);
 		}
 	}
+	int numpages = ceil(static_cast<double>(targets.size()) / previewsPerPage);
+	ui->spinPreviewPage->setMaximum(numpages);
+	targets = targets.mid(begin, end);
+
 	ui->previewProcessBar->setMaximum(targets.count());
 	ui->previewProcessBar->setMinimum(0);
 	ui->previewProcessBar->setValue(0);
