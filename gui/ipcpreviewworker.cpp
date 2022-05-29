@@ -10,13 +10,11 @@ IPCPreviewWorker::IPCPreviewWorker()
 
 void IPCPreviewWorker::start(RenderConfig config, const QVector<RenderTarget> &targets, QLocalSocket *peer)
 {
-
 	stop();
-	/* TODO: memleak */
-	auto mapFunctor = new PreviewGeneratorMapFunctor();
-	mapFunctor->setRenderConfig(config);
+	auto mapFunctor = PreviewGeneratorMapFunctor();
+	mapFunctor.setRenderConfig(config);
 
-	previewWorkerWatcher.setFuture(QtConcurrent::mapped(targets, *mapFunctor));
+	previewWorkerWatcher.setFuture(QtConcurrent::mapped(targets, mapFunctor));
 }
 
 void IPCPreviewWorker::stop()
