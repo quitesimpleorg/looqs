@@ -378,6 +378,7 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	}
 	ui->treeResultsList->resizeColumnToContents(0);
 	ui->treeResultsList->resizeColumnToContents(1);
+	ui->treeResultsList->resizeColumnToContents(2);
 	previewDirty = !this->previewableSearchResults.empty();
 
 	ui->spinPreviewPage->setValue(1);
