@@ -45,7 +45,8 @@ void enableIpcSandbox()
 	policy->namespace_options = EXILE_UNSHARE_NETWORK | EXILE_UNSHARE_USER;
 	policy->no_new_privs = 1;
 	policy->drop_caps = 1;
-	policy->vow_promises = exile_vows_from_str("thread cpath wpath rpath unix stdio prot_exec proc shm fsnotify ioctl");
+	policy->vow_promises =
+		exile_vows_from_str("thread cpath wpath rpath unix stdio prot_exec proc shm fsnotify ioctl error");
 
 	QString ipcSocketPath = Common::ipcSocketPath();
 	QFileInfo info{ipcSocketPath};
