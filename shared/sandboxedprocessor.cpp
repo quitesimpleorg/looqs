@@ -22,7 +22,7 @@ static QMap<QString, Processor *> processors{
 	{"py", defaultTextProcessor},	{"xml", nothingProcessor},	   {"html", tagStripperProcessor},
 	{"java", defaultTextProcessor}, {"js", defaultTextProcessor},  {"cpp", defaultTextProcessor},
 	{"c", defaultTextProcessor},	{"sql", defaultTextProcessor}, {"odt", odtProcessor},
-	{"ods", odsProcessor}};
+	{"ods", odsProcessor},			{"svg", nothingProcessor}};
 
 void SandboxedProcessor::enableSandbox(QString readablePath)
 {
@@ -50,7 +50,7 @@ void SandboxedProcessor::enableSandbox(QString readablePath)
 	int ret = exile_enable_policy(policy);
 	if(ret != 0)
 	{
-		qDebug() << "Failed to establish sandbox: " << ret;
+		qCritical() << "Failed to establish sandbox: " << ret;
 		exit(EXIT_FAILURE);
 	}
 	exile_free_policy(policy);
@@ -74,9 +74,27 @@ void SandboxedProcessor::printResults(const QVector<PageData> &pageData)
 int SandboxedProcessor::process()
 {
 	QFileInfo fileInfo(this->filePath);
-	Processor *processor = processors.value(fileInfo.suffix(), nothingProcessor);
-
-	if(processor == nothingProcessor)
+	Processor *processor = processors.value(fileInfo.suffix(), nullptr);
+	if(processor == nullptr)
+	{
+		/* TODO: This is not sandboxed yet ... */
+		QMimeType mimeType = mimeDatabase.mimeTypeForFile(fileInfo);
+		if(mimeType.name().startsWith("text/"))
+		{
+			processor = defaultTextProcessor;
+		}
+		else
+		{
+			for(QString &str : mimeType.allAncestors())
+			{
+				if(str.startsWith("text/"))
+				{
+					processor = defaultTextProcessor;
+				}
+			}
+		}
+	}
+	if(processor == nullptr || processor == nothingProcessor)
 	{
 		/* Nothing to do */
 		return NOTHING_PROCESSED;
