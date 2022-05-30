@@ -7,6 +7,7 @@
 #include <QSqlError>
 #include <QTextStream>
 #include <QDebug>
+#include <QMimeDatabase>
 #include "looqsgeneralexception.h"
 #include "common.h"
 #include "dbmigrator.h"
@@ -177,4 +178,26 @@ QStringList Common::excludedPaths()
 		::excludedPaths.append(userExcludedPaths);
 	}
 	return ::excludedPaths;
+}
+
+bool Common::isTextFile(QFileInfo fileInfo)
+{
+	/* TODO: This is not sandboxed yet ... */
+	QMimeDatabase mimeDatabase;
+	QMimeType mimeType = mimeDatabase.mimeTypeForFile(fileInfo);
+	if(mimeType.name().startsWith("text/"))
+	{
+		return true;
+	}
+	else
+	{
+		for(QString &str : mimeType.allAncestors())
+		{
+			if(str.startsWith("text/"))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }

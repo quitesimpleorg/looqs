@@ -9,6 +9,7 @@
 #include "odtprocessor.h"
 #include "odsprocessor.h"
 #include "../submodules/exile.h/exile.h"
+#include "common.h"
 #include "logger.h"
 
 static DefaultTextProcessor *defaultTextProcessor = new DefaultTextProcessor();
@@ -77,21 +78,10 @@ int SandboxedProcessor::process()
 	Processor *processor = processors.value(fileInfo.suffix(), nullptr);
 	if(processor == nullptr)
 	{
-		/* TODO: This is not sandboxed yet ... */
-		QMimeType mimeType = mimeDatabase.mimeTypeForFile(fileInfo);
-		if(mimeType.name().startsWith("text/"))
+		/* TODO: Not sandboxed */
+		if(Common::isTextFile(fileInfo))
 		{
 			processor = defaultTextProcessor;
-		}
-		else
-		{
-			for(QString &str : mimeType.allAncestors())
-			{
-				if(str.startsWith("text/"))
-				{
-					processor = defaultTextProcessor;
-				}
-			}
 		}
 	}
 	if(processor == nullptr || processor == nothingProcessor)
