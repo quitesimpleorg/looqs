@@ -1,3 +1,4 @@
+#include "../shared/common.h"
 #include "previewgenerator.h"
 #include "previewgeneratorpdf.h"
 #include "previewgeneratorplaintext.h"
@@ -11,5 +12,13 @@ static QMap<QString, PreviewGenerator *> generators{
 
 PreviewGenerator *PreviewGenerator::get(QFileInfo &info)
 {
-	return generators.value(info.suffix(), nullptr);
+	PreviewGenerator *result = generators.value(info.suffix(), nullptr);
+	if(result == nullptr)
+	{
+		if(Common::isTextFile(info))
+		{
+			return plainTextGenerator;
+		}
+	}
+	return result;
 }
