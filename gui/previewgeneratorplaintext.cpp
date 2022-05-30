@@ -23,12 +23,14 @@ QSharedPointer<PreviewResult> PreviewGeneratorPlainText::generate(RenderConfig c
 	int lastWordPos = 0;
 	QHash<QString, int> countmap;
 
+	const unsigned int maxSnippets = 7;
+	unsigned int currentSnippets = 0;
 	for(QString &word : config.wordsToHighlight)
 	{
 
 		int lastPos = 0;
 		int index = content.indexOf(word, lastPos, Qt::CaseInsensitive);
-		while(index != -1)
+		while(index != -1 && currentSnippets < maxSnippets)
 		{
 			countmap[word] = countmap.value(word, 0) + 1;
 
@@ -52,6 +54,7 @@ QSharedPointer<PreviewResult> PreviewGeneratorPlainText::generate(RenderConfig c
 			lastPos = index;
 
 			index = content.indexOf(word, lastPos + 1, Qt::CaseInsensitive);
+			++currentSnippets;
 		}
 		lastWordPos = lastPos;
 	}
@@ -75,8 +78,13 @@ QSharedPointer<PreviewResult> PreviewGeneratorPlainText::generate(RenderConfig c
 	{
 		header += word + ": " + QString::number(countmap[word]) + " ";
 	}
+	if(currentSnippets == maxSnippets)
+	{
+		header += "(truncated)";
+	}
+
 	header += "<hr>";
 
-	result->setText(header + resulText.replace("\n", "<br>"));
+	result->setText(header + resulText.replace("\n", "<br>").mid(0, 1000));
 	return QSharedPointer<PreviewResultPlainText>(result);
 }
