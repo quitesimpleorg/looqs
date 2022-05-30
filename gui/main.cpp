@@ -89,16 +89,16 @@ int main(int argc, char *argv[])
 		if(arg == "process")
 		{
 			Common::setupAppInfo();
-			QApplication a(argc, argv);
+			QCoreApplication a(argc, argv);
 
 			QStringList args = a.arguments();
-			if(args.length() < 1)
+			if(args.length() < 3)
 			{
 				qDebug() << "Filename is required";
 				return 1;
 			}
 
-			QString file = args.at(1);
+			QString file = args.at(2);
 			SandboxedProcessor processor(file);
 			return processor.process();
 		}
