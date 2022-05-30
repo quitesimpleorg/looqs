@@ -15,25 +15,6 @@
 #include "../submodules/exile.h/exile.h"
 #include "ipcserver.h"
 
-void enableSandbox()
-{
-	struct exile_policy *policy = exile_create_policy();
-	if(policy == NULL)
-	{
-		qCritical() << "Failed to init policy for sandbox";
-		exit(EXIT_FAILURE);
-	}
-	policy->namespace_options = 0;
-	policy->no_new_privs = 1;
-	int ret = exile_enable_policy(policy);
-	if(ret != 0)
-	{
-		qDebug() << "Failed to establish sandbox";
-		exit(EXIT_FAILURE);
-	}
-	exile_free_policy(policy);
-}
-
 void enableIpcSandbox()
 {
 	struct exile_policy *policy = exile_create_policy();
@@ -139,15 +120,6 @@ int main(int argc, char *argv[])
 	try
 	{
 		Common::ensureConfigured();
-		if(!parser.isSet("no-sandbox"))
-		{
-			enableSandbox();
-			qInfo() << "Sandbox: on";
-		}
-		else
-		{
-			qInfo() << "Sandbox: off";
-		}
 	}
 	catch(LooqsGeneralException &e)
 	{
