@@ -1,5 +1,5 @@
-# looqs - FTS for the Linux desktop with previews for search results
-looqs creates a full text search index for your files. It allows you to look at previews where your
+# looqs - Full-text search with previews for your files
+looqs is a tool that creates a full-text search index for your files. It allows you to look at previews where your
 search terms have been found, as shown in the screenshots below.
 
 
@@ -35,7 +35,7 @@ GPLv3.
 
 ### Contributing
 Fow now, github issues and pull-requests are preferred, but you can also just email
-your patches or issues to : looqs at quitesimple.org
+your patches or issues to: looqs at quitesimple.org
 
 
 ## Build
