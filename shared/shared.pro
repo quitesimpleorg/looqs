@@ -16,11 +16,16 @@ CONFIG += c++17
 INCLUDEPATH += $$PWD/../sandbox/exile.h/
 INCLUDEPATH += /usr/include/poppler/qt5/ /usr/include/quazip5
 
+
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
+
+DEFINES += GIT_COMMIT_ID="\\\"$(shell git rev-parse --short HEAD)\\\""
+DEFINES += GIT_TAG="\\\"$(shell git describe --tags HEAD)\\\""
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
