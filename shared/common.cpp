@@ -201,3 +201,9 @@ bool Common::isTextFile(QFileInfo fileInfo)
 	}
 	return false;
 }
+
+QString Common::versionText()
+{
+	QString commitid = GIT_COMMIT_ID;
+	return commitid + " built " + __DATE__ + " " + __TIME__;
+}

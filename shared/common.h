@@ -13,5 +13,6 @@ bool initSqliteDatabase(QString path);
 void ensureConfigured();
 QStringList excludedPaths();
 bool isTextFile(QFileInfo fileInfo);
+QString versionText();
 } // namespace Common
 #endif
