@@ -72,6 +72,9 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath) : QMainWindow(parent
 	QStringList indexPaths = settings.value("indexPaths").toStringList();
 	ui->lstPaths->addItems(indexPaths);
 
+	QString ignorePatterns = settings.value("ignorePatterns").toString();
+	ui->txtIgnorePatterns->setText(ignorePatterns);
+
 	ui->spinPreviewPage->setValue(1);
 	ui->spinPreviewPage->setMinimum(1);
 }
@@ -196,9 +199,12 @@ void MainWindow::startIndexing()
 		pathSettingsValue.append(path);
 	}
 	this->indexer->setTargetPaths(paths);
+	QString ignorePatterns = ui->txtIgnorePatterns->text();
+	this->indexer->setIgnorePattern(ignorePatterns.split(";"));
 	this->indexer->beginIndexing();
 	QSettings settings;
 	settings.setValue("indexPaths", pathSettingsValue);
+	settings.setValue("ignorePatterns", ignorePatterns);
 	ui->btnStartIndexing->setText("Stop indexing");
 }
 

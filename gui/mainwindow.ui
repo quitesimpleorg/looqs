@@ -27,7 +27,7 @@
        <enum>QTabWidget::South</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="resultsTab">
        <attribute name="title">
@@ -333,7 +333,7 @@
          </widget>
         </item>
         <item row="6" column="0">
-         <widget class="QLineEdit" name="lineEdit"/>
+         <widget class="QLineEdit" name="txtIgnorePatterns"/>
         </item>
         <item row="10" column="0">
          <widget class="QPushButton" name="btnStartIndexing">
