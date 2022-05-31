@@ -34,8 +34,10 @@ Linux (on amd64) is currently the main focus. Currently, I don't plan on support
 GPLv3.
 
 ### Contributing
-Fow now, github issues and pull-requests are preferred, but you can also just email
+For now, github issues and pull-requests are preferred, but you can also just email
 your patches or issues to: looqs at quitesimple.org
+
+Please target the 'dev' branch in your pull request. 
 
 
 ## Build
