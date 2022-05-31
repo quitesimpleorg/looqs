@@ -4,18 +4,16 @@ This document is still work in progress.
 # General points
 Please consult the [README](README.md) for a description of what looqs is and on how to obtain it.
 
-The GUI and CLI operate on the same database, so if you add files using the CLI, the GUI will search
-them too.
-
-
-
-# Limitations
+# Current Limitations and things to know
 You should be aware of the following:
 
-- Database paths are stored inefficiently, not deduplicated to
-simplify queries. This adds up quickly. Also, each PDF text is stored twice. Each page separately + the whole document to simplify queries.
+- It may seem naturally, but the GUI and CLI operate on the same database, so if you add files using the CLI, the GUI will search them too.
 
-I currently have 167874 files in the index. A FTS index is built for 14280 of those, of which 4146 are PDF documents. The PDFs take around 10GB storage space on the filesystem. All files for which an FTS has been built are around 7GB in size on the filesystem.
+- If a file is listed in the "Search results" tab, it does not imply that a preview will be available in the "Previews" tab, as looqs can search more file formats than it can generate previews for currently. 
+
+- Database paths are stored inefficiently, not deduplicated to simplify queries. This may add up quickly. Also, each PDF text is stored twice. Each page separately + the whole document to simplify queries.
+
+At the time this section was written, 167874 files were in my index. A FTS index was built for 14280 of those, of which 4146 were PDF documents. The PDFs take around 10GB storage space on the filesystem. All files for which an FTS has been built are around 7GB in size on the filesystem.
 
 The looqs database has a size of 1.6 GB.
 
@@ -25,7 +23,7 @@ It's in `$HOME/.config/quitesimple.org/looqs.conf`. It will be created on first 
 interface.
 
 Database default path: `$HOME/.local/share/quitesimple.org/looqs/looqs.sqlite`. If this does not work for
-you, move it, but you must adjust the path in the config file.
+you, move it and adjust adjust the path in the config file.
 
 
 ## GUI
@@ -45,7 +43,7 @@ only be reprocedded when necessary.
 It's most convenient if, when you click on a preview, the PDF reader opens the page you clicked. For that, looqs needs to know which viewer you want to launch.
 
 It tries to auto detect some common viewers. You must set the value yourself if it doesn't do something you
-like, such as not opening your favorite viewer. "%f" represents the filepath, "%p" the page number.
+like, such as not opening your favorite viewer. In the command line options, "%f" represents the filepath, "%p" the page number.
 
 ### Preview tab
 The preview tab shows previews. It marks you search keywords too. Click on a preview to open the file.
@@ -63,7 +61,8 @@ There is no point in using the "search" command on the first run. Add some files
 To add files to the index, run ``looqs add [path]```, where 'path' can be a directory or a single file.
 If the path is a directory, the directory will be recursively descended, and all files in there added.
 
-"Skipped" implies the file has not been changed since it has been added to the index.
+"Skipped" implies the file has not been changed since it has been added to the index. If it changed,
+the index content will be updated. 
 
 ### Searching files
 Of course the CLI will not render any previews, but it can show you the paths where search results
@@ -75,8 +74,6 @@ looqs search [terms...]
 
 There is an implicit "AND" condition, meaning if you search for "photo" and "mountain", only paths
 will be shown containing both terms, but not either alone.
-
-
 
 ### Deletion and Fixing Out of sync index
 You sometimes delete files, to get rid of those from the index too:
