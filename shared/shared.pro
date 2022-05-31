@@ -52,7 +52,8 @@ SOURCES += sqlitesearch.cpp \
     sqlitedbservice.cpp \
     tagstripperprocessor.cpp \
     utils.cpp \
-    ../submodules/exile.h/exile.c
+    ../submodules/exile.h/exile.c \
+    wildcardmatcher.cpp
 
 HEADERS += sqlitesearch.h \
     concurrentqueue.h \
@@ -81,7 +82,8 @@ HEADERS += sqlitesearch.h \
     tagstripperprocessor.h \
     token.h \
     common.h \
-    utils.h
+    utils.h \
+    wildcardmatcher.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
