@@ -1,5 +1,6 @@
 #include "indexer.h"
 #include "logger.h"
+#include "wildcardmatcher.h"
 
 Indexer::Indexer(SqliteDbService &db)
 {
@@ -17,8 +18,14 @@ void Indexer::beginIndexing()
 	this->currentIndexResult.begin = QDateTime::currentDateTime();
 	QVector<QString> dirs;
 
+	WildcardMatcher wildcardMatcher;
+	wildcardMatcher.setPatterns(this->ignorePattern);
 	for(QString &path : this->pathsToScan)
 	{
+		if(wildcardMatcher.match(path))
+		{
+			continue;
+		}
 		QFileInfo info{path};
 		if(info.isDir())
 		{
