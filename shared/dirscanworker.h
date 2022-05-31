@@ -4,6 +4,7 @@
 #include <QRunnable>
 #include <QDirIterator>
 #include "concurrentqueue.h"
+#include "wildcardmatcher.h"
 class DirScanWorker : public QObject, public QRunnable
 {
 	Q_OBJECT
@@ -12,7 +13,7 @@ class DirScanWorker : public QObject, public QRunnable
 	ConcurrentQueue<QString> *queue = nullptr;
 	ConcurrentQueue<QString> *resultQueue = nullptr;
 
-	QStringList ignorePattern;
+	WildcardMatcher wildcardMatcher;
 	QVector<QString> results;
 
 	std::atomic<bool> *stopToken;

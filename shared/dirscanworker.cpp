@@ -7,7 +7,7 @@ DirScanWorker::DirScanWorker(ConcurrentQueue<QString> &queue, ConcurrentQueue<QS
 {
 	this->queue = &queue;
 	this->resultQueue = &resultQueue;
-	this->ignorePattern = ignorePattern;
+	this->wildcardMatcher.setPatterns(ignorePattern);
 	this->progressReportThreshold = progressReportThreshold;
 	this->stopToken = &stopToken;
 	setAutoDelete(false);
@@ -24,10 +24,19 @@ void DirScanWorker::run()
 		start new DirScanWorkers ourselves here... */
 	while(queue->dequeue(path))
 	{
-		QDirIterator iterator(path, ignorePattern, QDir::Files, QDirIterator::Subdirectories);
+		if(wildcardMatcher.match(path))
+		{
+			continue;
+		}
+		QDirIterator iterator(path, QStringList{}, QDir::Files, QDirIterator::Subdirectories);
 		while(iterator.hasNext())
 		{
-			this->results.append(iterator.next());
+			QString entry = iterator.next();
+			if(wildcardMatcher.match(entry))
+			{
+				continue;
+			}
+			this->results.append(entry);
 			++currentProgress;
 			if(currentProgress == progressReportThreshold)
 			{
