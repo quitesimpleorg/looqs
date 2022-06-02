@@ -40,7 +40,6 @@ int CommandAdd::handle(QStringList arguments)
 						"Continue adding files, don't exit on first error. If this option is not given, looqs will "
 						"exit asap, but it's possible that a few files will still be processed. "
 						"Set -t 1 to avoid this behavior, but processing will be slower. "},
-					   {{"a", "all"}, "On error, no files should be added, even already processed ones"},
 					   {{"v", "verbose"}, "Print skipped and added files"},
 					   {{"t", "threads"}, "Number of threads to use.", "threads"}});
 
@@ -50,10 +49,6 @@ int CommandAdd::handle(QStringList arguments)
 	parser.process(arguments);
 	bool keepGoing = parser.isSet("continue");
 	bool verbose = parser.isSet("verbose");
-	if(parser.isSet("all"))
-	{
-		throw LooqsGeneralException("To be implemented");
-	}
 	if(parser.isSet("threads"))
 	{
 		QString threadsCount = parser.value("threads");
