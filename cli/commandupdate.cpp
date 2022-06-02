@@ -53,17 +53,20 @@ int CommandUpdate::handle(QStringList arguments)
 		for(FileData &fileData : files)
 		{
 			QFileInfo fileInfo(fileData.absPath);
-			if(fileInfo.exists() && fileInfo.isFile())
+			if(fileInfo.exists())
 			{
-				if(fileInfo.lastModified().toSecsSinceEpoch() != fileData.mtime)
+				if(fileInfo.isFile())
 				{
-					if(!dryRun)
+					if(fileInfo.lastModified().toSecsSinceEpoch() != fileData.mtime)
 					{
-						filePathsToUpdate.append(fileData.absPath);
-					}
-					else
-					{
-						Logger::info() << "Would update" << fileData.absPath << Qt::endl;
+						if(!dryRun)
+						{
+							filePathsToUpdate.append(fileData.absPath);
+						}
+						else
+						{
+							Logger::info() << "Would update" << fileData.absPath << Qt::endl;
+						}
 					}
 				}
 			}
