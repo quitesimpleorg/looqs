@@ -10,7 +10,6 @@
 #include <QSettings>
 #include <functional>
 #include <QTimer>
-
 #include <exception>
 #include "encodingdetector.h"
 #include "pdfprocessor.h"
@@ -21,6 +20,7 @@
 #include "commanddelete.h"
 #include "commandupdate.h"
 #include "commandsearch.h"
+#include "commandlist.h"
 #include "databasefactory.h"
 #include "logger.h"
 #include "sandboxedprocessor.h"
@@ -49,6 +49,10 @@ Command *commandFromName(QString name, SqliteDbService &dbService)
 	if(name == "search")
 	{
 		return new CommandSearch(dbService);
+	}
+	if(name == "list")
+	{
+		return new CommandList(dbService);
 	}
 
 	return nullptr;
