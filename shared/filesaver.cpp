@@ -85,7 +85,7 @@ int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFile
 										  }
 										  else if(result == OK)
 										  {
-											  Logger::info() << "Added" << path << Qt::endl;
+											  Logger::info() << "Saved" << path << Qt::endl;
 										  }
 									  }
 								  }
