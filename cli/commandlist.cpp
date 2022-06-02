@@ -7,29 +7,31 @@ int CommandList::handle(QStringList arguments)
 {
 	QCommandLineParser parser;
 	parser.addOptions({
-		{{"r", "reverse"}, "Print most-recent changed files first"},
-		{{"c", "count"}, "Counts the number of paths listed"},
-		{"pattern", "Only list files from index matching the pattern, e. g. */.git/*", "pattern"},
+		{"pattern", "Only list files from index matching the pattern, e. g. '*.txt'", "pattern"},
 	});
 
 	parser.addHelpOption();
 	parser.addPositionalArgument("list", "Lists paths in the index", "list [options]");
 
 	parser.process(arguments);
-	bool reverse = parser.isSet("reverse");
-	if(reverse)
+
+	QString pattern = parser.value("pattern");
+
+	QVector<FileData> results;
+
+	int offset = 0;
+	int limit = 1000;
+
+	auto resultscount = dbService->getFiles(results, pattern, offset, limit);
+	while(resultscount > 0)
 	{
-		throw LooqsGeneralException("Reverse option to be implemented");
+		for(FileData &fileData : results)
+		{
+			Logger::info() << fileData.absPath << Qt::endl;
+		}
+		offset += limit;
+		results.clear();
+		resultscount = dbService->getFiles(results, pattern, offset, limit);
 	}
-
-	QStringList files = parser.positionalArguments();
-	QString queryStrings = files.join(' ');
-	auto results = dbService->search(LooqsQuery::build(queryStrings, TokenType::FILTER_PATH_CONTAINS, false));
-
-	for(SearchResult &result : results)
-	{
-		Logger::info() << result.fileData.absPath << Qt::endl;
-	}
-
 	return 0;
 }

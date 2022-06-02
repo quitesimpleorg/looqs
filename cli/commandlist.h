@@ -1,5 +1,5 @@
-#ifndef COMMANDSEARCH_H
-#define COMMANDSEARCH_H
+#ifndef COMMANDLIST_H
+#define COMMANDLIST_H
 #include "command.h"
 #include "../shared/sqlitesearch.h"
 
@@ -11,4 +11,4 @@ class CommandList : public Command
 	int handle(QStringList arguments) override;
 };
 
-#endif // COMMANDSEARCH_H
+#endif // COMMANDLIST_H
