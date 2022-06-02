@@ -12,7 +12,7 @@ int CommandUpdate::handle(QStringList arguments)
 		{{{"v", "verbose"}, "Print path of the files while updating them"},
 		 {{"n", "dry-run"}, "Only print which files would be updated, don't actually update them"},
 		 {"pattern", "Only consider to update files in the index matching the pattern, e. g. */.git/*.", "pattern"},
-		 {{"d", "delete"}, "If a file does not exist anymore, delete it"},
+		 {{"d", "delete"}, "If a file does not exist anymore, delete it from the index"},
 		 {{"c", "continue"},
 		  "Continue adding files, don't exit on first error. If this option is not given, looqs will exit asap, but "
 		  "it's possible that a few files will still be processed. "
@@ -22,7 +22,7 @@ int CommandUpdate::handle(QStringList arguments)
 		});
 
 	parser.addHelpOption();
-	parser.addPositionalArgument("update", "Checks files for changes and updates them", "update");
+	parser.addPositionalArgument("update", "Checks files for changes and updates the index", "update");
 
 	parser.process(arguments);
 	bool keepGoing = parser.isSet("continue");
@@ -41,6 +41,9 @@ int CommandUpdate::handle(QStringList arguments)
 	int offset = 0;
 	int limit = 1000;
 	int processedRows = dbService->getFiles(files, pattern, offset, limit);
+
+	unsigned int totalUpdatesFilesCount = 0;
+	unsigned int totalDeletedFilesCount = 0;
 
 	while(processedRows > 0)
 	{
@@ -74,7 +77,7 @@ int CommandUpdate::handle(QStringList arguments)
 						if(!this->dbService->deleteFile(fileData.absPath))
 						{
 							Logger::error()
-								<< "Error: Failed to delete" << fileData.absPath << "from databas" << Qt::endl;
+								<< "Error: Failed to delete" << fileData.absPath << "from the index" << Qt::endl;
 							if(!keepGoing)
 							{
 								return 1;
@@ -82,13 +85,14 @@ int CommandUpdate::handle(QStringList arguments)
 						}
 						if(verbose)
 						{
-							Logger::info() << "Deleted" << fileData.absPath << Qt::endl;
+							Logger::info() << "Deleted from index:" << fileData.absPath << Qt::endl;
 						}
+						++totalDeletedFilesCount;
 					}
 					else
 					{
 
-						Logger::info() << "Would delete" << fileData.absPath << Qt::endl;
+						Logger::info() << "Would delete from index" << fileData.absPath << Qt::endl;
 					}
 				}
 			}
@@ -100,14 +104,22 @@ int CommandUpdate::handle(QStringList arguments)
 		{
 			if(!keepGoing)
 			{
-				Logger::error() << "Failed to update all files selected for updating. Updated" << updatedFilesCount
-								<< "out of" << shouldHaveUpdatedCount << "selected for upating" << Qt::endl;
+				Logger::error() << "Failed to update all files selected for updating in this batch. Updated"
+								<< updatedFilesCount << "out of" << shouldHaveUpdatedCount << "selected for updating"
+								<< Qt::endl;
 				return 1;
 			}
 		}
 		offset += limit;
 		files.clear();
 		processedRows = this->dbService->getFiles(files, pattern, offset, limit);
+
+		totalUpdatesFilesCount += static_cast<unsigned int>(updatedFilesCount);
+	}
+	if(!dryRun)
+	{
+		Logger::info() << "Total (updated): " << totalUpdatesFilesCount << Qt::endl;
+		Logger::info() << "Total (deleted from index): " << totalDeletedFilesCount << Qt::endl;
 	}
 
 	return 0;
