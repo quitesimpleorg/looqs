@@ -17,7 +17,6 @@ int CommandUpdate::handle(QStringList arguments)
 		  "Continue adding files, don't exit on first error. If this option is not given, looqs will exit asap, but "
 		  "it's possible that a few files will still be processed. "
 		  "Set -t 1 to avoid this behavior, but processing will be slower."},
-		 {{"a", "all"}, "On error, no files should be updated, even already processed ones"},
 		 {{"t", "threads"}, "Number of threads to use.", "threads"}
 
 		});
@@ -32,10 +31,6 @@ int CommandUpdate::handle(QStringList arguments)
 	bool dryRun = parser.isSet("dry-run");
 	QString pattern = parser.value("pattern");
 
-	if(parser.isSet("all"))
-	{
-		throw LooqsGeneralException("To be implemented");
-	}
 	if(parser.isSet("threads"))
 	{
 		QString threadsCount = parser.value("threads");
