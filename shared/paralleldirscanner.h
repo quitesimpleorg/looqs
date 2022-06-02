@@ -41,6 +41,7 @@ class ParallelDirScanner : public QObject
 	void progress(int, int);
   public slots:
 	void cancel();
+  private slots:
 	void handleWorkersProgress(unsigned int progress);
 	void handleWorkersFinish();
 };

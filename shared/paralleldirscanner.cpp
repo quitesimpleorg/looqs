@@ -50,6 +50,7 @@ void ParallelDirScanner::handleWorkersFinish()
 		running = false;
 		emit scanComplete();
 	}
+	delete QObject::sender();
 }
 
 unsigned int ParallelDirScanner::getThreadsNum() const
