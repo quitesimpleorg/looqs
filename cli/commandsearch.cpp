@@ -8,14 +8,19 @@ int CommandSearch::handle(QStringList arguments)
 	QCommandLineParser parser;
 	parser.addOptions({
 		{{"r", "reverse"},
-		 "Print most-recent changed files first. This is short for adding \"sort:(mtime asc)\" to the query."},
+		 "Print most-recently changed files last. This is short for adding \"sort:(mtime asc)\" to the query."},
 	});
 
 	parser.addHelpOption();
 	parser.process(arguments);
 
-	QStringList files = parser.positionalArguments();
-	QString queryStrings = files.join(' ');
+	QStringList terms = parser.positionalArguments();
+	if(terms.length() == 0)
+	{
+		Logger::error() << "Please enter search terms" << Qt::endl;
+		return 1;
+	}
+	QString queryStrings = terms.join(' ');
 	LooqsQuery query = LooqsQuery::build(queryStrings, TokenType::FILTER_PATH_CONTAINS, false);
 	bool reverse = parser.isSet("reverse");
 	if(reverse)
@@ -26,11 +31,19 @@ int CommandSearch::handle(QStringList arguments)
 		query.addSortCondition(sc);
 	}
 
-	auto results = dbService->search(query);
-
-	for(SearchResult &result : results)
+	try
 	{
-		Logger::info() << result.fileData.absPath << Qt::endl;
+		auto results = dbService->search(query);
+
+		for(SearchResult &result : results)
+		{
+			Logger::info() << result.fileData.absPath << Qt::endl;
+		}
+	}
+	catch(LooqsGeneralException &e)
+	{
+		Logger::error() << "Exception:" << e.message << Qt::endl;
+		return 1;
 	}
 
 	return 0;
