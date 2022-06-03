@@ -4,6 +4,7 @@
 #include <QThreadPool>
 #include "commandupdate.h"
 #include "logger.h"
+#include "../shared/indexsyncer.h"
 
 int CommandUpdate::handle(QStringList arguments)
 {
@@ -36,91 +37,56 @@ int CommandUpdate::handle(QStringList arguments)
 		QString threadsCount = parser.value("threads");
 		QThreadPool::globalInstance()->setMaxThreadCount(threadsCount.toInt());
 	}
-	FileSaver saver(*this->dbService);
-	QVector<FileData> files;
-	int offset = 0;
-	int limit = 1000;
-	int processedRows = dbService->getFiles(files, pattern, offset, limit);
 
-	unsigned int totalUpdatesFilesCount = 0;
-	unsigned int totalDeletedFilesCount = 0;
+	bool hasErrors = false;
+	IndexSyncer *syncer = new IndexSyncer(*this->dbService);
+	syncer->setKeepGoing(keepGoing);
+	syncer->setVerbose(verbose);
+	syncer->setPattern(pattern);
+	syncer->setDryRun(dryRun);
+	syncer->setRemoveDeletedFromIndex(deleteMissing);
 
-	while(processedRows > 0)
+	if(dryRun)
 	{
-		QVector<QString> filePathsToUpdate;
-		for(FileData &fileData : files)
-		{
-			QFileInfo fileInfo(fileData.absPath);
-			if(fileInfo.exists())
-			{
-				if(fileInfo.isFile())
-				{
-					if(fileInfo.lastModified().toSecsSinceEpoch() != fileData.mtime)
-					{
-						if(!dryRun)
-						{
-							filePathsToUpdate.append(fileData.absPath);
-						}
-						else
-						{
-							Logger::info() << "Would update" << fileData.absPath << Qt::endl;
-						}
-					}
-				}
-			}
-			else
-			{
-				if(deleteMissing)
-				{
-					if(!dryRun)
-					{
-						if(!this->dbService->deleteFile(fileData.absPath))
-						{
-							Logger::error()
-								<< "Error: Failed to delete" << fileData.absPath << "from the index" << Qt::endl;
-							if(!keepGoing)
-							{
-								return 1;
-							}
-						}
-						if(verbose)
-						{
-							Logger::info() << "Deleted from index:" << fileData.absPath << Qt::endl;
-						}
-						++totalDeletedFilesCount;
-					}
-					else
-					{
-
-						Logger::info() << "Would delete from index" << fileData.absPath << Qt::endl;
-					}
-				}
-			}
-		}
-
-		int updatedFilesCount = saver.updateFiles(filePathsToUpdate, keepGoing, verbose);
-		int shouldHaveUpdatedCount = filePathsToUpdate.size();
-		if(updatedFilesCount != shouldHaveUpdatedCount)
-		{
-			if(!keepGoing)
-			{
-				Logger::error() << "Failed to update all files selected for updating in this batch. Updated"
-								<< updatedFilesCount << "out of" << shouldHaveUpdatedCount << "selected for updating"
-								<< Qt::endl;
-				return 1;
-			}
-		}
-		offset += limit;
-		files.clear();
-		processedRows = this->dbService->getFiles(files, pattern, offset, limit);
-
-		totalUpdatesFilesCount += static_cast<unsigned int>(updatedFilesCount);
+		connect(syncer, &IndexSyncer::removedDryRun, this,
+				[](QString path) { Logger::info() << "Would delete" << path << Qt::endl; });
+		connect(syncer, &IndexSyncer::updatedDryRun, this,
+				[](QString path) { Logger::info() << "Would update" << path << Qt::endl; });
 	}
-	if(!dryRun)
+	else
 	{
-		Logger::info() << "Total (updated): " << totalUpdatesFilesCount << Qt::endl;
-		Logger::info() << "Total (deleted from index): " << totalDeletedFilesCount << Qt::endl;
+		connect(syncer, &IndexSyncer::removed, this,
+				[](QString path) { Logger::info() << "Removed " << path << Qt::endl; });
+		/* TODO: updated not printed, handled be verbose in FileSaver, but this can be improved */
 	}
+	connect(syncer, &IndexSyncer::finished, this,
+			[&](unsigned int totalUpdated, unsigned int totalRemoved, unsigned int totalErrors)
+			{
+				Logger::info() << "Syncing finished" << Qt::endl;
 
+				if(!dryRun)
+				{
+					Logger::info() << "Total updated:" << totalUpdated << Qt::endl;
+					Logger::info() << "Total removed from index: " << totalRemoved << Qt::endl;
+					Logger::info() << "Total deleted:" << totalErrors << Qt::endl;
+				}
+
+				int retval = 0;
+				if(hasErrors && !keepGoing)
+				{
+					retval = 1;
+				}
+				emit finishedCmd(retval);
+			});
+	connect(syncer, &IndexSyncer::error, this,
+			[&](QString error)
+			{
+				Logger::error() << error << Qt::endl;
+				hasErrors = true;
+			});
+
+	this->autoFinish = false;
+	syncer->sync();
+	/* Actual return code is handled by finishedCmd signal */
 	return 0;
 }
