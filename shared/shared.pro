@@ -42,6 +42,7 @@ SOURCES += sqlitesearch.cpp \
     filesaver.cpp \
     filescanworker.cpp \
     indexer.cpp \
+    indexsyncer.cpp \
     logger.cpp \
     looqsgeneralexception.cpp \
     common.cpp \
@@ -71,6 +72,7 @@ HEADERS += sqlitesearch.h \
     filesaver.h \
     filescanworker.h \
     indexer.h \
+    indexsyncer.h \
     logger.h \
     looqsgeneralexception.h \
     looqsquery.h \
