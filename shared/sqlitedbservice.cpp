@@ -62,10 +62,11 @@ bool SqliteDbService::deleteFile(QString path)
 	}
 	return result;
 }
-int SqliteDbService::getFiles(QVector<FileData> &results, QString wildCardPattern, int offset, int limit)
+
+unsigned int SqliteDbService::getFiles(QVector<FileData> &results, QString wildCardPattern, int offset, int limit)
 {
 
-	int processedRows = 0;
+	unsigned int processedRows = 0;
 	// TODO: translate/convert wildCardPattern to SQL where instead of regex
 	QString sql = "SELECT path, mtime, size, filetype FROM file";
 
