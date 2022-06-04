@@ -270,15 +270,15 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 				throw LooqsGeneralException("value cannot be empty for filters");
 			}
 
-			if(filtername == "path.contains")
+			if(filtername == "p" || filtername == "path.contains")
 			{
 				tokenType = FILTER_PATH_CONTAINS;
 			}
-			else if(filtername == "path.starts")
+			else if(filtername == "pb" || filtername == "path.starts")
 			{
 				tokenType = FILTER_PATH_STARTS;
 			}
-			else if(filtername == "path.ends")
+			else if(filtername == "pe" || filtername == "path.ends")
 			{
 				tokenType = FILTER_PATH_ENDS;
 			}
