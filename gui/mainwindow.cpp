@@ -444,9 +444,12 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 		bool exists = pathInfo.exists();
 		if(exists)
 		{
-			if(PreviewGenerator::get(pathInfo) != nullptr)
+			if(!pathInfo.suffix().contains("htm")) // hack until we can preview them properly...
 			{
-				this->previewableSearchResults.append(result);
+				if(PreviewGenerator::get(pathInfo) != nullptr)
+				{
+					this->previewableSearchResults.append(result);
+				}
 			}
 		}
 		else
