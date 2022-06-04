@@ -169,6 +169,10 @@ void LooqsQuery::addToken(Token t)
  * TODO: It's a bit ugly still*/
 LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, bool mergeLoneWords)
 {
+	if(expression.isEmpty())
+	{
+		return LooqsQuery{};
+	}
 	if(!checkParanthesis(expression))
 	{
 		throw LooqsGeneralException("Invalid paranthesis");
