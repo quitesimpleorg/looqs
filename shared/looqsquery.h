@@ -40,6 +40,7 @@ class LooqsQuery
 	/* Helper field to determine quertype as well as to quickly check what kind of filters etc.
 	 * are being used in this query*/
 	int tokensMask = 0;
+	int limit = -1;
 	QVector<Token> tokens;
 	QVector<SortCondition> sortConditions;
 	void addToken(Token t);
@@ -51,6 +52,14 @@ class LooqsQuery
 	int getTokensMask() const
 	{
 		return tokensMask;
+	}
+	int getLimit() const
+	{
+		return limit;
+	}
+	void setLimit(int limit)
+	{
+		this->limit = limit;
 	}
 	bool hasContentSearch();
 	bool hasPathSearch();

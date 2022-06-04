@@ -220,19 +220,8 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 			{
 				throw LooqsGeneralException("Can't have two negations following each other");
 			}
-			if(!previousWasBool())
-			{
-				result.addToken(Token(BOOL_AND)); // Implicit and, our default operation
-			}
 			result.addToken(Token(NEGATION));
 		}
-		if(!result.tokens.isEmpty() && !previousWasBool() && !previousWas(NEGATION) && !previousWas(BRACKET_OPEN) &&
-		   bracket != ")")
-		{
-			// the current token isn't a negation, isn't a boolean. Thus, implicit AND is required
-			result.addToken(Token(BOOL_AND));
-		}
-
 		if(bracket != "")
 		{
 			if(bracket == "(")
@@ -259,7 +248,7 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 
 		if(filtername != "")
 		{
-			TokenType tokenType;
+			TokenType tokenType = WORD;
 			QString value = m.captured("innerargs");
 			if(value == "")
 			{
@@ -294,19 +283,19 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 			{
 				tokenType = FILTER_CONTENT_PAGE;
 			}
-			else if(filtername ==
-					"sort") // TODO: given this is not really a "filter", this feels slightly misplaced here
+			// TODO: given this is not really a "filter", this feels slightly misplaced here
+			else if(filtername == "sort")
 			{
 				if(!result.sortConditions.empty())
 				{
 					throw LooqsGeneralException("Two sort statements are illegal");
 				}
-				// TODO: hack, since we are not a "filter", we must remove a preceeding (implicit) boolean
-				if((result.tokens.last().type & BOOL) == BOOL)
-				{
-					result.tokens.pop_back();
-				}
 				result.sortConditions = createSortConditions(value);
+				continue;
+			}
+			else if(filtername == "limit")
+			{
+				result.limit = value.toInt();
 				continue;
 			}
 			else
@@ -325,6 +314,26 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 			result.addToken(Token(loneWordsTokenType, mergedLoneWords));
 		}
 	}
+
+	/* Add our default implicit AND boolean condition where appropriate */
+	QVector<Token> newTokens;
+
+	TokenType prevType = BOOL_AND;
+	int needsBoolean = FILTER_CONTENT | FILTER_PATH | NEGATION;
+	for(Token &t : result.tokens)
+	{
+		if(t.type == BRACKET_OPEN || t.type & needsBoolean)
+		{
+			if(!((prevType & BOOL) == BOOL) && !((prevType & NEGATION) == NEGATION) &&
+			   !((prevType & BRACKET_OPEN) == BRACKET_OPEN))
+			{
+				newTokens.append(Token(BOOL_AND));
+			}
+		}
+		prevType = t.type;
+		newTokens.append(t);
+	}
+	result.tokens = newTokens;
 
 	bool contentsearch = result.hasContentSearch();
 	bool sortsForContent = std::any_of(result.sortConditions.begin(), result.sortConditions.end(),
