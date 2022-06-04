@@ -13,11 +13,14 @@ class IndexSyncer : public QObject
 	bool verbose = false;
 	QString pattern;
 
+	std::atomic<bool> stopToken{false};
+
   public:
 	IndexSyncer(SqliteDbService &dbService);
 
   public slots:
 	void sync();
+	void cancel();
 	void setDryRun(bool dryRun);
 	void setVerbose(bool verbose);
 	void setKeepGoing(bool keepGoing);

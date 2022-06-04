@@ -34,10 +34,11 @@ void IndexSyncer::setPattern(QString pattern)
 
 void IndexSyncer::sync()
 {
+	this->stopToken.store(false, std::memory_order_relaxed);
 	FileSaver saver(*this->dbService);
 	QVector<FileData> files;
 	int offset = 0;
-	int limit = 1000;
+	int limit = 10000;
 	unsigned int processedRows = dbService->getFiles(files, pattern, offset, limit);
 
 	unsigned int totalUpdatesFilesCount = 0;
@@ -49,6 +50,11 @@ void IndexSyncer::sync()
 		QVector<QString> filePathsToUpdate;
 		for(FileData &fileData : files)
 		{
+			if(processedRows % 100 == 0 && this->stopToken.load(std::memory_order_relaxed))
+			{
+				emit finished(totalUpdatesFilesCount, totalDeletedFilesCount, totalErroredFilesCount);
+				return;
+			}
 			QFileInfo fileInfo(fileData.absPath);
 			if(fileInfo.exists())
 			{
@@ -109,10 +115,15 @@ void IndexSyncer::sync()
 		}
 		offset += limit;
 		files.clear();
-		processedRows = this->dbService->getFiles(files, pattern, offset, limit);
-
 		totalUpdatesFilesCount += updatedFilesCount;
+
+		processedRows = this->dbService->getFiles(files, pattern, offset, limit);
 	}
 
 	emit finished(totalUpdatesFilesCount, totalDeletedFilesCount, totalErroredFilesCount);
+}
+
+void IndexSyncer::cancel()
+{
+	this->stopToken.store(true, std::memory_order_seq_cst);
 }
