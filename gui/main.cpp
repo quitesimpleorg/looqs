@@ -138,7 +138,9 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<RenderConfig>("RenderConfig");
 	qRegisterMetaType<QVector<RenderTarget>>("QVector<RenderTarget>");
 	qRegisterMetaType<QSharedPointer<PreviewResult>>("QSharedPointer<PreviewResult>");
-	MainWindow w{0, socketPath};
-	w.showMaximized();
-	return a.exec();
+	MainWindow *w = new MainWindow{0, socketPath};
+	w->showMaximized();
+	int ret = a.exec();
+	process.waitForFinished(1000);
+	return ret;
 }
