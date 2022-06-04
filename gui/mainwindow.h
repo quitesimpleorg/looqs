@@ -9,7 +9,9 @@
 #include <QFutureWatcher>
 #include <QSqlDatabase>
 #include <QLocalSocket>
+#include <QProgressDialog>
 #include "../shared/looqsquery.h"
+#include "../shared/indexsyncer.h"
 #include "ipcpreviewclient.h"
 #include "indexer.h"
 namespace Ui
@@ -34,6 +36,9 @@ class MainWindow : public QMainWindow
 	Ui::MainWindow *ui;
 	IPCPreviewClient ipcPreviewClient;
 	QThread ipcClientThread;
+	QThread syncerThread;
+	IndexSyncer *indexSyncer;
+	QProgressDialog progressDialog;
 
 	Indexer *indexer;
 	QFileIconProvider iconProvider;
@@ -67,10 +72,12 @@ class MainWindow : public QMainWindow
 	void startIndexing();
 	void finishIndexing();
 	void addPathToIndex();
+	void startIndexSync();
 
   signals:
 	void startIpcPreviews(RenderConfig config, const QVector<RenderTarget> &targets);
 	void stopIpcPreviews();
+	void beginIndexSync();
 };
 
 #endif // MAINWINDOW_H

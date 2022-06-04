@@ -14,6 +14,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QScreen>
+#include <QProgressDialog>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "clicklabel.h"
@@ -23,8 +24,10 @@
 #include "ipcpreviewclient.h"
 #include "previewgenerator.h"
 
-MainWindow::MainWindow(QWidget *parent, QString socketPath) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent, QString socketPath)
+	: QMainWindow(parent), ui(new Ui::MainWindow), progressDialog(this)
 {
+	this->progressDialog.cancel(); // because constructing it shows it, quite weird
 	ui->setupUi(this);
 	setWindowTitle(QCoreApplication::applicationName());
 	this->ipcPreviewClient.moveToThread(&this->ipcClientThread);
@@ -56,6 +59,8 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath) : QMainWindow(parent
 
 	db = this->dbFactory->forCurrentThread();
 	this->dbService = new SqliteDbService(*this->dbFactory);
+	this->indexSyncer = new IndexSyncer(*this->dbService);
+	this->indexSyncer->moveToThread(&this->syncerThread);
 
 	indexer = new Indexer(*(this->dbService));
 	indexer->setParent(this);
@@ -96,6 +101,7 @@ void MainWindow::addPathToIndex()
 	this->ui->lstPaths->addItem(path);
 	this->ui->txtPathScanAdd->clear();
 }
+
 void MainWindow::connectSignals()
 {
 	connect(ui->txtSearch, &QLineEdit::returnPressed, this, &MainWindow::lineEditReturnPressed);
@@ -194,8 +200,42 @@ void MainWindow::connectSignals()
 			});
 	connect(ui->menuAboutQtAction, &QAction::triggered, this,
 			[this](bool checked) { QMessageBox::aboutQt(this, "About Qt"); });
+	connect(ui->menuSyncIndexAction, &QAction::triggered, this, &MainWindow::startIndexSync);
+	connect(indexSyncer, &IndexSyncer::finished, this,
+			[&](unsigned int totalUpdated, unsigned int totalDeleted, unsigned int totalErrored)
+			{
+				this->progressDialog.cancel();
+
+				QMessageBox::information(
+					this, "Syncing finished",
+					QString("Syncing finished\n\nTotal updated: %1\nTotal deleted: %2\nTotal errors: %3\n")
+						.arg(QString::number(totalUpdated))
+						.arg(QString::number(totalDeleted))
+						.arg(QString::number(totalErrored)));
+			});
+	connect(this, &MainWindow::beginIndexSync, indexSyncer, &IndexSyncer::sync);
+	connect(&this->progressDialog, &QProgressDialog::canceled, indexSyncer, &IndexSyncer::cancel);
 }
 
+void MainWindow::startIndexSync()
+{
+	progressDialog.setWindowTitle("Syncing");
+	progressDialog.setLabelText("Syncing - this might take a moment, please wait");
+	progressDialog.setWindowModality(Qt::ApplicationModal);
+	progressDialog.setMinimum(0);
+	progressDialog.setMaximum(0);
+	progressDialog.setValue(0);
+	progressDialog.open();
+
+	indexSyncer->setKeepGoing(true);
+	indexSyncer->setVerbose(false);
+	indexSyncer->setDryRun(false);
+	indexSyncer->setRemoveDeletedFromIndex(true);
+
+	this->syncerThread.start();
+
+	emit beginIndexSync();
+}
 void MainWindow::spinPreviewPageValueChanged(int val)
 {
 	makePreviews(val);
@@ -563,5 +603,11 @@ void MainWindow::showSearchResultsContextMenu(const QPoint &point)
 
 MainWindow::~MainWindow()
 {
+	syncerThread.terminate();
+	ipcClientThread.terminate();
+	delete this->indexSyncer;
+	delete this->dbService;
+	delete this->dbFactory;
+	delete this->indexer;
 	delete ui;
 }

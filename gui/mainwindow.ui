@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1221</width>
-    <height>674</height>
+    <height>709</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -82,7 +82,7 @@
              <x>0</x>
              <y>0</y>
              <width>1185</width>
-             <height>384</height>
+             <height>419</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout"/>
@@ -377,8 +377,10 @@
      <string>looqs</string>
     </property>
     <addaction name="menuOpenConfigInTextEditorAction"/>
+    <addaction name="menuSyncIndexAction"/>
     <addaction name="menuAboutAction"/>
     <addaction name="menuAboutQtAction"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menulooqs"/>
   </widget>
@@ -395,6 +397,11 @@
   <action name="menuAboutQtAction">
    <property name="text">
     <string>About Qt</string>
+   </property>
+  </action>
+  <action name="menuSyncIndexAction">
+   <property name="text">
+    <string>Sync index (remove deleted, update existing files)</string>
    </property>
   </action>
  </widget>
