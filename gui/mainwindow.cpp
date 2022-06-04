@@ -389,6 +389,10 @@ void MainWindow::lineEditReturnPressed()
 		ui->lblSearchResults->setText("Invalid paranthesis");
 		return;
 	}
+	if(indexerTabActive())
+	{
+		ui->tabWidget->setCurrentIndex(0);
+	}
 	// TODO: validate q;
 	ui->treeResultsList->clear();
 	ui->lblSearchResults->setText("Searching...");
