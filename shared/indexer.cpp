@@ -36,10 +36,14 @@ void Indexer::beginIndexing()
 			this->filePathTargetsQueue.enqueue(path);
 		}
 	}
-	this->dirScanner->setPaths(dirs);
-	this->dirScanner->setIgnorePatterns(this->ignorePattern);
 
-	this->dirScanner->scan();
+	if(!dirs.empty())
+	{
+		this->dirScanner->setPaths(dirs);
+		this->dirScanner->setIgnorePatterns(this->ignorePattern);
+
+		this->dirScanner->scan();
+	}
 
 	this->workerCancellationToken.store(false, std::memory_order_seq_cst);
 	launchWorker(this->filePathTargetsQueue, this->filePathTargetsQueue.remaining());
@@ -68,7 +72,7 @@ IndexResult Indexer::getResult()
 
 void Indexer::dirScanFinished()
 {
-	Logger::info() << "Dir scan finished";
+	Logger::info() << "Dir scan finished" << Qt::endl;
 	if(!isRunning())
 	{
 		emit finished();
