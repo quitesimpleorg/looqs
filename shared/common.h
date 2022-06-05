@@ -12,7 +12,9 @@ QString findInPath(QString needle);
 bool initSqliteDatabase(QString path);
 void ensureConfigured();
 QStringList excludedPaths();
+QStringList mountPaths();
 bool isTextFile(QFileInfo fileInfo);
+bool isMountPath(QString path);
 QString versionText();
 } // namespace Common
 #endif

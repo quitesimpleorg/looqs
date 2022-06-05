@@ -19,6 +19,7 @@
 #define SETTINGS_KEY_IPCSOCKETPATH "ipcsocketpath"
 #define SETTINGS_KEY_PDFVIEWER "pdfviewer"
 #define SETTINGS_KEY_EXCLUDEDPATHS "excludedpaths"
+#define SETTINGS_KEY_MOUNTPATHS "mountpaths"
 
 inline void initResources()
 {
@@ -178,6 +179,32 @@ QStringList Common::excludedPaths()
 		::excludedPaths.append(userExcludedPaths);
 	}
 	return ::excludedPaths;
+}
+
+QStringList Common::mountPaths()
+{
+	static int ran = false;
+	static QStringList mountPaths;
+	if(!ran)
+	{
+		QSettings settings;
+		mountPaths = settings.value(SETTINGS_KEY_MOUNTPATHS, QStringList{"/media", "/mnt"}).toStringList();
+		ran = true;
+	}
+	return mountPaths;
+}
+
+bool Common::isMountPath(QString path)
+{
+	QStringList mountPaths = Common::mountPaths();
+	for(QString &mountPath : mountPaths)
+	{
+		if(path.startsWith(mountPath))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 bool Common::isTextFile(QFileInfo fileInfo)
