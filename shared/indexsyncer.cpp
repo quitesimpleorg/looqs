@@ -55,6 +55,11 @@ void IndexSyncer::sync()
 				emit finished(totalUpdatesFilesCount, totalDeletedFilesCount, totalErroredFilesCount);
 				return;
 			}
+			if(Common::isMountPath(fileData.absPath))
+			{
+				continue;
+			}
+
 			QFileInfo fileInfo(fileData.absPath);
 			if(fileInfo.exists())
 			{
