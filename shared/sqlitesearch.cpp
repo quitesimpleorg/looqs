@@ -183,6 +183,11 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 				  whereSql + " " + sortSql;
 	}
 
+	if(query.getLimit() > 0)
+	{
+		prepSql += " LIMIT " + QString::number(query.getLimit());
+	}
+
 	QSqlQuery dbquery(*db);
 	dbquery.prepare(prepSql);
 	for(const QString &value : bindValues)
