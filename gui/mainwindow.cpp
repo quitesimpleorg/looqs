@@ -472,7 +472,7 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	QString statusText = "Results: " + QString::number(results.size()) + " files";
 	if(hasDeleted)
 	{
-		statusText += " WARNING: Some files don't exist anymore. No preview available for those. Index out of sync";
+		statusText += " WARNING: Some files are inaccessible. No preview available for those. Index may be out of sync";
 	}
 	ui->lblSearchResults->setText(statusText);
 }
