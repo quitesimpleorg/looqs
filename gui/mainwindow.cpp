@@ -502,7 +502,7 @@ void MainWindow::makePreviews(int page)
 	scaleText.chop(1);
 
 	QVector<QString> wordsToHighlight;
-	QRegularExpression extractor(R"#("([^"]*)"|(\w+))#");
+	QRegularExpression extractor(R"#("([^"]*)"|(\p{L}+))#");
 	for(const Token &token : this->contentSearchQuery.getTokens())
 	{
 		if(token.type == FILTER_CONTENT_CONTAINS)
