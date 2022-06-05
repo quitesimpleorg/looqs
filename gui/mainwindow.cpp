@@ -411,10 +411,20 @@ void MainWindow::lineEditReturnPressed()
 			if(addPathSearch)
 			{
 				LooqsQuery filesQuery = LooqsQuery::build(q, TokenType::FILTER_PATH_CONTAINS, false);
+				if(filesQuery.getLimit() == -1)
+				{
+					filesQuery.setLimit(1000);
+				}
+
 				results.append(searcher.search(filesQuery));
 			}
 			if(addContentSearch)
 			{
+				if(this->contentSearchQuery.getLimit() == -1)
+				{
+					this->contentSearchQuery.setLimit(1000);
+				}
+
 				results.append(searcher.search(this->contentSearchQuery));
 			}
 			return results;
