@@ -1,0 +1,11 @@
+.user
+.o
+*.user
+*.o
+*.a
+moc_*.cpp
+moc_*.h
+Makefile
+cli/looqs
+gui/looqs-gui
+qrc_*
