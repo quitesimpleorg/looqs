@@ -10,6 +10,7 @@ class CommandAdd : public Command
   private:
 	SaveFileResult addFile(QString path);
 	Indexer *indexer;
+	bool keepGoing = true;
 
   protected:
   public:

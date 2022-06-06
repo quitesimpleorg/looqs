@@ -29,8 +29,12 @@ void CommandAdd::indexerFinished()
 		}
 	}
 
-	/* TODO maybe not 0 if keepGoing not given */
-	emit finishedCmd(0);
+	int ret = 0;
+	if(!keepGoing && failedPathsCount > 0)
+	{
+		ret = 1;
+	}
+	emit finishedCmd(ret);
 }
 
 int CommandAdd::handle(QStringList arguments)
@@ -40,15 +44,13 @@ int CommandAdd::handle(QStringList arguments)
 						"Continue adding files, don't exit on first error. If this option is not given, looqs will "
 						"exit asap, but it's possible that a few files will still be processed. "
 						"Set -t 1 to avoid this behavior, but processing will be slower. "},
-					   {{"v", "verbose"}, "Print skipped and added files"},
 					   {{"t", "threads"}, "Number of threads to use.", "threads"}});
 
 	parser.addHelpOption();
 	parser.addPositionalArgument("add", "Add paths to the index", "add [paths...]");
 
 	parser.process(arguments);
-	bool keepGoing = parser.isSet("continue");
-	bool verbose = parser.isSet("verbose");
+	this->keepGoing = parser.isSet("continue");
 	if(parser.isSet("threads"))
 	{
 		QString threadsCount = parser.value("threads");
@@ -70,16 +72,14 @@ int CommandAdd::handle(QStringList arguments)
 
 	indexer = new Indexer(*this->dbService);
 	indexer->setTargetPaths(files.toVector());
+	indexer->setKeepGoing(keepGoing);
 
 	connect(indexer, &Indexer::pathsCountChanged, this,
 			[](int pathsCount) { Logger::info() << "Found paths: " << pathsCount << Qt::endl; });
-
 	connect(indexer, &Indexer::indexProgress, this,
 			[](int pathsCount, unsigned int added, unsigned int skipped, unsigned int failed, unsigned int totalCount)
 			{ Logger::info() << "Processed files: " << pathsCount << Qt::endl; });
 	connect(indexer, &Indexer::finished, this, &CommandAdd::indexerFinished);
-
-	/* TODO: keepGoing, verbose */
 
 	this->autoFinish = false;
 	indexer->beginIndexing();
