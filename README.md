@@ -6,14 +6,14 @@ search terms have been found, as shown in the screenshots below.
 The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state of the GUI.
 
 ### Preview
-looqs allow you to look inside files. It marks what you have searched for. 
+looqs allow you to look inside files. It marks what you have searched for.
 
 ![Screenshot looqs](https://garage.quitesimple.org/assets/looqs/orwell.png)
 ![Screenshot looqs search fstream](https://garage.quitesimple.org/assets/looqs/fstream_write.png)
 
 ### Results list
 #### Classic results list
-Just enter what you want to find, it will search paths and file content. 
+Just enter what you want to find, it will search paths and file content.
 ![Screenshot looqs results](https://garage.quitesimple.org/assets/looqs/looqs_diary.png)
 
 #### Searching with filters
@@ -30,7 +30,7 @@ There is no need to write the long form of filters. There are also booleans avai
 
 
 ## Current status
-Last version: 2022-0X-XX, v0.1
+Last version: 2022-06-0X, v0.1
 
 Please see [Changelog](CHANGELOG.md) for a human readable list of changes.
 
@@ -42,8 +42,8 @@ Please see [Changelog](CHANGELOG.md) for a human readable list of changes.
  * **GUI & CLI**. Provide CLI interfaces and GUI interfaces
  * **Sandboxing**. As reading and rendering lots of formats naturally opens the door for security bugs, those tasks are offloaded to small, sandboxed sub-processes to mitigate the effect of exploited vulnerabilities.
 
- 
-## Features 
+
+## Features
 - GUI, CLI interface
 - Indexing of file path and some metadata.
 - Indexing of file file content for FTS search. Currently: .pdf, odt, docx, plaintext.
@@ -59,7 +59,7 @@ Linux (on amd64) is currently the main focus. Currently, I don't plan on support
 GPLv3.
 
 ### Contributing
-Please see the [Contribution guidelines](CONTRIBUTING.md) file. 
+Please see the [Contribution guidelines](CONTRIBUTING.md) file.
 
 ## Documentation
 Please see [USAGE.md](USAGE.md) for the user manual. There is also [HACKING.md](HACKING.md) with more technical information.
@@ -69,7 +69,7 @@ Please see [USAGE.md](USAGE.md) for the user manual. There is also [HACKING.md](
 
 ### Ubuntu 21.10/22.04
 
-To build on Ubuntu, clone the repo and then run: 
+To build on Ubuntu and Debian, clone the repo and then run:
 ```
 git submodule init
 git submodule update
@@ -80,8 +80,22 @@ make
 
 The GUI is located in `gui/looqs-gui`, the binary for the CLI is in `cli/looqs`
 
-This may also work on Debian, but it's untested.
-
-
 ## Packages
-Coming soon™
+At this point, looqs is not in any official distro package repo, but I maintain some packages.
+
+### Ubuntu 21.10/22.04
+Latest release can be installed using apt from the repo.
+```
+# First, obtain key, assume it's trusted.
+wget -O- https://repo.quitesimple.org/repo.quitesimple.org.asc  | gpg --dearmor > repo.quitesimple.org-keyring.gpg
+cat repo.quitesimple.org-keyring.gpg | sudo tee -a /usr/share/keyrings/repo.quitesimple.org.gpg > /dev/null
+
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/repo.quitesimple.org.gpg] https://repo.quitesimple.org/debian/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/quitesimple.list
+sudo apt-get update
+sudo apt-get install looqs
+```
+
+### Other distros
+I'll probably add a package for voidlinux at some point and maybe will provide a Gentoo ebuild. However, I would appreciate help for others distros. If you create a package, let me know!
+
+As for distro-agnostic packages, I will also take a look into appimage / flatpak etc.  and/or maybe just provide a self-contained archive.
