@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	QApplication a(argc, argv);
-	a.setWindowIcon(QIcon(":/icon.svg"));
+	a.setWindowIcon(QIcon(":/looqs.svg"));
 	QObject::connect(&a, &QApplication::aboutToQuit, &process, &QProcess::kill);
 
 	qRegisterMetaType<QVector<SearchResult>>("QVector<SearchResult>");
