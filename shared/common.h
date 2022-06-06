@@ -15,6 +15,7 @@ QStringList excludedPaths();
 QStringList mountPaths();
 bool isTextFile(QFileInfo fileInfo);
 bool isMountPath(QString path);
+bool noSandboxModeRequested();
 QString versionText();
 } // namespace Common
 #endif

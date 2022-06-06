@@ -12,6 +12,8 @@ The architecture ensures that the parsing of documents and the preview generatio
 
 Qt code is considered trusted in this model. While one may critize this, it was the only practical solution. looqs uses its serialization mechanism and other classes to communicate between the non-sandboxed GUI process and the sandboxed processes. 
 
+Set the enviornment variable `LOOQS_DISABLE_SANDBOX=1` to disable sandboxing. It's intended for troublehshooting.
+
 ## Database
 The heart is sqlite, with the FTS5 extensions behind the full-text search. I definitly did not
 want to run some heavy Java based solutions. I explored other options like Postgresql, I've discard them due to some limitations back then.

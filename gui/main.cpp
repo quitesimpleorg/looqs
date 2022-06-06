@@ -58,7 +58,14 @@ int main(int argc, char *argv[])
 		if(arg == "ipc")
 		{
 			Common::setupAppInfo();
-			enableIpcSandbox();
+			if(Common::noSandboxModeRequested())
+			{
+				qInfo() << "Launching with no sandbox!" << Qt::endl;
+			}
+			else
+			{
+				enableIpcSandbox();
+			}
 			QApplication a(argc, argv);
 
 			IpcServer *ipcserver = new IpcServer();

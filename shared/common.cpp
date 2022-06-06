@@ -157,6 +157,16 @@ QString Common::databasePath()
 	return env;
 }
 
+bool Common::noSandboxModeRequested()
+{
+	QString env = getenv("LOOQS_DISABLE_SANDBOX");
+	if(env == "1")
+	{
+		return true;
+	}
+	return false;
+}
+
 QString Common::ipcSocketPath()
 {
 	return "/tmp/.looqs/looqs-ipc-socket";

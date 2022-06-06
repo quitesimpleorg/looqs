@@ -27,6 +27,11 @@ static QMap<QString, Processor *> processors{
 
 void SandboxedProcessor::enableSandbox(QString readablePath)
 {
+	if(Common::noSandboxModeRequested())
+	{
+		qInfo() << "Sandbox is disabled!" << Qt::endl;
+		return;
+	}
 	struct exile_policy *policy = exile_init_policy();
 	if(policy == NULL)
 	{
