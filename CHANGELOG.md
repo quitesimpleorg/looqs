@@ -1,5 +1,10 @@
 # looqs: Release notes
 
+## 2022-06-07 - v0.2
+CHANGES:
+- Sandboxing: Add environment variable `LOOQS_DISABLE_SANDBOXING` to disable sandboxing. This is intended for troubleshooting
+- Sandboxing: Fix issue where activation failed on kernels without landlock
+
 ## 2022-06-06 - v0.1
 The first release comes with basic functionality. It's a start that can be considered useful to some degree.
 
