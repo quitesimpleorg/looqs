@@ -23,19 +23,23 @@ void enableIpcSandbox()
 		qCritical() << "Failed to init policy for sandbox";
 		exit(EXIT_FAILURE);
 	}
-	policy->namespace_options = EXILE_UNSHARE_NETWORK | EXILE_UNSHARE_USER;
+	policy->namespace_options = EXILE_UNSHARE_USER | EXILE_UNSHARE_MOUNT | EXILE_UNSHARE_NETWORK;
 	policy->no_new_privs = 1;
 	policy->drop_caps = 1;
 	policy->vow_promises =
 		exile_vows_from_str("thread cpath wpath rpath unix stdio prot_exec proc shm fsnotify ioctl error");
+	policy->mount_path_policies_to_chroot = 1;
 
 	QString ipcSocketPath = Common::ipcSocketPath();
 	QFileInfo info{ipcSocketPath};
 	QString ipcSocketPathDir = info.absolutePath();
 	std::string stdIpcSocketPath = ipcSocketPathDir.toStdString();
 
-	exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ, "/");
-	exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE, stdIpcSocketPath.c_str());
+	/* ALLOW_EXEC is needed for fallback, not in landlock mode. It does not allow executing anything though here
+	 * due to the vows */
+	exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_EXEC, "/");
+	exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ | EXILE_FS_ALLOW_ALL_WRITE | EXILE_FS_ALLOW_EXEC,
+							   stdIpcSocketPath.c_str());
 	int ret = exile_enable_policy(policy);
 	if(ret != 0)
 	{
@@ -61,7 +65,7 @@ int main(int argc, char *argv[])
 			qDebug() << "Launching IPC Server";
 			if(!ipcserver->startSpawner(socketPath))
 			{
-				qCritical() << "Error failed to spawn";
+				qCritical() << "Error failed to spawn" << Qt::endl;
 				return 1;
 			}
 			qDebug() << "Launched IPC Server";
