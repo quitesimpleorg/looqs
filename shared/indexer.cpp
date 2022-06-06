@@ -59,6 +59,16 @@ void Indexer::setTargetPaths(QVector<QString> pathsToScan)
 	this->pathsToScan = pathsToScan;
 }
 
+void Indexer::setVerbose(bool verbose)
+{
+	this->verbose = verbose;
+}
+
+void Indexer::setKeepGoing(bool keepGoing)
+{
+	this->keepGoing = keepGoing;
+}
+
 void Indexer::requestCancellation()
 {
 	this->dirScanner->cancel();
@@ -96,17 +106,24 @@ void Indexer::dirScanProgress(int current, int total)
 
 void Indexer::processFileScanResult(FileScanResult result)
 {
-	if(verbose)
+	if(result.second == DBFAIL || result.second == PROCESSFAIL || result.second == NOTFOUND)
 	{
 		this->currentIndexResult.results.append(result);
+		if(!keepGoing)
+		{
+			this->requestCancellation();
+			emit finished();
+			return;
+		}
 	}
 	else
 	{
-		if(result.second == DBFAIL || result.second == PROCESSFAIL || result.second == NOTFOUND)
+		if(verbose)
 		{
 			this->currentIndexResult.results.append(result);
 		}
 	}
+
 	if(result.second == OK)
 	{
 		++this->currentIndexResult.addedPaths;

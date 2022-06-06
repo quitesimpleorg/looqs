@@ -67,6 +67,8 @@ class Indexer : public QObject
 	void beginIndexing();
 	void setIgnorePattern(QStringList ignorePattern);
 	void setTargetPaths(QVector<QString> pathsToScan);
+	void setVerbose(bool verbose);
+	void setKeepGoing(bool keepGoing);
 
 	void requestCancellation();
 
