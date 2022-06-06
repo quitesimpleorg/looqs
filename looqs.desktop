@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=looqs
-Exec=/usr/bin/looqs-gui
+Exec=looqs-gui
 Terminal=false
 Type=Application
 Icon=looqs
