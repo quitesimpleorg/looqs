@@ -1,6 +1,6 @@
 # looqs: Release notes
 
-## 2022-06-XX - v0.1
+## 2022-06-06 - v0.1
 The first release comes with basic functionality. It's a start that can be considered useful to some degree.
 
 looqs is still at an early stage and may exhibit some weirdness and contain bugs.

@@ -30,7 +30,7 @@ There is no need to write the long form of filters. There are also booleans avai
 
 
 ## Current status
-Last version: 2022-06-0X, v0.1
+Last version: 2022-06-06, v0.1
 
 Please see [Changelog](CHANGELOG.md) for a human readable list of changes.
 
