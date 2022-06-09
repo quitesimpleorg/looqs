@@ -35,7 +35,7 @@ void SandboxedProcessor::enableSandbox(QString readablePath)
 	struct exile_policy *policy = exile_init_policy();
 	if(policy == NULL)
 	{
-		qCritical() << "Could not init exile";
+		qCritical() << "Could not init exile" << Qt::endl;
 		exit(EXIT_FAILURE);
 	}
 	policy->namespace_options = EXILE_UNSHARE_NETWORK | EXILE_UNSHARE_USER;
@@ -43,6 +43,8 @@ void SandboxedProcessor::enableSandbox(QString readablePath)
 	std::string readablePathLocation;
 	if(!readablePath.isEmpty())
 	{
+		policy->namespace_options |= EXILE_UNSHARE_MOUNT;
+		policy->mount_path_policies_to_chroot = 1;
 		readablePathLocation = readablePath.toStdString();
 		if(exile_append_path_policies(policy, EXILE_FS_ALLOW_ALL_READ, readablePathLocation.c_str()) != 0)
 		{
