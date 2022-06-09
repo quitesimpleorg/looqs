@@ -26,14 +26,19 @@ void enableIpcSandbox()
 	policy->namespace_options = EXILE_UNSHARE_USER | EXILE_UNSHARE_MOUNT | EXILE_UNSHARE_NETWORK;
 	policy->no_new_privs = 1;
 	policy->drop_caps = 1;
-	policy->vow_promises =
-		exile_vows_from_str("thread cpath wpath rpath unix stdio prot_exec proc shm fsnotify ioctl error");
+	policy->vow_promises = exile_vows_from_str("thread cpath rpath unix stdio proc error");
 	policy->mount_path_policies_to_chroot = 1;
 
 	QString ipcSocketPath = Common::ipcSocketPath();
 	QFileInfo info{ipcSocketPath};
 	QString ipcSocketPathDir = info.absolutePath();
 	std::string stdIpcSocketPath = ipcSocketPathDir.toStdString();
+
+	/* we only need the 'server' side of the 'unix' vow (for unix sockets)'. The process
+	 * has no business to connect anywhere.
+	 *
+	 * Maybe this case should be handled by exile at some point, but for now deal with it here */
+	exile_append_syscall_policy(policy, EXILE_SYS(connect), EXILE_SYSCALL_DENY_RET_ERROR, NULL, 0);
 
 	/* ALLOW_EXEC is needed for fallback, not in landlock mode. It does not allow executing anything though here
 	 * due to the vows */
@@ -43,9 +48,26 @@ void enableIpcSandbox()
 	int ret = exile_enable_policy(policy);
 	if(ret != 0)
 	{
-		qDebug() << "Failed to establish sandbox";
+		qDebug() << "Failed to establish sandbox" << Qt::endl;
 		exit(EXIT_FAILURE);
 	}
+
+	/* Arguments are irrelevant for sandbox test, just want to silence analyzer/compiler warnings */
+	ret = socket(AF_INET, SOCK_STREAM, 0);
+	if(ret != -1 || errno != EACCES)
+	{
+		qCritical() << "Sandbox sanity check failed" << Qt::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	const struct sockaddr *addr = {};
+	ret = connect(3, addr, sizeof(*addr));
+	if(ret != -1 || errno != EACCES)
+	{
+		qCritical() << "Sandbox sanity check failed" << Qt::endl;
+		exit(EXIT_FAILURE);
+	}
+
 	exile_free_policy(policy);
 }
 
@@ -66,7 +88,7 @@ int main(int argc, char *argv[])
 			{
 				enableIpcSandbox();
 			}
-			QApplication a(argc, argv);
+			QCoreApplication a(argc, argv);
 
 			IpcServer *ipcserver = new IpcServer();
 			qDebug() << "Launching IPC Server";
