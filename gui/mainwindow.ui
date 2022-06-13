@@ -496,7 +496,6 @@
     <property name="title">
      <string>looqs</string>
     </property>
-    <addaction name="menuOpenConfigInTextEditorAction"/>
     <addaction name="menuSyncIndexAction"/>
     <addaction name="menuAboutAction"/>
     <addaction name="menuAboutQtAction"/>
@@ -507,11 +506,6 @@
   <action name="menuAboutAction">
    <property name="text">
     <string>About</string>
-   </property>
-  </action>
-  <action name="menuOpenConfigInTextEditorAction">
-   <property name="text">
-    <string>Open config in text editor</string>
    </property>
   </action>
   <action name="menuAboutQtAction">

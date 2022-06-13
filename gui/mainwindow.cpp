@@ -192,12 +192,6 @@ void MainWindow::connectSignals()
 
 			QMessageBox::about(this, "About looqs", html);
 		});
-	connect(ui->menuOpenConfigInTextEditorAction, &QAction::triggered, this,
-			[this](bool checked)
-			{
-				QSettings setting;
-				QDesktopServices::openUrl(setting.fileName());
-			});
 	connect(ui->menuAboutQtAction, &QAction::triggered, this,
 			[this](bool checked) { QMessageBox::aboutQt(this, "About Qt"); });
 	connect(ui->menuSyncIndexAction, &QAction::triggered, this, &MainWindow::startIndexSync);
