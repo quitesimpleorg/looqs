@@ -61,8 +61,8 @@ class LooqsQuery
 	{
 		this->limit = limit;
 	}
-	bool hasContentSearch();
-	bool hasPathSearch();
+	bool hasContentSearch() const;
+	bool hasPathSearch() const;
 
 	void addSortCondition(SortCondition sc);
 	static bool checkParanthesis(QString query);

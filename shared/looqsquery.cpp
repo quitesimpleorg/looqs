@@ -23,12 +23,12 @@ QueryType LooqsQuery::getQueryType()
 	return static_cast<QueryType>(tokensMask & COMBINED);
 }
 
-bool LooqsQuery::hasContentSearch()
+bool LooqsQuery::hasContentSearch() const
 {
 	return (this->getTokensMask() & FILTER_CONTENT) == FILTER_CONTENT;
 }
 
-bool LooqsQuery::hasPathSearch()
+bool LooqsQuery::hasPathSearch() const
 {
 	return (this->getTokensMask() & FILTER_PATH) == FILTER_PATH;
 }
