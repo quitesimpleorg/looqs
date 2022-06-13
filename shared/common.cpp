@@ -84,10 +84,10 @@ void Common::setPdfViewer()
 void Common::ensureConfigured()
 {
 	QSettings settings;
-	QVariant firstRun = settings.value(SETTINGS_KEY_FIRSTRUN);
-	if(!firstRun.isValid())
+	QString dbpath = databasePath();
+	if(dbpath == "")
 	{
-		QString dbpath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+		dbpath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 		QDir dir;
 		if(!dir.exists(dbpath))
 		{
@@ -97,38 +97,34 @@ void Common::ensureConfigured()
 			}
 		}
 		dbpath += "/looqs.sqlite";
+	}
+	if(!QFile::exists(dbpath))
+	{
 		if(!initSqliteDatabase(dbpath))
 		{
 			throw LooqsGeneralException("Failed to initialize sqlite database");
 		}
-
-		settings.setValue(SETTINGS_KEY_FIRSTRUN, false);
 		settings.setValue(SETTINGS_KEY_DBPATH, dbpath);
-		setPdfViewer();
 	}
-	else
+	DatabaseFactory factory{dbpath};
+	auto db = factory.forCurrentThread();
+	DBMigrator migrator{db};
+	if(migrator.migrationNeeded())
 	{
-
-		QString dbpath = databasePath();
-		if(!QFile::exists(dbpath))
-		{
-			throw LooqsGeneralException("Database " + dbpath + " was not found");
-		}
-		DatabaseFactory factory{dbpath};
-		auto db = factory.forCurrentThread();
-		DBMigrator migrator{db};
-		if(migrator.migrationNeeded())
-		{
-			QFile out;
-			out.open(stderr, QIODevice::WriteOnly);
-			Logger migrationLogger{&out};
-			migrationLogger << "Database is being upgraded, please be patient..." << Qt::endl;
-			QObject::connect(&migrator, &DBMigrator::migrationDone,
-							 [&migrationLogger](uint32_t migration)
-							 { migrationLogger << "Progress: Successfully migrated to: " << migration << Qt::endl; });
-			migrator.performMigrations();
-			migrationLogger << "Database upgraded successfully" << Qt::endl;
-		}
+		QFile out;
+		out.open(stderr, QIODevice::WriteOnly);
+		Logger migrationLogger{&out};
+		migrationLogger << "Database is being upgraded, please be patient..." << Qt::endl;
+		QObject::connect(&migrator, &DBMigrator::migrationDone,
+						 [&migrationLogger](uint32_t migration)
+						 { migrationLogger << "Progress: Successfully migrated to: " << migration << Qt::endl; });
+		migrator.performMigrations();
+		migrationLogger << "Database upgraded successfully" << Qt::endl;
+	}
+	QVariant pdfViewer = settings.value(SETTINGS_KEY_PDFVIEWER);
+	if(!pdfViewer.isValid())
+	{
+		setPdfViewer();
 	}
 }
 

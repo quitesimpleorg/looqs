@@ -4,7 +4,6 @@
 #include <QFileInfo>
 
 #define SETTINGS_KEY_DBPATH "dbpath"
-#define SETTINGS_KEY_FIRSTRUN "firstrun"
 #define SETTINGS_KEY_IPCSOCKETPATH "ipcsocketpath"
 #define SETTINGS_KEY_PDFVIEWER "pdfviewer"
 #define SETTINGS_KEY_EXCLUDEDPATHS "excludedpaths"
