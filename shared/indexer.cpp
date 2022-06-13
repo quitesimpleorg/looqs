@@ -19,7 +19,21 @@ void Indexer::beginIndexing()
 	QVector<QString> dirs;
 
 	WildcardMatcher wildcardMatcher;
-	wildcardMatcher.setPatterns(this->ignorePattern);
+
+	QStringList ignoreList = this->ignorePattern;
+
+	for(QString &excludedPath : Common::excludedPaths())
+	{
+		QString pattern = excludedPath;
+		if(!pattern.endsWith("/"))
+		{
+			pattern += "/";
+		}
+		pattern += "*";
+		ignoreList.append(excludedPath);
+	}
+	ignoreList.append(this->ignorePattern);
+	wildcardMatcher.setPatterns(ignoreList);
 	for(QString &path : this->pathsToScan)
 	{
 		if(wildcardMatcher.match(path))
@@ -40,7 +54,7 @@ void Indexer::beginIndexing()
 	if(!dirs.empty())
 	{
 		this->dirScanner->setPaths(dirs);
-		this->dirScanner->setIgnorePatterns(this->ignorePattern);
+		this->dirScanner->setIgnorePatterns(ignoreList);
 
 		this->dirScanner->scan();
 	}
