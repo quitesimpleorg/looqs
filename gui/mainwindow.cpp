@@ -249,6 +249,7 @@ void MainWindow::startIndexing()
 
 	ui->previewsTab->setEnabled(false);
 	ui->resultsTab->setEnabled(false);
+	ui->settingsTab->setEnabled(false);
 	ui->txtPathScanAdd->setEnabled(false);
 	ui->txtSearch->setEnabled(false);
 	ui->previewProcessBar->setValue(0);
@@ -285,6 +286,7 @@ void MainWindow::finishIndexing()
 	ui->btnStartIndexing->setText("Start indexing");
 	ui->previewsTab->setEnabled(true);
 	ui->resultsTab->setEnabled(true);
+	ui->settingsTab->setEnabled(true);
 	ui->txtPathScanAdd->setEnabled(true);
 	ui->txtSearch->setEnabled(true);
 }
