@@ -215,6 +215,7 @@ void MainWindow::connectSignals()
 			});
 	connect(this, &MainWindow::beginIndexSync, indexSyncer, &IndexSyncer::sync);
 	connect(&this->progressDialog, &QProgressDialog::canceled, indexSyncer, &IndexSyncer::cancel);
+	connect(ui->btnSaveSettings, &QPushButton::clicked, this, &MainWindow::saveSettings);
 }
 
 void MainWindow::startIndexSync()
@@ -236,6 +237,7 @@ void MainWindow::startIndexSync()
 
 	emit beginIndexSync();
 }
+
 void MainWindow::spinPreviewPageValueChanged(int val)
 {
 	makePreviews(val);
@@ -351,6 +353,45 @@ void MainWindow::tabChanged()
 			makePreviews(ui->spinPreviewPage->value());
 		}
 	}
+	/* Settings tab active */
+	if(ui->tabWidget->currentIndex() == 3)
+	{
+		initSettingsTabs();
+	}
+}
+
+void MainWindow::initSettingsTabs()
+{
+	QSettings settings;
+
+	QString pdfViewerCmd = settings.value(SETTINGS_KEY_PDFVIEWER).toString();
+	QString excludedPaths = Common::excludedPaths().join(';');
+	QString mountPaths = Common::mountPaths().join(';');
+	int numPagesPerPreview = settings.value(SETTINGS_KEY_PREVIEWSPERPAGE, 20).toInt();
+
+	ui->txtSettingPdfPreviewerCmd->setText(pdfViewerCmd);
+	ui->txtSettingIgnoredPaths->setText(excludedPaths);
+	ui->txtSettingMountPaths->setText(mountPaths);
+	ui->spinSettingNumerPerPages->setValue(numPagesPerPreview);
+}
+
+void MainWindow::saveSettings()
+{
+	QSettings settings;
+
+	QString pdfViewerCmd = ui->txtSettingPdfPreviewerCmd->text();
+	QStringList excludedPaths = ui->txtSettingIgnoredPaths->text().split(';');
+	QStringList mountPaths = ui->txtSettingMountPaths->text().split(';');
+
+	settings.setValue(SETTINGS_KEY_PDFVIEWER, pdfViewerCmd);
+	settings.setValue(SETTINGS_KEY_EXCLUDEDPATHS, excludedPaths);
+	settings.setValue(SETTINGS_KEY_MOUNTPATHS, mountPaths);
+	settings.setValue(SETTINGS_KEY_PREVIEWSPERPAGE, ui->spinSettingNumerPerPages->value());
+
+	settings.sync();
+
+	QProcess::startDetached(qApp->arguments()[0], qApp->arguments().mid(1));
+	qApp->quit();
 }
 
 void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned int previewGeneration)
@@ -389,7 +430,7 @@ void MainWindow::lineEditReturnPressed()
 		ui->lblSearchResults->setText("Invalid paranthesis");
 		return;
 	}
-	if(indexerTabActive())
+	if(ui->tabWidget->currentIndex() > 1)
 	{
 		ui->tabWidget->setCurrentIndex(0);
 	}

@@ -61,6 +61,7 @@ class MainWindow : public QMainWindow
 	void openDocument(QString path, int num);
 	void openFile(QString path);
 	unsigned int currentPreviewGeneration = 1;
+	void initSettingsTabs();
   private slots:
 	void lineEditReturnPressed();
 	void treeSearchItemActivated(QTreeWidgetItem *item, int i);
@@ -73,6 +74,7 @@ class MainWindow : public QMainWindow
 	void finishIndexing();
 	void addPathToIndex();
 	void startIndexSync();
+	void saveSettings();
 
   signals:
 	void startIpcPreviews(RenderConfig config, const QVector<RenderTarget> &targets);

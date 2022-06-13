@@ -14,13 +14,6 @@
 #include "databasefactory.h"
 #include "logger.h"
 
-#define SETTINGS_KEY_DBPATH "dbpath"
-#define SETTINGS_KEY_FIRSTRUN "firstrun"
-#define SETTINGS_KEY_IPCSOCKETPATH "ipcsocketpath"
-#define SETTINGS_KEY_PDFVIEWER "pdfviewer"
-#define SETTINGS_KEY_EXCLUDEDPATHS "excludedpaths"
-#define SETTINGS_KEY_MOUNTPATHS "mountpaths"
-
 inline void initResources()
 {
 	Q_INIT_RESOURCE(migrations);
@@ -176,19 +169,18 @@ QString Common::ipcSocketPath()
 	// return settings.value(SETTINGS_KEY_IPCSOCKETPATH, "/tmp/.looqs/looqs-ipc-socket").toString();
 }
 
-static QStringList excludedPaths = {"/proc", "/sys", "/dev", "/tmp", "/var/run", "/run"};
-
 QStringList Common::excludedPaths()
 {
 	static int ran = false;
+	static QStringList excludedPaths;
 	if(!ran)
 	{
 		QSettings settings;
-		QStringList userExcludedPaths = settings.value(SETTINGS_KEY_EXCLUDEDPATHS).toStringList();
+		QStringList defaults{"/proc", "/sys", "/dev", "/tmp", "/var/run", "/run"};
+		excludedPaths = settings.value(SETTINGS_KEY_EXCLUDEDPATHS, defaults).toStringList();
 		ran = true;
-		::excludedPaths.append(userExcludedPaths);
 	}
-	return ::excludedPaths;
+	return excludedPaths;
 }
 
 QStringList Common::mountPaths()
