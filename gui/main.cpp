@@ -142,7 +142,6 @@ int main(int argc, char *argv[])
 	}
 	Common::setupAppInfo();
 	QCommandLineParser parser;
-	parser.addOption({{"s", "no-sandbox"}, "Disable sandboxing"});
 	QStringList appArgs;
 	for(int i = 0; i < argc; i++)
 	{
