@@ -213,6 +213,7 @@ QVector<SearchResult> SqliteSearch::search(const LooqsQuery &query)
 		throw LooqsGeneralException("SQL Error: " + dbQuery.lastError().text());
 	}
 
+	bool contentSearch = query.hasContentSearch();
 	while(dbQuery.next())
 	{
 		SearchResult result;
@@ -229,6 +230,7 @@ QVector<SearchResult> SqliteSearch::search(const LooqsQuery &query)
 				result.pages.append(page.toUInt());
 			}
 		}
+		result.wasContentSearch = contentSearch;
 		results.append(result);
 	}
 	return results;
