@@ -150,6 +150,7 @@ int main(int argc, char *argv[])
 	}
 	parser.parse(appArgs);
 
+	QApplication a(argc, argv);
 	try
 	{
 		Common::ensureConfigured();
@@ -160,7 +161,6 @@ int main(int argc, char *argv[])
 		QMessageBox::critical(nullptr, "Error", e.message);
 		return 1;
 	}
-	QApplication a(argc, argv);
 	a.setWindowIcon(QIcon(":/looqs.svg"));
 	QObject::connect(&a, &QApplication::aboutToQuit, &process, &QProcess::kill);
 
