@@ -363,12 +363,14 @@ void MainWindow::initSettingsTabs()
 	QString pdfViewerCmd = settings.value(SETTINGS_KEY_PDFVIEWER).toString();
 	QString excludedPaths = Common::excludedPaths().join(';');
 	QString mountPaths = Common::mountPaths().join(';');
+	QString databasePath = Common::databasePath();
 	int numPagesPerPreview = settings.value(SETTINGS_KEY_PREVIEWSPERPAGE, 20).toInt();
 
 	ui->txtSettingPdfPreviewerCmd->setText(pdfViewerCmd);
 	ui->txtSettingIgnoredPaths->setText(excludedPaths);
 	ui->txtSettingMountPaths->setText(mountPaths);
 	ui->spinSettingNumerPerPages->setValue(numPagesPerPreview);
+	ui->txtSettingDatabasePath->setText(databasePath);
 }
 
 void MainWindow::saveSettings()
@@ -378,11 +380,13 @@ void MainWindow::saveSettings()
 	QString pdfViewerCmd = ui->txtSettingPdfPreviewerCmd->text();
 	QStringList excludedPaths = ui->txtSettingIgnoredPaths->text().split(';');
 	QStringList mountPaths = ui->txtSettingMountPaths->text().split(';');
+	QString databasePath = ui->txtSettingDatabasePath->text();
 
 	settings.setValue(SETTINGS_KEY_PDFVIEWER, pdfViewerCmd);
 	settings.setValue(SETTINGS_KEY_EXCLUDEDPATHS, excludedPaths);
 	settings.setValue(SETTINGS_KEY_MOUNTPATHS, mountPaths);
 	settings.setValue(SETTINGS_KEY_PREVIEWSPERPAGE, ui->spinSettingNumerPerPages->value());
+	settings.setValue(SETTINGS_KEY_DBPATH, databasePath);
 
 	settings.sync();
 

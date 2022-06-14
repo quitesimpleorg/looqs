@@ -407,6 +407,25 @@
          </widget>
         </item>
         <item>
+         <widget class="QGroupBox" name="groupSettingDatabasePath">
+          <property name="title">
+           <string>Database path</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <widget class="QLabel" name="lblSettingDatabasePath">
+             <property name="text">
+              <string>Path of the database. Note: Changing it here will create an empty, new database. The old will not be moved.  </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtSettingDatabasePath"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <widget class="QGroupBox" name="Misc">
           <property name="title">
            <string>Misc</string>
