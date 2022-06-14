@@ -1,5 +1,18 @@
 # looqs: Release notes
 
+## 2022-06-14 - v0.3
+CHANGES:
+- GUI: Add settings tab to configure various settings
+- GUI: Don't render previews for results that do not originate from a content search. This was confusing.
+- GUI: Remove 'open config file' menu action
+- GUI: Highlight "words" that are actually numbers in preview texts
+- search: Search for "words" that are a number, e. g. 23. Previously, those were ignored due to a regression.
+- CLI: Minor cleanups.
+- sandbox: Improve preview generation sandbox further by restricting it more
+- sandbox: Fix case where activiation would fail during indexing in some cases on kernels without landlock.
+- Remove 'firstrun' setting
+
+
 ## 2022-06-07 - v0.2
 CHANGES:
 - Sandboxing: Add environment variable `LOOQS_DISABLE_SANDBOXING` to disable sandboxing. This is intended for troubleshooting
