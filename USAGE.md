@@ -20,15 +20,12 @@ To give you some idea: At the time this section was written, 167874 files were i
 has changed. 
 
 ## Config
-The config file is in `$HOME/.config/quitesimple.org/looqs.conf`. It will be created on first execution of the CLI or GUI
-interface. The GUI has a menu entry to quickly open this config file. This is to be considered temporary and will be removed once the GUI itself can edit all settings.
+The config file is in `$HOME/.config/quitesimple.org/looqs.conf`. It will be created on first execution of the CLI or GUI interface. Generally, you should not edit this file directly. Instead, use the "Settings" tab in the GUI.
 
-Database default path: `$HOME/.local/share/quitesimple.org/looqs/looqs.sqlite`. If this does not work for
-you, move it and adjust adjust the path in the config file.
+Database default path: `$HOME/.local/share/quitesimple.org/looqs/looqs.sqlite`. If you prefer a different path, move it and adjust the path.
 
 
 ## GUI
-The GUI is minimal at this point. Depending on what you want to do, you may need to open the config file and change the settings there. Chances are that you may not need to do that. 
 
 ### First run
 You will be presented with an empty list. Go to the **"Index"** tab, add some directories and click **"Start indexing"**.
@@ -47,8 +44,7 @@ see this document at the end. By default, both the full path and the content are
 ### Configuring PDF viewer
 It's most convenient if, when you click on a preview, the PDF reader opens the page you clicked. For that, looqs needs to know which viewer you want to launch.
 
-It tries to auto detect some common viewers. You must set the value of the ```pdfviewer=``` config entry yourself if it doesn't do something you
-like, such as not opening your favorite viewer. In the command line options, "%f" represents the filepath, "%p" the page number.
+It tries to auto detect some common viewers. You must set the value in the "Settings" tab yourself if it doesn't do something you like, such as not opening your favorite viewer. In the command line options, "%f" represents the filepath, "%p" the page number.
 
 ### Preview tab
 The preview tab shows previews. It marks your search keywords too. Click on a preview to open the file.
