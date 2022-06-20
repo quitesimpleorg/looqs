@@ -78,6 +78,17 @@ qmake
 make
 ```
 
+### Void
+```
+# as root
+xbps-install qt5-devel poppler-qt5-devel quazip-qt5-devel uchardet-devel gcc make
+# as user
+git submodule init
+git submodule update
+qmake
+make
+```
+
 The GUI is located in `gui/looqs-gui`, the binary for the CLI is in `cli/looqs`
 
 ## Packages
