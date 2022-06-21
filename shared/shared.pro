@@ -16,7 +16,11 @@ CONFIG += c++17
 INCLUDEPATH += $$PWD/../sandbox/exile.h/
 INCLUDEPATH += /usr/include/poppler/qt5/ /usr/include/quazip5
 
-
+# Dirty, we only need the includes here but well this magic works, so...
+packagesExist(quazip1-qt5) {
+       PKGCONFIG += quazip1-qt5
+       CONFIG += link_pkgconfig
+}
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings

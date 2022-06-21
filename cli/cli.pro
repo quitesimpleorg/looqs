@@ -37,6 +37,12 @@ else:unix: LIBS += -L$$OUT_PWD/../shared/ -lshared
 
 LIBS += -luchardet -lpoppler-qt5 -lquazip5
 
+packagesExist(quazip1-qt5) {
+	PKGCONFIG += quazip1-qt5
+	CONFIG += link_pkgconfig
+	LIBS -= -lquazip5
+}
+
 INCLUDEPATH += $$PWD/../shared
 DEPENDPATH += $$PWD/../shared
 
