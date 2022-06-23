@@ -19,9 +19,12 @@ void DirScanWorker::run()
 	QString path;
 	/* TODO: if we have e. g. only one path, then only one thread will scan this path.
 		 *
-		 * Thus, we must resubmit to the queue directories so other threads can help
-		the current one (requires a new logic for threads in ParallelDirScanner). Alterantively,
-		start new DirScanWorkers ourselves here... */
+		 * Thus, we must submit new directory paths to the queue so other threads can help
+		the current one.
+
+		It also may not be guaranteed enqueuing new paths is faster than just scanning them,
+		at least not for dirs with a small number of files
+		*/
 	while(queue->dequeue(path))
 	{
 		if(wildcardMatcher.match(path))

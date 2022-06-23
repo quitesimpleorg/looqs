@@ -71,7 +71,34 @@ void ParallelDirScanner::scan()
 	this->targetPathsQueue.clear();
 	this->resultPathsQueue.clear();
 
-	this->targetPathsQueue.enqueue(this->paths);
+	/* First scan without subdirs. This way we collect paths for the threads */
+	WildcardMatcher matcher;
+	matcher.setPatterns(this->ignorePatterns);
+	for(QString &path : this->paths)
+	{
+		QDirIterator iterator(path, QStringList{}, QDir::Dirs | QDir::QDir::Files | QDir::NoDotDot);
+		while(iterator.hasNext())
+		{
+			QString path = iterator.next();
+			if(matcher.match(path))
+			{
+				continue;
+			}
+			QFileInfo info = iterator.fileInfo();
+			if(!info.isSymLink())
+			{
+				if(info.isDir())
+				{
+					this->targetPathsQueue.enqueue(info.absoluteFilePath());
+				}
+				else
+				{
+					this->resultPathsQueue.enqueue(info.absoluteFilePath());
+					this->processedPaths += 1;
+				}
+			}
+		}
+	}
 	int threadsNum = getThreadsNum();
 	if(threadsNum == 0)
 	{
