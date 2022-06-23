@@ -100,6 +100,11 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 
 	int status = -1;
 
+	if(!fileInfo.isReadable())
+	{
+		return NOACCESS;
+	}
+
 	if(!fileInfo.exists())
 	{
 		return NOTFOUND;
