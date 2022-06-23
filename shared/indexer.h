@@ -22,17 +22,28 @@ class IndexResult
 		return addedPaths + skippedPaths + erroredPaths;
 	}
 
-	QVector<QString> failedPaths() const
+	QVector<FileScanResult> failedResults() const
 	{
-		QVector<QString> result;
+		QVector<FileScanResult> result;
 		std::for_each(results.begin(), results.end(),
 					  [&result](FileScanResult res)
 					  {
-						  if(res.second == DBFAIL || res.second == PROCESSFAIL || res.second == NOTFOUND)
+						  if(res.second == DBFAIL || res.second == PROCESSFAIL || res.second == NOTFOUND ||
+							 res.second == NOACCESS)
 						  {
-							  result.append(res.first);
+							  result.append(res);
 						  }
 					  });
+		return result;
+	}
+
+	QVector<QString> failedPaths() const
+	{
+		QVector<QString> result;
+
+		QVector<FileScanResult> results = failedResults();
+
+		std::for_each(results.begin(), results.end(), [&result](FileScanResult res) { result.append(res.first); });
 		return result;
 	}
 };
