@@ -120,7 +120,8 @@ void Indexer::dirScanProgress(int current, int total)
 
 void Indexer::processFileScanResult(FileScanResult result)
 {
-	if(result.second == DBFAIL || result.second == PROCESSFAIL || result.second == NOTFOUND)
+	if(result.second == DBFAIL || result.second == PROCESSFAIL || result.second == NOTFOUND ||
+	   result.second == NOACCESS)
 	{
 		this->currentIndexResult.results.append(result);
 		if(!keepGoing)
