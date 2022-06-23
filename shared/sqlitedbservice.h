@@ -13,8 +13,23 @@ enum SaveFileResult
 	SKIPPED,
 	DBFAIL,
 	PROCESSFAIL,
-	NOTFOUND
+	NOTFOUND,
+	NOACCESS
 };
+
+static inline QString SaveFileResultToString(SaveFileResult sfr)
+{
+	QStringList SaveFileResultStr;
+
+	SaveFileResultStr << "OK"
+					  << "SKIPPED"
+					  << "DBFAIL"
+					  << "PROCESSFAIL"
+					  << "NOTFOUND"
+					  << "NOACCESS";
+
+	return SaveFileResultStr[(int)sfr];
+}
 
 class SqliteDbService
 {
