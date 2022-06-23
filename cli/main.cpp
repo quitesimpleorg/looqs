@@ -30,6 +30,7 @@
 void printUsage(QString argv0)
 {
 	qInfo() << "Usage:" << argv0 << "command";
+	qInfo() << "Valid commands: add, update, delete, search, list. Each command has a --help option.";
 }
 
 Command *commandFromName(QString name, SqliteDbService &dbService)
@@ -116,7 +117,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		Logger::error() << "Unknown command:" << commandName << Qt::endl;
+		printUsage(argv0);
 		return 1;
 	}
 
