@@ -92,6 +92,10 @@ int SandboxedProcessor::process()
 			processor = defaultTextProcessor;
 		}
 	}
+	if(!fileInfo.isReadable())
+	{
+		return NO_ACCESS;
+	}
 	if(processor == nullptr || processor == nothingProcessor)
 	{
 		/* Nothing to do */
