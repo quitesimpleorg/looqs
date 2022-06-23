@@ -47,7 +47,8 @@ int CommandAdd::handle(QStringList arguments)
 					   {{"t", "threads"}, "Number of threads to use.", "threads"}});
 
 	parser.addHelpOption();
-	parser.addPositionalArgument("add", "Add paths to the index", "add [paths...]");
+	parser.addPositionalArgument("add", "Add paths to the index",
+								 "add [paths...]. If no path is given, read from stdin, one path per line.");
 
 	parser.process(arguments);
 	this->keepGoing = parser.isSet("continue");
