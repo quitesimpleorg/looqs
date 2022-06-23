@@ -82,6 +82,12 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath)
 
 	ui->spinPreviewPage->setValue(1);
 	ui->spinPreviewPage->setMinimum(1);
+
+	ui->btnOpenFailed->setVisible(false);
+
+	auto policy = ui->btnOpenFailed->sizePolicy();
+	policy.setRetainSizeWhenHidden(true);
+	ui->btnOpenFailed->setSizePolicy(policy);
 }
 
 void MainWindow::addPathToIndex()
@@ -210,6 +216,32 @@ void MainWindow::connectSignals()
 	connect(this, &MainWindow::beginIndexSync, indexSyncer, &IndexSyncer::sync);
 	connect(&this->progressDialog, &QProgressDialog::canceled, indexSyncer, &IndexSyncer::cancel);
 	connect(ui->btnSaveSettings, &QPushButton::clicked, this, &MainWindow::saveSettings);
+	connect(ui->btnOpenFailed, &QPushButton::clicked, this, &MainWindow::exportFailedPaths);
+}
+
+void MainWindow::exportFailedPaths()
+{
+
+	QString filename =
+		QString("/tmp/looqs_indexresult_failed_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hhmmss"));
+	QFile outFile(filename);
+	if(!outFile.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		QMessageBox::critical(this, "Failed to write log file", "An error occured while trying to create log file");
+		return;
+	}
+
+	QTextStream stream(&outFile);
+
+	IndexResult result = this->indexer->getResult();
+
+	stream << "Failed to index the following paths:\n";
+	for(FileScanResult &fsr : result.failedResults())
+	{
+		stream << fsr.first << " " << SaveFileResultToString(fsr.second) << '\n';
+	}
+
+	QDesktopServices::openUrl(filename);
 }
 
 void MainWindow::startIndexSync()
@@ -254,6 +286,7 @@ void MainWindow::startIndexing()
 	ui->txtSearch->setEnabled(false);
 	ui->previewProcessBar->setValue(0);
 	ui->previewProcessBar->setVisible(true);
+	ui->btnOpenFailed->setVisible(false);
 
 	QVector<QString> paths;
 	QStringList pathSettingsValue;
@@ -289,6 +322,10 @@ void MainWindow::finishIndexing()
 	ui->settingsTab->setEnabled(true);
 	ui->txtPathScanAdd->setEnabled(true);
 	ui->txtSearch->setEnabled(true);
+	if(result.erroredPaths > 0)
+	{
+		ui->btnOpenFailed->setVisible(true);
+	}
 }
 
 void MainWindow::comboScaleChanged(int i)

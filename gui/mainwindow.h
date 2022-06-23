@@ -75,6 +75,7 @@ class MainWindow : public QMainWindow
 	void addPathToIndex();
 	void startIndexSync();
 	void saveSettings();
+	void exportFailedPaths();
 
   signals:
 	void startIpcPreviews(RenderConfig config, const QVector<RenderTarget> &targets);
