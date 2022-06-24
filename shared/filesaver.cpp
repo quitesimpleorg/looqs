@@ -87,6 +87,10 @@ int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFile
 										  {
 											  Logger::info() << "Saved" << path << Qt::endl;
 										  }
+										  else if(result == OK_WASEMPTY)
+										  {
+											  Logger::info() << "Saved (but content was empty)" << path << Qt::endl;
+										  }
 									  }
 								  }
 							  });
