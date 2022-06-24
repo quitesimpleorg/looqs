@@ -120,8 +120,7 @@ void Indexer::dirScanProgress(int current, int total)
 
 void Indexer::processFileScanResult(FileScanResult result)
 {
-	if(result.second == DBFAIL || result.second == PROCESSFAIL || result.second == NOTFOUND ||
-	   result.second == NOACCESS)
+	if(result.second != OK || result.second != OK_WASEMPTY || result.second != SKIPPED)
 	{
 		this->currentIndexResult.results.append(result);
 		if(!keepGoing)
@@ -139,7 +138,8 @@ void Indexer::processFileScanResult(FileScanResult result)
 		}
 	}
 
-	if(result.second == OK)
+	/* TODO: OK_WASEMPTY might need a special list */
+	if(result.second == OK || result.second == OK_WASEMPTY)
 	{
 		++this->currentIndexResult.addedPaths;
 	}
