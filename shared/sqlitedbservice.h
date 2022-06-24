@@ -7,29 +7,7 @@
 #include "filedata.h"
 #include "../shared/sqlitesearch.h"
 #include "../shared/token.h"
-enum SaveFileResult
-{
-	OK,
-	SKIPPED,
-	DBFAIL,
-	PROCESSFAIL,
-	NOTFOUND,
-	NOACCESS
-};
-
-static inline QString SaveFileResultToString(SaveFileResult sfr)
-{
-	QStringList SaveFileResultStr;
-
-	SaveFileResultStr << "OK"
-					  << "SKIPPED"
-					  << "DBFAIL"
-					  << "PROCESSFAIL"
-					  << "NOTFOUND"
-					  << "NOACCESS";
-
-	return SaveFileResultStr[(int)sfr];
-}
+#include "savefileresult.h"
 
 class SqliteDbService
 {

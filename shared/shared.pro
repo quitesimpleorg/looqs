@@ -88,6 +88,7 @@ HEADERS += sqlitesearch.h \
     pdfprocessor.h \
     processor.h \
     sandboxedprocessor.h \
+    savefileresult.h \
     searchresult.h \
     sqlitedbservice.h \
     tagstripperprocessor.h \
