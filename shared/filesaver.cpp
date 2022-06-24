@@ -98,7 +98,7 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 	QVector<PageData> pageData;
 	QString canonicalPath = fileInfo.canonicalFilePath();
 
-	int status = -1;
+	int processorReturnCode = -1;
 
 	if(!fileInfo.isReadable())
 	{
@@ -143,21 +143,19 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 			in >> pd;
 			pageData.append(pd);
 		}
-		status = process.exitCode();
-		if(status != OK)
+		processorReturnCode = process.exitCode();
+		if(processorReturnCode != OK && processorReturnCode != OK_WASEMPTY)
 		{
 			Logger::error() << "FileSaver::saveFile(): Error while processing" << canonicalPath << ":"
-							<< "Exit code " << status << Qt::endl;
+							<< "Exit code " << processorReturnCode << Qt::endl;
 
-			return static_cast<SaveFileResult>(status);
+			return static_cast<SaveFileResult>(processorReturnCode);
 		}
 	}
-
-	// Could happen if a file corrupted for example
-	if(pageData.isEmpty() && status != OK)
+	SaveFileResult result = this->dbService->saveFile(fileInfo, pageData);
+	if(result == OK && processorReturnCode == OK_WASEMPTY)
 	{
-		Logger::error() << "Could not get any content for " << canonicalPath << Qt::endl;
+		return OK_WASEMPTY;
 	}
-
-	return this->dbService->saveFile(fileInfo, pageData);
+	return result;
 }
