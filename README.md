@@ -3,8 +3,6 @@ looqs is a tool that creates a full-text search index for your files. It allows 
 search terms have been found, as shown in the screenshots below.
 
 ## Screenshots
-The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state of the GUI.
-
 ### Preview
 looqs allow you to look inside files. It marks what you have searched for.
 
@@ -28,6 +26,7 @@ There is no need to write the long form of filters. There are also booleans avai
 
 ![Screenshot looqs results](https://garage.quitesimple.org/assets/looqs/looqs_beatles_marley.png)
 
+The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state of the GUI.
 
 ## Current status
 Last version: 2022-06-14, v0.3
@@ -106,7 +105,36 @@ sudo apt-get update
 sudo apt-get install looqs
 ```
 
+### Prebuilt tarball (distro-agnostic) (EXPERIMENTAL)
+looqs is also distributed as a tarball containing prebuilt binaries and its library dependencies. The tarball is
+built with the Gentoo Hardened toolchain and the Qt version is smaller than what distributions usually
+include. It does not include libraries that should mess with fontrendering or the graphics stack. The binaries should run on any recent Linux distribution (requires glibc 2.34 or newer at least) and expects
+dependencies such as libGL to be provided by your distribution already (should be the case).
+
+It's considered experimental for two reasons. Firstly, looqs has no updater (yet). You will have to manually check for updates. Secondly, I can't guarantee that I'll be quick with updates of the tarball specifically
+if the library versions become outdated between looqs updates.
+
+You are therefore encouraged to use distro-native packages or to build it yourself if possible.
+
+The prebuilt tarball can be obtained here: https://repo.quitesimple.org/tarball/looqs
+
+Quick start:
+
+```
+# Verify sig, see the end of this document: gpg --verify looqs-v0.4.tar.xz.sig
+tar xf looqs-v0.4.tar.xz # Replace with the actual version you have obtained
+cd looqs-v0.4
+./looqs-gui # or ./looqs for the CLI
+```
+
+An AppImage may accompany the prebuilt tarball in the future.
+
+
 ### Other distros
 I'll probably add a package for voidlinux at some point and maybe will provide a Gentoo ebuild. However, I would appreciate help for others distros. If you create a package, let me know!
 
-As for distro-agnostic packages, I will also take a look into appimage / flatpak etc.  and/or maybe just provide a self-contained archive.
+
+### Signature verification
+Release tags can be verified with  [my PGP public key](https://quitesimple.org/share/pubkey). For what little it's worth, its fingerprint is: `C342 CA02 D2EC 2E14 F3C3  D5FF 7F7B 4C08 02CD 02F2`
+
+Packages can be verified with the [repo-specific public key](https://repo.quitesimple.org/repo.quitesimple.org.asc). For what little it's worth, its fingerprint is: `1B49 45B3 16B2 468A 3DAC  C1E0 75EF 3FE8 D753 C8F9`
