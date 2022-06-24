@@ -144,17 +144,17 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 			pageData.append(pd);
 		}
 		status = process.exitCode();
-		if(status != 0 && status != NOTHING_PROCESSED)
+		if(status != OK)
 		{
 			Logger::error() << "FileSaver::saveFile(): Error while processing" << canonicalPath << ":"
 							<< "Exit code " << status << Qt::endl;
 
-			return PROCESSFAIL;
+			return static_cast<SaveFileResult>(status);
 		}
 	}
 
 	// Could happen if a file corrupted for example
-	if(pageData.isEmpty() && status != NOTHING_PROCESSED)
+	if(pageData.isEmpty() && status != OK)
 	{
 		Logger::error() << "Could not get any content for " << canonicalPath << Qt::endl;
 	}
