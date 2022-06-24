@@ -80,7 +80,7 @@ void SandboxedProcessor::printResults(const QVector<PageData> &pageData)
 	fsstdout.close();
 }
 
-int SandboxedProcessor::process()
+SaveFileResult SandboxedProcessor::process()
 {
 	QFileInfo fileInfo(this->filePath);
 	Processor *processor = processors.value(fileInfo.suffix(), nullptr);
@@ -94,12 +94,12 @@ int SandboxedProcessor::process()
 	}
 	if(!fileInfo.isReadable())
 	{
-		return NO_ACCESS;
+		return NOACCESS;
 	}
 	if(processor == nullptr || processor == nothingProcessor)
 	{
 		/* Nothing to do */
-		return NOTHING_PROCESSED;
+		return OK;
 	}
 
 	QVector<PageData> pageData;
@@ -123,9 +123,9 @@ int SandboxedProcessor::process()
 	catch(LooqsGeneralException &e)
 	{
 		Logger::error() << "SandboxedProcessor: Error while processing" << absPath << ":" << e.message << Qt::endl;
-		return 3 /* PROCESSFAIL */;
+		return PROCESSFAIL;
 	}
 
 	printResults(pageData);
-	return 0;
+	return pageData.isEmpty() ? OK_WASEMPTY : OK;
 }

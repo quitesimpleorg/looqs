@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 
 			QString file = args.at(2);
 			SandboxedProcessor processor(file);
-			return processor.process();
+			return static_cast<int>(processor.process());
 		}
 	}
 	QString ipcSocketPath = Common::ipcSocketPath();

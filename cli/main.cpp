@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 
 		QString file = args.at(1);
 		SandboxedProcessor processor(file);
-		return processor.process();
+		return static_cast<int>(processor.process());
 	}
 	Command *cmd = commandFromName(commandName, dbService);
 	if(cmd != nullptr)

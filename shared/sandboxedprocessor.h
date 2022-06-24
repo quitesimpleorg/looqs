@@ -3,6 +3,7 @@
 #include <QString>
 #include <QMimeDatabase>
 #include "pagedata.h"
+#include "savefileresult.h"
 
 class SandboxedProcessor
 {
@@ -19,7 +20,7 @@ class SandboxedProcessor
 		this->filePath = filepath;
 	}
 
-	int process();
+	SaveFileResult process();
 };
 
 #endif // SANDBOXEDPROCESSOR_H
