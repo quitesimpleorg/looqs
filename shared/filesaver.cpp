@@ -124,36 +124,39 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 			}
 		}
 
-		QProcess process;
-		QStringList args;
-		args << "process" << canonicalPath;
-		process.setProcessChannelMode(QProcess::ForwardedErrorChannel);
-		process.start("/proc/self/exe", args);
-		process.waitForStarted();
-		process.waitForFinished();
-
-		/* TODO: This is suboptimal as it eats lots of mem
-		 * but avoids a weird QDataStream/QProcess behaviour
-		 * where it thinks the process has ended when it has not...
-		 *
-		 * Also, there seem to be issues with reads not being blocked, so
-		 * the only reliable way appears to be waiting until the process
-		 * finishes.
-		 */
-		QDataStream in(process.readAllStandardOutput());
-		while(!in.atEnd())
+		if(fileInfo.size() > 0)
 		{
-			PageData pd;
-			in >> pd;
-			pageData.append(pd);
-		}
-		processorReturnCode = process.exitCode();
-		if(processorReturnCode != OK && processorReturnCode != OK_WASEMPTY)
-		{
-			Logger::error() << "FileSaver::saveFile(): Error while processing" << canonicalPath << ":"
-							<< "Exit code " << processorReturnCode << Qt::endl;
+			QProcess process;
+			QStringList args;
+			args << "process" << canonicalPath;
+			process.setProcessChannelMode(QProcess::ForwardedErrorChannel);
+			process.start("/proc/self/exe", args);
+			process.waitForStarted();
+			process.waitForFinished();
 
-			return static_cast<SaveFileResult>(processorReturnCode);
+			/* TODO: This is suboptimal as it eats lots of mem
+			 * but avoids a weird QDataStream/QProcess behaviour
+			 * where it thinks the process has ended when it has not...
+			 *
+			 * Also, there seem to be issues with reads not being blocked, so
+			 * the only reliable way appears to be waiting until the process
+			 * finishes.
+			 */
+			QDataStream in(process.readAllStandardOutput());
+			while(!in.atEnd())
+			{
+				PageData pd;
+				in >> pd;
+				pageData.append(pd);
+			}
+			processorReturnCode = process.exitCode();
+			if(processorReturnCode != OK && processorReturnCode != OK_WASEMPTY)
+			{
+				Logger::error() << "FileSaver::saveFile(): Error while processing" << canonicalPath << ":"
+								<< "Exit code " << processorReturnCode << Qt::endl;
+
+				return static_cast<SaveFileResult>(processorReturnCode);
+			}
 		}
 	}
 	SaveFileResult result = this->dbService->saveFile(fileInfo, pageData);
