@@ -76,7 +76,7 @@ void ParallelDirScanner::scan()
 	matcher.setPatterns(this->ignorePatterns);
 	for(QString &path : this->paths)
 	{
-		QDirIterator iterator(path, QStringList{}, QDir::Dirs | QDir::QDir::Files | QDir::NoDotDot);
+		QDirIterator iterator(path, QStringList{}, QDir::Dirs | QDir::QDir::Files | QDir::NoDotAndDotDot);
 		while(iterator.hasNext())
 		{
 			QString path = iterator.next();
