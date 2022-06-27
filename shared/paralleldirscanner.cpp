@@ -99,6 +99,7 @@ void ParallelDirScanner::scan()
 			}
 		}
 	}
+	emit this->progress(this->processedPaths, this->processedPaths);
 	int threadsNum = getThreadsNum();
 	if(threadsNum == 0)
 	{
