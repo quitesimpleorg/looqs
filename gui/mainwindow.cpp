@@ -23,6 +23,7 @@
 #include "../shared/common.h"
 #include "ipcpreviewclient.h"
 #include "previewgenerator.h"
+#include "aboutdialog.h"
 
 MainWindow::MainWindow(QWidget *parent, QString socketPath)
 	: QMainWindow(parent), ui(new Ui::MainWindow), progressDialog(this)
@@ -180,26 +181,13 @@ void MainWindow::connectSignals()
 					}
 				}
 			});
-	connect(
-		ui->menuAboutAction, &QAction::triggered, this,
-		[this](bool checked)
-		{
-			QString html = "<h2>looqs</h2>";
-			html += "Full-text search with previews for your files<br><br>";
-			html += "Copyright (c) 2018-2022: Albert Schwarzkopf<br><br>";
-			html += QString("Version: %1<br><br>").arg(Common::versionText());
-			html += "Contact: looqs at quitesimple dot org<br><br>";
-			html += "Website: <a href=\"https://quitesimple.org\">https://quitesimple.org</a><br><br>";
-			html +=
-				"Source code: <a "
-				"href=\"https://github.com/quitesimpleorg/looqs\">https://github.com/quitesimpleorg/looqs</a><br><br>";
-			html += "License: GPLv3<br><br><br>";
-			html += "looqs is open source and free of charge in the hope it will be useful. The author(s) do not "
-					"give any warranty. In the unlikely event of any damage, the author(s) cannot be held responsible. "
-					"You are using looqs at your own risk";
+	connect(ui->menuAboutAction, &QAction::triggered, this,
+			[this](bool checked)
+			{
+				AboutDialog aboutDialog(this);
 
-			QMessageBox::about(this, "About looqs", html);
-		});
+				aboutDialog.exec();
+			});
 	connect(ui->menuAboutQtAction, &QAction::triggered, this,
 			[this](bool checked) { QMessageBox::aboutQt(this, "About Qt"); });
 	connect(ui->menuSyncIndexAction, &QAction::triggered, this, &MainWindow::startIndexSync);
