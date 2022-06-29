@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath)
 			{
 				this->ui->previewProcessBar->setValue(this->ui->previewProcessBar->maximum());
 				this->ui->spinPreviewPage->setEnabled(true);
+				this->ui->comboPreviewFiles->setEnabled(true);
 			});
 	connect(&ipcPreviewClient, &IPCPreviewClient::error, this,
 			[this](QString msg)
@@ -84,6 +85,7 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath)
 	ui->spinPreviewPage->setMinimum(1);
 
 	ui->btnOpenFailed->setVisible(false);
+	ui->comboPreviewFiles->setVisible(false);
 
 	auto policy = ui->btnOpenFailed->sizePolicy();
 	policy.setRetainSizeWhenHidden(true);
@@ -217,6 +219,9 @@ void MainWindow::connectSignals()
 	connect(&this->progressDialog, &QProgressDialog::canceled, indexSyncer, &IndexSyncer::cancel);
 	connect(ui->btnSaveSettings, &QPushButton::clicked, this, &MainWindow::saveSettings);
 	connect(ui->btnOpenFailed, &QPushButton::clicked, this, &MainWindow::exportFailedPaths);
+	connect(
+		ui->comboPreviewFiles, qOverload<int>(&QComboBox::currentIndexChanged), this, [&]() { makePreviews(1); },
+		Qt::QueuedConnection);
 }
 
 void MainWindow::exportFailedPaths()
@@ -514,6 +519,9 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 {
 	this->previewableSearchResults.clear();
 	ui->treeResultsList->clear();
+	ui->comboPreviewFiles->clear();
+	ui->comboPreviewFiles->addItem("All previews");
+	ui->comboPreviewFiles->setVisible(true);
 
 	bool hasDeleted = false;
 	for(const SearchResult &result : results)
@@ -542,6 +550,7 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 				if(PreviewGenerator::get(pathInfo) != nullptr)
 				{
 					this->previewableSearchResults.append(result);
+					ui->comboPreviewFiles->addItem(result.fileData.absPath);
 				}
 			}
 		}
@@ -619,6 +628,13 @@ void MainWindow::makePreviews(int page)
 	QVector<RenderTarget> targets;
 	for(SearchResult &sr : this->previewableSearchResults)
 	{
+		if(ui->comboPreviewFiles->currentIndex() != 0)
+		{
+			if(sr.fileData.absPath != ui->comboPreviewFiles->currentText())
+			{
+				continue;
+			}
+		}
 		RenderTarget renderTarget;
 		renderTarget.path = sr.fileData.absPath;
 
@@ -639,6 +655,7 @@ void MainWindow::makePreviews(int page)
 	ui->previewProcessBar->setVisible(this->previewableSearchResults.size() > 0);
 	++this->currentPreviewGeneration;
 	this->ui->spinPreviewPage->setEnabled(false);
+	this->ui->comboPreviewFiles->setEnabled(false);
 	emit startIpcPreviews(renderConfig, targets);
 }
 
@@ -654,6 +671,20 @@ void MainWindow::createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo)
 	menu.addAction("Copy full path to clipboard",
 				   [&fileInfo] { QGuiApplication::clipboard()->setText(fileInfo.absoluteFilePath()); });
 	menu.addAction("Open containing folder", [this, &fileInfo] { this->openFile(fileInfo.absolutePath()); });
+
+	auto result =
+		std::find_if(this->previewableSearchResults.begin(), this->previewableSearchResults.end(),
+					 [this, &fileInfo](SearchResult &a) { return fileInfo.absoluteFilePath() == a.fileData.absPath; });
+
+	if(result != this->previewableSearchResults.end())
+	{
+		menu.addAction("Show previews for this file",
+					   [this, &fileInfo]
+					   {
+						   ui->tabWidget->setCurrentIndex(1);
+						   this->ui->comboPreviewFiles->setCurrentText(fileInfo.absoluteFilePath());
+					   });
+	}
 }
 
 void MainWindow::openDocument(QString path, int num)
