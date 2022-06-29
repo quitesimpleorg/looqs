@@ -69,11 +69,11 @@ void Common::setPdfViewer()
 	}
 	else if(evincePath != "")
 	{
-		value = evincePath + "-i %p %f";
+		value = evincePath + " -i %p %f";
 	}
 	else if(qpdfviewPath != "")
 	{
-		value = qpdfviewPath + "%f#%p";
+		value = qpdfviewPath + " %f#%p";
 	}
 
 	QSettings settings;
