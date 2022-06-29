@@ -57,6 +57,8 @@ Linux (on amd64) is currently the main focus. Currently, I don't plan on support
 ### Licence
 GPLv3.
 
+For the dependencies/third-party libraries, see: LICENSE-3RD-PARTY
+
 ### Contributing
 Please see the [Contribution guidelines](CONTRIBUTING.md) file.
 
@@ -107,16 +109,15 @@ sudo apt-get install looqs
 
 ### Prebuilt tarball (distro-agnostic) (EXPERIMENTAL)
 looqs is also distributed as a tarball containing prebuilt binaries and its library dependencies. The tarball is
-built with the Gentoo Hardened toolchain and the Qt version is smaller than what distributions usually
+built using the Gentoo Hardened toolchain and the Qt version is smaller than what distributions usually
 include. It does not include libraries that should mess with fontrendering or the graphics stack. The binaries should run on any recent Linux distribution (requires glibc 2.34 or newer at least) and expects
 dependencies such as libGL to be provided by your distribution already (should be the case).
 
-It's considered experimental for two reasons. Firstly, looqs has no updater (yet). You will have to manually check for updates. Secondly, I can't guarantee that I'll be quick with updates of the tarball specifically
-if the library versions become outdated between looqs updates.
+It's considered experimental for two reasons. Firstly, looqs has no updater (yet). You will have to manually check for updates. Secondly, I can't guarantee that I'll be quick with updates of the tarball specifically if the library versions become outdated between looqs updates.
 
 You are therefore encouraged to use distro-native packages or to build it yourself if possible.
 
-The prebuilt tarball can be obtained here: https://repo.quitesimple.org/tarball/looqs
+The tarball can be obtained here: https://repo.quitesimple.org/tarball/looqs
 
 Quick start:
 
@@ -127,7 +128,7 @@ cd looqs-v0.4
 ./looqs-gui # or ./looqs for the CLI
 ```
 
-An AppImage may accompany the prebuilt tarball in the future.
+An AppImage may accompany the tarball in the future.
 
 
 ### Other distros

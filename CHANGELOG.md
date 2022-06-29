@@ -1,5 +1,19 @@
 # looqs: Release notes
 
+## 2022-06-29 - v0.4
+This release makes several minor improvements and begins prebuilt binaries of looqs that (should) run
+on any recent Linux distribution. 
+
+ - General: Begin new, experimental distro-agnostic tarball containing prebuilt binaries and libs. See the README for more information.
+ - GUI: In the "Previews" tab, allow filtering by file, to only show previews for a specific file.
+ - GUI: Add "Show previews" context menu option to files in result (if available)
+ - General: Fix build with libquazip 1.X 
+ - General: Properly report access errors as a failure during indexing
+ - GUI: Add button to export a list of all paths that failed
+ - General: Improve dir scan threading
+ - CLI: Improve helptext
+ - General: Add voidlinux build instructions
+ 
 ## 2022-06-14 - v0.3
 CHANGES:
 - GUI: Add settings tab to configure various settings
