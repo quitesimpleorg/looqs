@@ -27,6 +27,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    aboutdialog.cpp \
     ipcpreviewclient.cpp \
     ipcpreviewworker.cpp \
     ipcserver.cpp \
@@ -44,6 +45,7 @@ SOURCES += \
     rendertarget.cpp
 
 HEADERS += \
+    aboutdialog.h \
     ipc.h \
     ipcpreviewclient.h \
     ipcpreviewworker.h \
