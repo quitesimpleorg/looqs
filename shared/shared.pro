@@ -101,3 +101,4 @@ unix {
     INSTALLS += target
 }
 RESOURCES = migrations/migrations.qrc
+RESOURCES += plaintexts.qrc

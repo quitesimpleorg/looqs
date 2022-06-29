@@ -1,0 +1,6 @@
+<RCC>
+    <qresource>
+		<file>../LICENSE</file>
+        <file>../LICENSE-3RD-PARTY</file>
+    </qresource>
+</RCC>

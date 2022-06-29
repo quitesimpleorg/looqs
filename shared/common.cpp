@@ -17,6 +17,7 @@
 inline void initResources()
 {
 	Q_INIT_RESOURCE(migrations);
+	Q_INIT_RESOURCE(plaintexts);
 }
 
 bool Common::initSqliteDatabase(QString path)
