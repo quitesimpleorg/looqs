@@ -30,4 +30,9 @@ static inline QString SaveFileResultToString(SaveFileResult sfr)
 	return SaveFileResultStr[(int)sfr];
 }
 
+static inline bool isErrorSaveFileResult(SaveFileResult result)
+{
+	return result == DBFAIL || result == PROCESSFAIL || result == NOTFOUND || result == NOACCESS;
+}
+
 #endif // SAVEFILERESULT_H
