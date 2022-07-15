@@ -68,7 +68,7 @@ Please see [USAGE.md](USAGE.md) for the user manual. There is also [HACKING.md](
 
 ## Build
 
-### Ubuntu 21.10/22.04
+### Debian/Ubuntu
 
 To build on Ubuntu and Debian, clone the repo and then run:
 ```
@@ -95,7 +95,7 @@ The GUI is located in `gui/looqs-gui`, the binary for the CLI is in `cli/looqs`
 ## Packages
 At this point, looqs is not in any official distro package repo, but I maintain some packages.
 
-### Ubuntu 21.10/22.04
+### Ubuntu 22.04
 Latest release can be installed using apt from the repo.
 ```
 # First, obtain key, assume it's trusted.
