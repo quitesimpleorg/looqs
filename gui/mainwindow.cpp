@@ -33,28 +33,6 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath)
 	setWindowTitle(QCoreApplication::applicationName());
 	this->ipcPreviewClient.moveToThread(&this->ipcClientThread);
 	this->ipcPreviewClient.setSocketPath(socketPath);
-
-	connect(&ipcPreviewClient, &IPCPreviewClient::previewReceived, this, &MainWindow::previewReceived,
-			Qt::QueuedConnection);
-	connect(&ipcPreviewClient, &IPCPreviewClient::finished, this,
-			[&]
-			{
-				this->ui->previewProcessBar->setValue(this->ui->previewProcessBar->maximum());
-				this->ui->spinPreviewPage->setEnabled(true);
-				this->ui->comboPreviewFiles->setEnabled(true);
-			});
-	connect(&ipcPreviewClient, &IPCPreviewClient::error, this,
-			[this](QString msg)
-			{
-				qCritical() << msg << Qt::endl;
-				QMessageBox::critical(this, "IPC error", msg);
-			});
-
-	connect(this, &MainWindow::startIpcPreviews, &ipcPreviewClient, &IPCPreviewClient::startGeneration,
-			Qt::QueuedConnection);
-	connect(this, &MainWindow::stopIpcPreviews, &ipcPreviewClient, &IPCPreviewClient::stopGeneration,
-			Qt::QueuedConnection);
-	this->ipcClientThread.start();
 	QSettings settings;
 
 	this->dbFactory = new DatabaseFactory(Common::databasePath());
@@ -91,6 +69,8 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath)
 	auto policy = ui->btnOpenFailed->sizePolicy();
 	policy.setRetainSizeWhenHidden(true);
 	ui->btnOpenFailed->setSizePolicy(policy);
+
+	this->ipcClientThread.start();
 }
 
 void MainWindow::addPathToIndex()
@@ -210,6 +190,26 @@ void MainWindow::connectSignals()
 	connect(
 		ui->comboPreviewFiles, qOverload<int>(&QComboBox::currentIndexChanged), this, [&]() { makePreviews(1); },
 		Qt::QueuedConnection);
+	connect(&ipcPreviewClient, &IPCPreviewClient::previewReceived, this, &MainWindow::previewReceived,
+			Qt::QueuedConnection);
+	connect(&ipcPreviewClient, &IPCPreviewClient::finished, this,
+			[&]
+			{
+				this->ui->previewProcessBar->setValue(this->ui->previewProcessBar->maximum());
+				this->ui->spinPreviewPage->setEnabled(true);
+				this->ui->comboPreviewFiles->setEnabled(true);
+			});
+	connect(&ipcPreviewClient, &IPCPreviewClient::error, this,
+			[this](QString msg)
+			{
+				qCritical() << msg << Qt::endl;
+				QMessageBox::critical(this, "IPC error", msg);
+			});
+
+	connect(this, &MainWindow::startIpcPreviews, &ipcPreviewClient, &IPCPreviewClient::startGeneration,
+			Qt::QueuedConnection);
+	connect(this, &MainWindow::stopIpcPreviews, &ipcPreviewClient, &IPCPreviewClient::stopGeneration,
+			Qt::QueuedConnection);
 }
 
 void MainWindow::exportFailedPaths()
