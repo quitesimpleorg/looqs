@@ -441,6 +441,9 @@ void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned
 
 		ClickLabel *label = dynamic_cast<ClickLabel *>(preview->createPreviewWidget());
 		ui->scrollAreaWidgetContents->layout()->addWidget(label);
+		QFont font = label->font();
+		font.setPointSize(QApplication::font().pointSize() * currentSelectedScale() / 100);
+		label->setFont(font);
 		connect(label, &ClickLabel::leftClick, [this, docPath, previewPage]() { openDocument(docPath, previewPage); });
 		connect(label, &ClickLabel::rightClick,
 				[this, docPath, previewPage]()
@@ -570,6 +573,13 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	ui->lblSearchResults->setText(statusText);
 }
 
+int MainWindow::currentSelectedScale()
+{
+	QString scaleText = ui->comboScale->currentText();
+	scaleText.chop(1);
+	return scaleText.toInt();
+}
+
 void MainWindow::makePreviews(int page)
 {
 	if(this->previewableSearchResults.empty())
@@ -581,8 +591,6 @@ void MainWindow::makePreviews(int page)
 	ui->scrollAreaWidgetContents->setLayout(new QHBoxLayout());
 	ui->previewProcessBar->setMaximum(this->previewableSearchResults.size());
 	processedPdfPreviews = 0;
-	QString scaleText = ui->comboScale->currentText();
-	scaleText.chop(1);
 
 	QVector<QString> wordsToHighlight;
 	QRegularExpression extractor(R"#("([^"]*)"|((\p{L}|\p{N})+))#");
@@ -611,9 +619,10 @@ void MainWindow::makePreviews(int page)
 		begin = 0;
 	}
 
+	int currentScale = currentSelectedScale();
 	RenderConfig renderConfig;
-	renderConfig.scaleX = QGuiApplication::primaryScreen()->physicalDotsPerInchX() * (scaleText.toInt() / 100.);
-	renderConfig.scaleY = QGuiApplication::primaryScreen()->physicalDotsPerInchY() * (scaleText.toInt() / 100.);
+	renderConfig.scaleX = QGuiApplication::primaryScreen()->physicalDotsPerInchX() * (currentScale / 100.);
+	renderConfig.scaleY = QGuiApplication::primaryScreen()->physicalDotsPerInchY() * (currentScale / 100.);
 	renderConfig.wordsToHighlight = wordsToHighlight;
 
 	QVector<RenderTarget> targets;

@@ -62,6 +62,7 @@ class MainWindow : public QMainWindow
 	void openFile(QString path);
 	unsigned int currentPreviewGeneration = 1;
 	void initSettingsTabs();
+	int currentSelectedScale();
   private slots:
 	void lineEditReturnPressed();
 	void treeSearchItemActivated(QTreeWidgetItem *item, int i);
