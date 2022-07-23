@@ -171,6 +171,9 @@ void MainWindow::connectSignals()
 	connect(ui->menuAboutQtAction, &QAction::triggered, this,
 			[this](bool checked) { QMessageBox::aboutQt(this, "About Qt"); });
 	connect(ui->menuSyncIndexAction, &QAction::triggered, this, &MainWindow::startIndexSync);
+	connect(ui->menuOpenUserManualAction, &QAction::triggered, this,
+			[this]() { QDesktopServices::openUrl(Common::userManualUrl()); });
+
 	connect(indexSyncer, &IndexSyncer::finished, this,
 			[&](unsigned int totalUpdated, unsigned int totalDeleted, unsigned int totalErrored)
 			{

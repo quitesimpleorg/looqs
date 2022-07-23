@@ -626,6 +626,7 @@
      <string>looqs</string>
     </property>
     <addaction name="menuSyncIndexAction"/>
+    <addaction name="menuOpenUserManualAction"/>
     <addaction name="menuAboutAction"/>
     <addaction name="menuAboutQtAction"/>
     <addaction name="separator"/>
@@ -645,6 +646,11 @@
   <action name="menuSyncIndexAction">
    <property name="text">
     <string>Sync index (remove deleted, update existing files)</string>
+   </property>
+  </action>
+  <action name="menuOpenUserManualAction">
+   <property name="text">
+    <string>Open user manual</string>
    </property>
   </action>
  </widget>

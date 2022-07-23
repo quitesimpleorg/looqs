@@ -234,3 +234,8 @@ QString Common::versionText()
 	QString tag = GIT_TAG;
 	return tag + " (" + commitid + ") built " + __DATE__ + " " + __TIME__;
 }
+
+QString Common::userManualUrl()
+{
+	return QString("https://github.com/quitesimpleorg/looqs/blob/%1/USAGE.md").arg(QString(GIT_COMMIT_ID));
+}

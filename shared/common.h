@@ -25,5 +25,6 @@ bool isTextFile(QFileInfo fileInfo);
 bool isMountPath(QString path);
 bool noSandboxModeRequested();
 QString versionText();
+QString userManualUrl();
 } // namespace Common
 #endif
