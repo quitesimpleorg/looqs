@@ -439,22 +439,46 @@ void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned
 		QString docPath = preview->getDocumentPath();
 		auto previewPage = preview->getPage();
 
+		ClickLabel *headerLabel = new ClickLabel();
+		headerLabel->setText(QString("Path: ") + preview->getDocumentPath());
+
 		ClickLabel *label = dynamic_cast<ClickLabel *>(preview->createPreviewWidget());
-		ui->scrollAreaWidgetContents->layout()->addWidget(label);
+
+		QVBoxLayout *previewLayout = new QVBoxLayout();
+
 		QFont font = label->font();
 		font.setPointSize(QApplication::font().pointSize() * currentSelectedScale() / 100);
 		label->setFont(font);
-		connect(label, &ClickLabel::leftClick, [this, docPath, previewPage]() { openDocument(docPath, previewPage); });
-		connect(label, &ClickLabel::rightClick,
-				[this, docPath, previewPage]()
-				{
-					QFileInfo fileInfo{docPath};
-					QMenu menu("labeRightClick", this);
-					createSearchResutlMenu(menu, fileInfo);
-					menu.addAction("Copy page number", [previewPage]
-								   { QGuiApplication::clipboard()->setText(QString::number(previewPage)); });
-					menu.exec(QCursor::pos());
-				});
+		headerLabel->setFont(font);
+
+		auto leftClickHandler = [this, docPath, previewPage]() { openDocument(docPath, previewPage); };
+		auto rightClickhandler = [this, docPath, previewPage]()
+		{
+			QFileInfo fileInfo{docPath};
+			QMenu menu("labeRightClick", this);
+			createSearchResutlMenu(menu, fileInfo);
+			menu.addAction("Copy page number",
+						   [previewPage] { QGuiApplication::clipboard()->setText(QString::number(previewPage)); });
+			menu.exec(QCursor::pos());
+		};
+
+		connect(label, &ClickLabel::leftClick, leftClickHandler);
+		connect(label, &ClickLabel::rightClick, rightClickhandler);
+
+		connect(headerLabel, &ClickLabel::rightClick, rightClickhandler);
+
+		previewLayout->addWidget(label);
+
+		previewLayout->addWidget(headerLabel);
+
+		previewLayout->setMargin(0);
+		previewLayout->insertStretch(0, 1);
+		previewLayout->insertStretch(-1, 1);
+		QWidget *previewWidget = new QWidget();
+
+		previewWidget->setLayout(previewLayout);
+
+		ui->scrollAreaWidgetContents->layout()->addWidget(previewWidget);
 	}
 }
 
