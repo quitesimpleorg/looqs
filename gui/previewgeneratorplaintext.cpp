@@ -9,9 +9,9 @@ QString PreviewGeneratorPlainText::generatePreviewText(QString content, RenderCo
 
 	QMap<int, QString> snippet;
 
-	int coveredRange = 0;
+	int coveredRange = -1;
+	int lastWordPos = -1;
 
-	int lastWordPos = 0;
 	QHash<QString, int> countmap;
 
 	const unsigned int maxSnippets = 7;
