@@ -3,19 +3,10 @@
 #include "previewgeneratorplaintext.h"
 #include "previewresultplaintext.h"
 
-QSharedPointer<PreviewResult> PreviewGeneratorPlainText::generate(RenderConfig config, QString documentPath,
-																  unsigned int page)
+QString PreviewGeneratorPlainText::generatePreviewText(QString content, RenderConfig config, QString fileName)
 {
-	PreviewResultPlainText *result = new PreviewResultPlainText(documentPath, page);
-	QFile file(documentPath);
-	if(!file.open(QFile::ReadOnly | QFile::Text))
-	{
-		return QSharedPointer<PreviewResultPlainText>(result);
-	}
-	QTextStream in(&file);
-
 	QString resulText = "";
-	QString content = in.readAll();
+
 	QMap<int, QString> snippet;
 
 	int coveredRange = 0;
@@ -71,9 +62,7 @@ QSharedPointer<PreviewResult> PreviewGeneratorPlainText::generate(RenderConfig c
 		resulText.replace(word, "<span style=\"background-color: yellow;\">" + word + "</span>", Qt::CaseInsensitive);
 	}
 
-	QFileInfo info{documentPath};
-
-	QString header = "<b>" + info.fileName() + "</b> ";
+	QString header = "<b>" + fileName + "</b> ";
 	for(QString &word : config.wordsToHighlight)
 	{
 		header += word + ": " + QString::number(countmap[word]) + " ";
@@ -85,6 +74,22 @@ QSharedPointer<PreviewResult> PreviewGeneratorPlainText::generate(RenderConfig c
 
 	header += "<hr>";
 
-	result->setText(header + resulText.replace("\n", "<br>").mid(0, 1000));
+	return header + resulText.replace("\n", "<br>").mid(0, 1000);
+}
+
+QSharedPointer<PreviewResult> PreviewGeneratorPlainText::generate(RenderConfig config, QString documentPath,
+																  unsigned int page)
+{
+	PreviewResultPlainText *result = new PreviewResultPlainText(documentPath, page);
+	QFile file(documentPath);
+	if(!file.open(QFile::ReadOnly | QFile::Text))
+	{
+		return QSharedPointer<PreviewResultPlainText>(result);
+	}
+	QTextStream in(&file);
+
+	QString content = in.readAll();
+	QFileInfo info{documentPath};
+	result->setText(generatePreviewText(content, config, info.fileName()));
 	return QSharedPointer<PreviewResultPlainText>(result);
 }
