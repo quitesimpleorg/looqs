@@ -36,9 +36,11 @@ SOURCES += \
       clicklabel.cpp \
     previewgenerator.cpp \
     previewgeneratormapfunctor.cpp \
+    previewgeneratorodt.cpp \
     previewgeneratorpdf.cpp \
     previewgeneratorplaintext.cpp \
     previewresult.cpp \
+    previewresultodt.cpp \
     previewresultpdf.cpp \
     previewresultplaintext.cpp \
     renderconfig.cpp \
@@ -54,9 +56,11 @@ HEADERS += \
     clicklabel.h \
     previewgenerator.h \
     previewgeneratormapfunctor.h \
+    previewgeneratorodt.h \
     previewgeneratorpdf.h \
     previewgeneratorplaintext.h \
     previewresult.h \
+    previewresultodt.h \
     previewresultpdf.h \
     previewresultplaintext.h \
     renderconfig.h \
@@ -66,6 +70,7 @@ FORMS += \
         mainwindow.ui
 
 INCLUDEPATH += /usr/include/poppler/qt5/
+INCLUDEPATH += /usr/include/quazip5
 
 QT += widgets sql
 
