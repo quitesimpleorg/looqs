@@ -58,9 +58,9 @@ void Common::setPdfViewer()
 		value = qpdfviewPath + " %f#%p";
 	}
 
-	QSettings settings;
 	if(value != "")
 	{
+		QSettings settings;
 		settings.setValue(SETTINGS_KEY_PDFVIEWER, value);
 	}
 }
