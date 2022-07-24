@@ -36,32 +36,14 @@ bool Common::initSqliteDatabase(QString path)
 	return true;
 }
 
-QString Common::findInPath(QString needle)
-{
-	QStringList results;
-	QString pathVar = QProcessEnvironment::systemEnvironment().value("PATH", "/usr/bin/:/bin/:");
-	QStringList paths = pathVar.split(":");
-	for(const QString &path : paths)
-	{
-		// TODO: can pass ../ but so be it for now.
-
-		QFileInfo info{path + "/" + needle};
-		if(info.exists())
-		{
-			return info.absoluteFilePath();
-		}
-	}
-	return "";
-}
-
 void Common::setPdfViewer()
 {
 	QString value;
 
 	/* TODO: well, we should query this probably from xdg*/
-	QString okularPath = findInPath("okular");
-	QString evincePath = findInPath("evince");
-	QString qpdfviewPath = findInPath("qpdfview");
+	QString okularPath = QStandardPaths::findExecutable("okular");
+	QString evincePath = QStandardPaths::findExecutable("evince");
+	QString qpdfviewPath = QStandardPaths::findExecutable("qpdfview");
 
 	if(okularPath != "")
 	{

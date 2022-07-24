@@ -16,7 +16,6 @@ void setupAppInfo();
 QString databasePath();
 QString ipcSocketPath();
 void setPdfViewer();
-QString findInPath(QString needle);
 bool initSqliteDatabase(QString path);
 void ensureConfigured();
 QStringList excludedPaths();
