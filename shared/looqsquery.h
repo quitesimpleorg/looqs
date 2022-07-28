@@ -44,6 +44,13 @@ class LooqsQuery
 	QVector<Token> tokens;
 	QVector<SortCondition> sortConditions;
 	void addToken(Token t);
+	void updateTokensMask()
+	{
+		for(const Token &t : tokens)
+		{
+			this->tokensMask |= t.type;
+		}
+	}
 
   public:
 	const QVector<Token> &getTokens() const;
@@ -65,8 +72,34 @@ class LooqsQuery
 	bool hasPathSearch() const;
 
 	void addSortCondition(SortCondition sc);
+
+	void setTokens(const QVector<Token> &tokens)
+	{
+		this->tokens = tokens;
+		updateTokensMask();
+	}
+
 	static bool checkParanthesis(QString query);
 	static LooqsQuery build(QString query, TokenType loneWordsTokenType, bool mergeLoneWords);
+
+	LooqsQuery()
+	{
+	}
+
+	LooqsQuery(const QVector<Token> &tokens, const QVector<SortCondition> &sortConditions)
+	{
+		this->tokens = tokens;
+		this->sortConditions = sortConditions;
+		updateTokensMask();
+	}
+
+	LooqsQuery(const LooqsQuery &o)
+	{
+		this->tokens = o.tokens;
+		this->sortConditions = o.sortConditions;
+		this->tokensMask = o.tokensMask;
+		this->limit = o.limit;
+	}
 };
 
 #endif // LOOQSQUERY_H
