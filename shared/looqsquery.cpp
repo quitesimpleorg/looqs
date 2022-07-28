@@ -320,7 +320,7 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 	QVector<Token> newTokens;
 
 	TokenType prevType = BOOL_AND;
-	int needsBoolean = FILTER_CONTENT | FILTER_PATH | NEGATION;
+	int needsBoolean = FILTER_CONTENT | FILTER_PATH | NEGATION | WORD;
 	for(Token &t : result.tokens)
 	{
 		if(t.type == BRACKET_OPEN || t.type & needsBoolean)
