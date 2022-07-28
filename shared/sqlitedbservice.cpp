@@ -151,11 +151,14 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &
 	int lastid = inserterQuery.lastInsertId().toInt();
 	for(const PageData &data : pageData)
 	{
+		QSqlQuery ftsQuery(db);
+		ftsQuery.prepare("INSERT INTO fts(content) VALUES(?)");
+		ftsQuery.addBindValue(data.content);
+		ftsQuery.exec();
 		QSqlQuery contentQuery(db);
-		contentQuery.prepare("INSERT INTO content(fileid, page, content) VALUES(?, ?, ?)");
+		contentQuery.prepare("INSERT INTO content(fileid, page, ftsid) VALUES(?, ?, last_insert_rowid())");
 		contentQuery.addBindValue(lastid);
 		contentQuery.addBindValue(data.pagenumber);
-		contentQuery.addBindValue(data.content);
 		if(!contentQuery.exec())
 		{
 			db.rollback();

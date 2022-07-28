@@ -115,7 +115,7 @@ QPair<QString, QVector<QString>> SqliteSearch::createSql(const Token &token)
 	}
 	if(token.type == FILTER_CONTENT_CONTAINS)
 	{
-		return {" content.id IN (SELECT content_fts.ROWID FROM content_fts WHERE content_fts.content MATCH ? ORDER BY "
+		return {" content.id IN (SELECT fts.ROWID FROM fts WHERE fts.content MATCH ? ORDER BY "
 				"rank) ",
 				{value}};
 	}
@@ -141,10 +141,10 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 		{
 			if(!ftsAlreadyJoined)
 			{
-				joinSql += " INNER JOIN content_fts ON content.id = content_fts.ROWID ";
+				joinSql += " INNER JOIN fts ON content.ftsid = fts.ROWID ";
 				ftsAlreadyJoined = true;
 			}
-			whereSql += " content_fts.content MATCH ? ";
+			whereSql += " fts.content MATCH ? ";
 			bindValues.append(token.value);
 		}
 		else
