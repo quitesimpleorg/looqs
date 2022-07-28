@@ -3,14 +3,15 @@
 #include <QStringList>
 #include <QSqlDatabase>
 #include <QObject>
+#include "databasefactory.h"
 class DBMigrator : public QObject
 {
 	Q_OBJECT
   private:
-	QSqlDatabase *db;
+	DatabaseFactory *dbFactory;
 
   public:
-	DBMigrator(QSqlDatabase &db);
+	DBMigrator(DatabaseFactory &dbFactory);
 	~DBMigrator();
 	uint32_t currentRevision();
 	void performMigrations();
@@ -19,6 +20,9 @@ class DBMigrator : public QObject
   signals:
 	void migrationDone(uint32_t);
 	void done();
+	void error(QString e);
+  public slots:
+	void start();
 };
 
 #endif // DBMIGRATOR_H
