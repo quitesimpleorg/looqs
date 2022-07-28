@@ -22,17 +22,18 @@ inline void initResources()
 
 bool Common::initSqliteDatabase(QString path)
 {
-	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-	db.setDatabaseName(path);
-	if(!db.open())
+	try
 	{
-		qDebug() << "failed to open database: " << path;
+		initResources();
+		DatabaseFactory factory(path);
+		DBMigrator migrator{factory};
+		migrator.performMigrations();
+	}
+	catch(std::exception &ex)
+	{
+		Logger::error() << "Failed to init dabase: " << ex.what();
 		return false;
 	}
-	initResources();
-	DBMigrator migrator{db};
-	migrator.performMigrations();
-	db.close();
 	return true;
 }
 
@@ -88,21 +89,6 @@ void Common::ensureConfigured()
 			throw LooqsGeneralException("Failed to initialize sqlite database");
 		}
 		settings.setValue(SETTINGS_KEY_DBPATH, dbpath);
-	}
-	DatabaseFactory factory{dbpath};
-	auto db = factory.forCurrentThread();
-	DBMigrator migrator{db};
-	if(migrator.migrationNeeded())
-	{
-		QFile out;
-		out.open(stderr, QIODevice::WriteOnly);
-		Logger migrationLogger{&out};
-		migrationLogger << "Database is being upgraded, please be patient..." << Qt::endl;
-		QObject::connect(&migrator, &DBMigrator::migrationDone,
-						 [&migrationLogger](uint32_t migration)
-						 { migrationLogger << "Progress: Successfully migrated to: " << migration << Qt::endl; });
-		migrator.performMigrations();
-		migrationLogger << "Database upgraded successfully" << Qt::endl;
 	}
 	QVariant pdfViewer = settings.value(SETTINGS_KEY_PDFVIEWER);
 	if(!pdfViewer.isValid())
