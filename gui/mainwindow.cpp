@@ -503,21 +503,74 @@ void MainWindow::lineEditReturnPressed()
 		{
 			SqliteSearch searcher(db);
 			QVector<SearchResult> results;
-			this->contentSearchQuery = LooqsQuery::build(q, TokenType::FILTER_CONTENT_CONTAINS, true);
+			LooqsQuery tmpQuery = LooqsQuery::build(q, TokenType::WORD, true);
 
-			/* We can have a path search in contentsearch too (if given explicitly), so no need to do it twice.
-				Make sure path results are listed first. */
-			bool addContentSearch = this->contentSearchQuery.hasContentSearch();
-			bool addPathSearch = !this->contentSearchQuery.hasPathSearch() || !addContentSearch;
+			LooqsQuery pathsQuery = tmpQuery;
+
+			this->contentSearchQuery = tmpQuery;
+			this->contentSearchQuery.setTokens({});
+
+			bool addContentSearch = false;
+			bool addPathSearch = false;
+
+			auto createFinalTokens = [&tmpQuery](TokenType replacementToken)
+			{
+				QVector<Token> tokens = tmpQuery.getTokens();
+				for(Token &token : tokens)
+				{
+					if(token.type == TokenType::WORD)
+					{
+						token.type = replacementToken;
+					}
+				}
+				return tokens;
+			};
+
+			/* An explicit search, we just pass it on */
+			if(!(tmpQuery.getTokensMask() & TokenType::WORD))
+			{
+				if(tmpQuery.hasContentSearch())
+				{
+					this->contentSearchQuery.setTokens(createFinalTokens(TokenType::FILTER_CONTENT_CONTAINS));
+					addContentSearch = true;
+				}
+				else
+				{
+					this->contentSearchQuery.setTokens(createFinalTokens(TokenType::FILTER_PATH_CONTAINS));
+					addPathSearch = true;
+				}
+			}
+			/* A path search, and lone words, e. g. p:("docs") invoice */
+			else if(tmpQuery.hasPathSearch() && (tmpQuery.getTokensMask() & TokenType::WORD))
+			{
+				this->contentSearchQuery = tmpQuery;
+				this->contentSearchQuery.setTokens(createFinalTokens(TokenType::FILTER_CONTENT_CONTAINS));
+				addContentSearch = true;
+				addPathSearch = false;
+			}
+			/* A content search and lone words, e. g. c:("to be or not") ebooks */
+			else if(tmpQuery.hasContentSearch() && (tmpQuery.getTokensMask() & TokenType::WORD))
+			{
+				this->contentSearchQuery = tmpQuery;
+				this->contentSearchQuery.setTokens(createFinalTokens(TokenType::FILTER_PATH_CONTAINS));
+				addContentSearch = true;
+				addPathSearch = false;
+			}
+			/* "Simply lone words, so search both" */
+			else if(!tmpQuery.hasPathSearch() && !tmpQuery.hasContentSearch())
+			{
+				this->contentSearchQuery.setTokens(createFinalTokens(TokenType::FILTER_CONTENT_CONTAINS));
+				pathsQuery.setTokens(createFinalTokens(TokenType::FILTER_PATH_CONTAINS));
+				addContentSearch = true;
+				addPathSearch = true;
+			}
 			if(addPathSearch)
 			{
-				LooqsQuery filesQuery = LooqsQuery::build(q, TokenType::FILTER_PATH_CONTAINS, false);
-				if(filesQuery.getLimit() == -1)
+				if(pathsQuery.getLimit() == -1)
 				{
-					filesQuery.setLimit(1000);
+					pathsQuery.setLimit(1000);
 				}
-
-				results.append(searcher.search(filesQuery));
+				results.append(searcher.search(pathsQuery));
 			}
 			if(addContentSearch)
 			{
@@ -525,7 +578,6 @@ void MainWindow::lineEditReturnPressed()
 				{
 					this->contentSearchQuery.setLimit(1000);
 				}
-
 				results.append(searcher.search(this->contentSearchQuery));
 			}
 			return results;
