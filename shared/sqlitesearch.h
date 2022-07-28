@@ -18,6 +18,7 @@ class SqliteSearch
 	QString fieldToColumn(QueryField field);
 	QPair<QString, QVector<QString>> createSql(const Token &token);
 	QString createSortSql(const QVector<SortCondition> sortConditions);
+	QString escapeFtsArgument(QString ftsArg);
 };
 
 #endif // SQLITESEARCH_H

@@ -66,6 +66,28 @@ QString SqliteSearch::createSortSql(const QVector<SortCondition> sortConditions)
 	return "";
 }
 
+QString SqliteSearch::escapeFtsArgument(QString ftsArg)
+{
+	QString result;
+	QRegularExpression extractor(R"#("([^"]*)"|([^\s]+))#");
+	QRegularExpressionMatchIterator i = extractor.globalMatch(ftsArg);
+	while(i.hasNext())
+	{
+		QRegularExpressionMatch m = i.next();
+		QString value = m.captured(1);
+		if(value.isEmpty())
+		{
+			value = m.captured(2);
+		}
+		else
+		{
+			value = "\"\"" + value + "\"\"";
+		}
+		result += "\"" + value + "\" ";
+	}
+	return result;
+}
+
 QPair<QString, QVector<QString>> createNonArgPair(QString key)
 {
 	return {" " + key + " ", QVector<QString>()};
@@ -117,7 +139,7 @@ QPair<QString, QVector<QString>> SqliteSearch::createSql(const Token &token)
 	{
 		return {" content.id IN (SELECT fts.ROWID FROM fts WHERE fts.content MATCH ? ORDER BY "
 				"rank) ",
-				{value}};
+				{escapeFtsArgument(value)}};
 	}
 	throw LooqsGeneralException("Unknown token passed (should not happen)");
 }
@@ -145,7 +167,7 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 				ftsAlreadyJoined = true;
 			}
 			whereSql += " fts.content MATCH ? ";
-			bindValues.append(token.value);
+			bindValues.append(escapeFtsArgument(token.value));
 		}
 		else
 		{
