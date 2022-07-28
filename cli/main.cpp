@@ -26,6 +26,7 @@
 #include "sandboxedprocessor.h"
 #include "../shared/common.h"
 #include "../shared/filescanworker.h"
+#include "../shared/dbmigrator.h"
 
 void printUsage(QString argv0)
 {
@@ -75,6 +76,27 @@ int main(int argc, char *argv[])
 	try
 	{
 		Common::ensureConfigured();
+
+		DatabaseFactory factory{Common::databasePath()};
+		DBMigrator migrator{factory};
+		if(migrator.migrationNeeded())
+		{
+			Logger::info() << "Database is being upgraded, please be patient..." << Qt::endl;
+
+			QObject::connect(&migrator, &DBMigrator::migrationDone,
+							 [&](uint32_t migration)
+							 { Logger::info() << "Progress: Successfully migrated to: " << migration << Qt::endl; });
+			QObject::connect(&migrator, &DBMigrator::done,
+							 []() { Logger::info() << "Database upgrade successful" << Qt::endl; });
+			QObject::connect(&migrator, &DBMigrator::error,
+							 [&](QString error)
+							 {
+								 Logger::error() << error << Qt::endl;
+								 qApp->quit();
+							 });
+
+			migrator.performMigrations();
+		}
 	}
 	catch(LooqsGeneralException &e)
 	{
