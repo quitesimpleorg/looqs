@@ -12,6 +12,8 @@
 #include "previewresultpdf.h"
 #include "../shared/common.h"
 #include "../shared/sandboxedprocessor.h"
+#include "../shared/dbmigrator.h"
+#include "../shared/logger.h"
 #include "../submodules/exile.h/exile.h"
 #include "ipcserver.h"
 
@@ -153,6 +155,63 @@ int main(int argc, char *argv[])
 	try
 	{
 		Common::ensureConfigured();
+		DatabaseFactory factory{Common::databasePath()};
+		DBMigrator migrator{factory};
+
+		if(migrator.migrationNeeded())
+		{
+			auto answer = QMessageBox::question(nullptr, "Proceed with upgrade?",
+												"A database upgrade is required. This might take a few minutes. Say "
+												"'yes' to start upgrade, 'no' to exit.");
+
+			if(answer == QMessageBox::No)
+			{
+				a.quit();
+				return 0;
+			}
+
+			QFile out;
+			out.open(stderr, QIODevice::WriteOnly);
+			Logger migrationLogger{&out};
+			migrationLogger << "Database is being upgraded, please be patient..." << Qt::endl;
+			QThread migratorThread;
+			migrator.moveToThread(&migratorThread);
+			migratorThread.start();
+			QProgressDialog progressDialog;
+
+			QObject::connect(&migrator, &DBMigrator::migrationDone,
+							 [&migrationLogger](uint32_t migration)
+							 { migrationLogger << "Progress: Successfully migrated to: " << migration << Qt::endl; });
+			QObject::connect(&migrator, &DBMigrator::done, &progressDialog, &QProgressDialog::reset);
+			QObject::connect(&migrator, &DBMigrator::error,
+							 [&](QString error)
+							 {
+								 QMetaObject::invokeMethod(qApp,
+														   [error]
+
+														   {
+															   Logger::error() << error << Qt::endl;
+															   QMessageBox::critical(nullptr, "Error during upgrade",
+																					 error);
+															   qApp->quit();
+														   }
+
+								 );
+							 });
+			QTimer::singleShot(0, &migrator, &DBMigrator::start);
+
+			progressDialog.setWindowTitle("Upgrading database");
+			progressDialog.setLabelText("Upgrading database - this might take several minutes, please wait");
+			progressDialog.setWindowModality(Qt::ApplicationModal);
+			progressDialog.setMinimum(0);
+			progressDialog.setMaximum(0);
+			progressDialog.setValue(0);
+			progressDialog.setCancelButton(nullptr);
+			progressDialog.exec();
+
+			migrationLogger << "Database has been successfully upgraded" << Qt::endl;
+			migratorThread.quit();
+		}
 	}
 	catch(LooqsGeneralException &e)
 	{
