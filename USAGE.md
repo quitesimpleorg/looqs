@@ -9,15 +9,11 @@ looqs is still at an early stage and may exhibit some weirdness and contain bugs
 ## Current Limitations and things to know
 You should be aware of the following:
 
-- It may seem natural, but the GUI and CLI operate on the same database, so if you add files using the CLI, the GUI will search them too.
+- It may seem natural, but the GUI and CLI operate on the same database, so if you add files using the CLI, the GUI will know about them too.
 
 - If a file is listed in the "Search results" tab, it does not imply that a preview will be available in the "Previews" tab, as looqs can search more file formats than it can generate previews for currently.
 
-- Database paths are stored inefficiently, not deduplicated to simplify queries. This may add up quickly. Also, each PDF text is stored twice. Each page separately + the whole document to simplify queries.
-To give you some idea: At the time this section was written, 167874 files were in my index. A FTS index was built for 14280 of those, of which 4146 were PDF documents. The PDFs take around 10GB storage space on the filesystem. All files for which an FTS has been built are around 7GB in size on the filesystem. The looqs database had a size of 1.6 GB.
-
-- Existing files are considered modified when the mtime has changed. looqs currently does not check whether the content
-has changed. 
+- Existing files are considered modified when the modification time has changed. looqs currently does not check whether the content has changed.
 
 ## Config
 The config file is in `$HOME/.config/quitesimple.org/looqs.conf`. It will be created on first execution of the CLI or GUI interface. Generally, you should not edit this file directly. Instead, use the "Settings" tab in the GUI.
@@ -34,21 +30,21 @@ For large directories the progress bar is essentially just decoration. As long a
 increase, everything is fine even if it seems the progress bar is stuck.
 
 The indexing can be stopped. If you run it again you do not start from scratch, because looqs knows
-which files have been modified or not since they have been added to the index. Thus, files will
-only be reprocedded when necessary. Note that cancellation itself may take a moment as files finish processing. 
+which files have been modified since they have been added to the index. Thus, files will
+only be reprocessed when necessary. Note that cancellation itself may take a moment as files finish processing.
 
 ### Search
-The text field at the top is where you type your query. It can be selected quickly using **CTRL + L**. Filters are avalable,
-see this document at the end. By default, both the full path and the content are searched. Path names take precedence.
+The text field at the top is where you type your query. It can be selected quickly using **CTRL + L**. Filters are available, see this document at the end. By default, both the full path and the content are searched. Path names take precedence, i. e. they will appear the top of the list.
 
 ### Configuring PDF viewer
 It's most convenient if, when you click on a preview, the PDF reader opens the page you clicked. For that, looqs needs to know which viewer you want to launch.
 
-It tries to auto detect some common viewers. You must set the value in the "Settings" tab yourself if it doesn't do something you like, such as not opening your favorite viewer. In the command line options, "%f" represents the filepath, "%p" the page number.
+It tries to auto detect some common viewers. You must set the value in the "Settings" tab yourself if the
+default does not work for you. In the command line options, "%f" represents the filepath, "%p" the page number.
 
 ### Preview tab
 The preview tab shows previews. It marks your search keywords too. Click on a preview to open the file.
-A right click on a preview allows you to copy the file path, or to open the containing folder. Hovering tells you which file the preview originates from.
+A right click on a preview allows you to copy the file path, or to open the containing folder.
 
 ### Syncing index
 Over time, files get deleted or their content changes. Go to **looqs** -> **Sync index**. looqs will reindex the content of files which have been changed. Files that cannot be found anymore will be removed from the index.
@@ -81,12 +77,11 @@ There is an implicit "AND" condition, meaning if you search for "photo" and "mou
 will be shown containing both terms, but not either alone.
 
 ### Deletion and Fixing Out of sync index
-You sometimes delete files, to get rid of those from the index too, run:
+To get rid of deleted files from the index, run:
 
 ```
 looqs delete --deleted --dry-run
 ```
-
 This commands lists all files which are indexed, but which cannot be found anymore.
 
 Remove them using:
@@ -122,13 +117,13 @@ looqs update
 ```
 
 This will not add new files, you must run ```looqs add``` for this. For this reason, most users
-will probably seldomly use the 'update' command alone.
+will probably seldom use the 'update' command alone.
 
 
 ## Tips
 
 ### Keeping index up to date
-The most obvious way is to use the GUI and add your favorite paths in the "Index" tab. Then occasionally, just rescan. This works for me personally, looqs quickly picks up new files. This however may not be good enough for some users.
+The most obvious way is to use the GUI to add your favorite paths in the "Index" tab. Then occasionally, just rescan. This works for me personally, looqs quickly picks up new files. This however may not be good enough for some users.
 
 Some users may prefer setting up cronjobs or wire up the CLI interface with file system monitoring tools such as [adhocify](https://github.com/quitesimpleorg/adhocify).
 
@@ -140,20 +135,20 @@ are indexed by looqs, you may find the lh (look here) alias useful:
 alias lh='looqs search $(pwd)'
 ```
 
-So typing "lh recipes" searchs the current dir and its subdirs for a file containing 'recipes'.
+So typing "lh recipes" searches the current dir and its subdirs for a file containing 'recipes'. Alternatively, a "lh c:(rice)" may be a quick grep alternative.
 
 ## Query syntax / Search filters
 A number of search filters are available.
 
 | Filter (long) |  Filter (short) | Explanation |
 | ----------- | ----------- |----------- |
-| path.contains:(term) | p:(term) | Pretty much a SQL LIKE '%term%' conditions, just searches the path string |
+| path.contains:(term) | p:(term) | Pretty much a SQL LIKE '%term%' condition, just searches the path string |
 | path.ends:(term) | pe:(term) | Filters path ending with the specified term, e. g.: pe:(.ogg) |
 | path.begins:(term) | pb:(term) |  Filters path beginning with the specified term |
-| contains:(terms) | c:(terms) | ull-text search, also understands quotes | 
-
-Filters can be combined. The booleans AND and OR are supported. Negations can be applied too, except for c:(). 
-The AND boolean is implicit and thus entering it strictly optional. 
+| contains:(terms) | c:(terms) | Full-text search, also understands quotes |
+| limit:(integer) | - | Limits the number of results. The default is 1000. Say "limit:0" to see all results |
+Filters can be combined. The booleans AND and OR are supported. Negations can be applied too, except for c:(). Negations are specified with "!".
+The AND boolean is implicit and thus entering it strictly optional.
 
 Examples:
 
@@ -162,8 +157,10 @@ Examples:
 |pe:(.ogg) p:(marley)| Finds paths that end with .ogg and contain 'marley' (case-insensitive)
 |p:(slides) support vector machine &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; |Performs a content search for 'support vector machine' in all paths containing 'slides'|
 |p:(notes) (pe:(odt) OR pe:(docx)) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|Finds files such as notes.docx, notes.odt but also any .docs and .odt when the path contains the string 'notes'|
-|memcpy !(pe:(.c) OR pe:(.cpp))| Performs a FTS search for 'memcpy' but excludes .cpp and .c files. 
-|c:("I think, therefore")|Performs a FTS search for the phrase "I think, therefore". 
+|memcpy !(pe:(.c) OR pe:(.cpp))| Performs a FTS search for 'memcpy' but excludes .cpp and .c files.|
+|c:("I think, therefore")|Performs a FTS search for the phrase "I think, therefore".|
+|c:("invoice") Downloads|This query is equivalent to c:("invoice") p:("Downloads")|
+
 
 
 
