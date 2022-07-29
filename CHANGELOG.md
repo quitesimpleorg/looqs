@@ -1,4 +1,30 @@
 # looqs: Release notes
+## 2022-07-29 - v0.5
+This release features multiple fixes and enhancements.
+
+It changes the database to drop an unused content column. Dropping it allows us
+to change to a contentless sqlite FTS index which frees up space.
+
+Upgrading might take a few seconds to a few minutes as looqs will recreate the whole index.
+How long this will take depends on the size of your database.
+
+The other major highlight is preview support for .odt files (unformatted, like plaintext).
+
+List of changes:
+
+ - General: As Ubuntu 21.10 is EOL, no looqs package will be provided for it any longer
+ - General: Update database scheme to drop unused content column and free up space
+ - General: Properly escape FTS arguments passed to sqlite to avoid query errors on some terms
+ - GUI: Fix double searches and results when explicit content search filters are provided
+ - GUI: Previews: Plaintext previews now obey scale selection too
+ - GUI: Previews: Begin basic, unformatted previews of .odt files
+ - GUI: Previews: Add file path below every preview for convenience (hovering unnecessary now).
+ - GUI: Previews: Fix bug causing an empty preview if a plaintext file started with a searched word
+ - GUI: Add menu option to open user manual
+ - GUI: Show progress dialog during database upgrade
+ - General: Correct error count in some conditions for failed paths
+ - General: Update user manual
+ - Minor improvements
 
 ## 2022-06-29 - v0.4
 This release makes several minor improvements and begins prebuilt binaries of looqs that (should) run

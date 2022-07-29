@@ -29,7 +29,7 @@ There is no need to write the long form of filters. There are also booleans avai
 The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state of the GUI.
 
 ## Current status
-Latest version: 2022-06-29, v0.4
+Latest version: 2022-07-29, v0.5
 
 Please see [Changelog](CHANGELOG.md) for a human readable list of changes.
 
@@ -46,7 +46,7 @@ Please see [Changelog](CHANGELOG.md) for a human readable list of changes.
 - GUI, CLI interface
 - Indexing of file path and some metadata.
 - Indexing of file file content for FTS search. Currently: .pdf, odt, docx, plaintext.
-- Preview of file formats: Currently: .pdf, plaintext
+- Preview of file formats: Currently: .pdf, .odt, plaintext
 - Highlight searched terms.
 - Quickly open PDF viewer or text editor at location of preview
 - Search filters
