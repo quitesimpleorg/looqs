@@ -508,7 +508,6 @@ void MainWindow::lineEditReturnPressed()
 			LooqsQuery pathsQuery = tmpQuery;
 
 			this->contentSearchQuery = tmpQuery;
-			this->contentSearchQuery.setTokens({});
 
 			bool addContentSearch = false;
 			bool addPathSearch = false;
@@ -526,17 +525,15 @@ void MainWindow::lineEditReturnPressed()
 				return tokens;
 			};
 
-			/* An explicit search, we just pass it on */
+			/* An explicit search, no lone words. We just pass it on */
 			if(!(tmpQuery.getTokensMask() & TokenType::WORD))
 			{
 				if(tmpQuery.hasContentSearch())
 				{
-					this->contentSearchQuery.setTokens(createFinalTokens(TokenType::FILTER_CONTENT_CONTAINS));
 					addContentSearch = true;
 				}
 				else
 				{
-					this->contentSearchQuery.setTokens(createFinalTokens(TokenType::FILTER_PATH_CONTAINS));
 					addPathSearch = true;
 				}
 			}
@@ -551,8 +548,7 @@ void MainWindow::lineEditReturnPressed()
 			/* A content search and lone words, e. g. c:("to be or not") ebooks */
 			else if(tmpQuery.hasContentSearch() && (tmpQuery.getTokensMask() & TokenType::WORD))
 			{
-				this->contentSearchQuery = tmpQuery;
-				this->contentSearchQuery.setTokens(createFinalTokens(TokenType::FILTER_PATH_CONTAINS));
+				this->contentSearchQuery = LooqsQuery::build(q, TokenType::FILTER_PATH_CONTAINS, false);
 				addContentSearch = true;
 				addPathSearch = false;
 			}
@@ -560,7 +556,7 @@ void MainWindow::lineEditReturnPressed()
 			else if(!tmpQuery.hasPathSearch() && !tmpQuery.hasContentSearch())
 			{
 				this->contentSearchQuery.setTokens(createFinalTokens(TokenType::FILTER_CONTENT_CONTAINS));
-				pathsQuery.setTokens(createFinalTokens(TokenType::FILTER_PATH_CONTAINS));
+				pathsQuery = LooqsQuery::build(q, TokenType::FILTER_PATH_CONTAINS, false);
 				addContentSearch = true;
 				addPathSearch = true;
 			}
@@ -579,6 +575,10 @@ void MainWindow::lineEditReturnPressed()
 					this->contentSearchQuery.setLimit(1000);
 				}
 				results.append(searcher.search(this->contentSearchQuery));
+			}
+			else
+			{
+				this->contentSearchQuery.setTokens({});
 			}
 			return results;
 		});
