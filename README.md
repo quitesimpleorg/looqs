@@ -29,7 +29,7 @@ There is no need to write the long form of filters. There are also booleans avai
 The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state of the GUI.
 
 ## Current status
-Latest version: 2022-07-29, v0.5
+Latest version: 2022-07-30, v0.5.1
 
 Please see [Changelog](CHANGELOG.md) for a human readable list of changes.
 

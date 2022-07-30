@@ -1,4 +1,9 @@
 # looqs: Release notes
+## 2022-07-30 - v0.5.1
+
+CHANGES:
+	- gui: Fix regression in implicit paths queries introduced in previous version
+
 ## 2022-07-29 - v0.5
 This release features multiple fixes and enhancements.
 
