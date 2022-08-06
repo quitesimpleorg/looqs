@@ -2,6 +2,7 @@
 
 #include "previewgeneratorplaintext.h"
 #include "previewresultplaintext.h"
+#include "../shared/limitqueue.h"
 
 QString PreviewGeneratorPlainText::generatePreviewText(QString content, RenderConfig config, QString fileName)
 {
@@ -73,6 +74,82 @@ QString PreviewGeneratorPlainText::generatePreviewText(QString content, RenderCo
 	return header + resulText.replace("\n", "<br>").mid(0, 1000);
 }
 
+QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in, RenderConfig config, QString fileName)
+{
+	QString resultText;
+	const unsigned int contextLinesCount = 2;
+	LimitQueue<QString> queue(contextLinesCount);
+	QString currentLine;
+	currentLine.reserve(512);
+
+	/* How many lines to read after a line with a match (like grep -A ) */
+	int justReadLinesCount = -1;
+
+	auto appendLine = [&resultText](int lineNumber, QString &line)
+	{ resultText.append(QString("<b>%1</b>%2<br>").arg(lineNumber).arg(line)); };
+
+	QHash<QString, int> countmap;
+	QString header = "<b>" + fileName + "</b> ";
+
+	unsigned int snippetsCount = 0;
+	unsigned int lineCount = 0;
+	while(in.readLineInto(&currentLine) && snippetsCount < MAX_SNIPPETS)
+	{
+		++lineCount;
+		bool matched = false;
+		if(justReadLinesCount > 0)
+		{
+			appendLine(lineCount, currentLine);
+			--justReadLinesCount;
+			continue;
+		}
+		if(justReadLinesCount == 0)
+		{
+			resultText += "---<br>";
+			justReadLinesCount = -1;
+			++snippetsCount;
+		}
+		for(QString &word : config.wordsToHighlight)
+		{
+			if(currentLine.contains(word, Qt::CaseInsensitive))
+			{
+				countmap[word] = countmap.value(word, 0) + 1;
+				matched = true;
+				currentLine.replace(word, "<span style=\"background-color: yellow;\">" + word + "</span>",
+									Qt::CaseInsensitive);
+			}
+		}
+		if(matched)
+		{
+			while(queue.size() > 0)
+			{
+				int queuedLineCount = lineCount - queue.size();
+				QString queuedLine = queue.dequeue();
+
+				appendLine(queuedLineCount, queuedLine);
+			}
+			appendLine(lineCount, currentLine);
+			justReadLinesCount = contextLinesCount;
+		}
+		else
+		{
+			queue.enqueue(currentLine);
+		}
+	}
+
+	for(QString &word : config.wordsToHighlight)
+	{
+		header += word + ": " + QString::number(countmap[word]) + " ";
+	}
+	if(snippetsCount == MAX_SNIPPETS)
+	{
+		header += "(truncated)";
+	}
+	header += "<hr>";
+
+	return header + resultText;
+}
+
 QSharedPointer<PreviewResult> PreviewGeneratorPlainText::generate(RenderConfig config, QString documentPath,
 																  unsigned int page)
 {
@@ -83,9 +160,7 @@ QSharedPointer<PreviewResult> PreviewGeneratorPlainText::generate(RenderConfig c
 		return QSharedPointer<PreviewResultPlainText>(result);
 	}
 	QTextStream in(&file);
-
-	QString content = in.readAll();
 	QFileInfo info{documentPath};
-	result->setText(generatePreviewText(content, config, info.fileName()));
+	result->setText(generateLineBasedPreviewText(in, config, info.fileName()));
 	return QSharedPointer<PreviewResultPlainText>(result);
 }
