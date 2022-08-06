@@ -4,6 +4,9 @@
 
 class PreviewGeneratorPlainText : public PreviewGenerator
 {
+  protected:
+	const unsigned int MAX_SNIPPETS = 7;
+
   public:
 	using PreviewGenerator::PreviewGenerator;
 	QString generatePreviewText(QString content, RenderConfig config, QString fileName);

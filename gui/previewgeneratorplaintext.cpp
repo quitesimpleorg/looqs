@@ -14,14 +14,13 @@ QString PreviewGeneratorPlainText::generatePreviewText(QString content, RenderCo
 
 	QHash<QString, int> countmap;
 
-	const unsigned int maxSnippets = 7;
 	unsigned int currentSnippets = 0;
 	for(QString &word : config.wordsToHighlight)
 	{
 
 		int lastPos = 0;
 		int index = content.indexOf(word, lastPos, Qt::CaseInsensitive);
-		while(index != -1 && currentSnippets < maxSnippets)
+		while(index != -1 && currentSnippets < MAX_SNIPPETS)
 		{
 			countmap[word] = countmap.value(word, 0) + 1;
 
@@ -57,17 +56,14 @@ QString PreviewGeneratorPlainText::generatePreviewText(QString content, RenderCo
 		++i;
 	}
 
-	for(QString &word : config.wordsToHighlight)
-	{
-		resulText.replace(word, "<span style=\"background-color: yellow;\">" + word + "</span>", Qt::CaseInsensitive);
-	}
-
 	QString header = "<b>" + fileName + "</b> ";
 	for(QString &word : config.wordsToHighlight)
 	{
+		resulText.replace(word, "<span style=\"background-color: yellow;\">" + word + "</span>", Qt::CaseInsensitive);
 		header += word + ": " + QString::number(countmap[word]) + " ";
 	}
-	if(currentSnippets == maxSnippets)
+
+	if(currentSnippets == MAX_SNIPPETS)
 	{
 		header += "(truncated)";
 	}
