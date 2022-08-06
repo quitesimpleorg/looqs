@@ -77,6 +77,7 @@ HEADERS += sqlitesearch.h \
     filescanworker.h \
     indexer.h \
     indexsyncer.h \
+    limitqueue.h \
     logger.h \
     looqsgeneralexception.h \
     looqsquery.h \
