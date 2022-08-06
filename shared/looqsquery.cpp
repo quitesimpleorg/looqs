@@ -180,9 +180,8 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 
 	QStringList loneWords;
 	LooqsQuery result;
-	QRegularExpression rx(
-		"((?<filtername>(\\.|\\w)+):(?<args>\\((?<innerargs>[^\\)]+)\\)|([\\p{L}\\p{N},])+)|(?<boolean>AND|OR)"
-		"|(?<negation>!)|(?<bracket>\\(|\\))|(?<loneword>[\"\\p{L}\\p{N}]+))");
+	QRegularExpression rx("((?<filtername>(\\.|\\w)+):(?<args>\\((?<innerargs>[^\\)]+)\\)|([^\\s])+)|(?<boolean>AND|OR)"
+						  "|(?<negation>!)|(?<bracket>\\(|\\))|(?<loneword>[^\\s]+))");
 	QRegularExpressionMatchIterator i = rx.globalMatch(expression);
 	auto previousWasBool = [&result] { return !result.tokens.empty() && ((result.tokens.last().type & BOOL) == BOOL); };
 	auto previousWas = [&result](TokenType t) { return !result.tokens.empty() && (result.tokens.last().type == t); };

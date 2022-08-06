@@ -669,7 +669,7 @@ void MainWindow::makePreviews(int page)
 	processedPdfPreviews = 0;
 
 	QVector<QString> wordsToHighlight;
-	QRegularExpression extractor(R"#("([^"]*)"|((\p{L}|\p{N})+))#");
+	QRegularExpression extractor(R"#("([^"]*)"|([^\s]+))#");
 	for(const Token &token : this->contentSearchQuery.getTokens())
 	{
 		if(token.type == FILTER_CONTENT_CONTAINS)
