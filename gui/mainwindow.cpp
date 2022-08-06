@@ -588,6 +588,8 @@ void MainWindow::lineEditReturnPressed()
 void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 {
 	this->previewableSearchResults.clear();
+	qDeleteAll(ui->scrollAreaWidgetContents->children());
+
 	ui->treeResultsList->clear();
 	ui->comboPreviewFiles->clear();
 	ui->comboPreviewFiles->addItem("All previews");
