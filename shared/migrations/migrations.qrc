@@ -2,5 +2,6 @@
     <qresource prefix="/looqs-migrations">
         <file>1.sql</file>
         <file>2.sql</file>
+        <file>3.sql</file>
     </qresource>
 </RCC>
