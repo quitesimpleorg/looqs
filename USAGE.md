@@ -9,6 +9,8 @@ looqs is still at an early stage and may exhibit some weirdness and contain bugs
 ## Current Limitations and things to know
 You should be aware of the following:
 
+- Lags are to be expected for networked mount points such as SMB and NFS etc.
+
 - It may seem natural, but the GUI and CLI operate on the same database, so if you add files using the CLI, the GUI will know about them too.
 
 - If a file is listed in the "Search results" tab, it does not imply that a preview will be available in the "Previews" tab, as looqs can search more file formats than it can generate previews for currently.
@@ -26,6 +28,7 @@ Database default path: `$HOME/.local/share/quitesimple.org/looqs/looqs.sqlite`. 
 ### First run
 You will be presented with an empty list. Go to the **"Index"** tab, add some directories and click **"Start indexing"**.
 
+### Indexing
 For large directories the progress bar is essentially just decoration. As long as you see the counters
 increase, everything is fine even if it seems the progress bar is stuck.
 
@@ -33,8 +36,16 @@ The indexing can be stopped. If you run it again you do not start from scratch, 
 which files have been modified since they have been added to the index. Thus, files will
 only be reprocessed when necessary. Note that cancellation itself may take a moment as files finish processing.
 
+The counters increase in batches, therefore it's normal that it seems no progress is being made, particularly when processing lots of large documents. This aspect will be improved in a future version.
+
 ### Search
 The text field at the top is where you type your query. It can be selected quickly using **CTRL + L**. Filters are available, see this document at the end. By default, both the full path and the content are searched. Path names take precedence, i. e. they will appear the top of the list.
+
+**CTRL + F**: This is helpful shortcut if you want to perform several searches. Consider the following
+query: "p:(docs) c:(invoice credit card)". Press CTRL+F to highlight 'invoice credit card'. This way
+you can quickly perform content searches in paths containing 'docs'.
+
+**CTRL + W**: Removes the last filter. If we take above's example "p:(docs) c:(invoice credit card)" again, then CTRL + W kills "c:(invoice credit card)".
 
 ### Configuring PDF viewer
 It's most convenient if, when you click on a preview, the PDF reader opens the page you clicked. For that, looqs needs to know which viewer you want to launch.
