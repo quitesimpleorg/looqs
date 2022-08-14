@@ -408,6 +408,17 @@ void MainWindow::initSettingsTabs()
 
 void MainWindow::saveSettings()
 {
+	if(ui->chkRemoveOldDb->isChecked())
+	{
+		bool result = QFile::remove(Common::databasePath());
+		if(!result)
+		{
+			QMessageBox::critical(this, "Error removing database",
+								  "Failed to remove old database. Settings not saved.");
+			return;
+		}
+	}
+
 	QSettings settings;
 
 	QString pdfViewerCmd = ui->txtSettingPdfPreviewerCmd->text();
