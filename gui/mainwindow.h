@@ -63,7 +63,8 @@ class MainWindow : public QMainWindow
 	unsigned int currentPreviewGeneration = 1;
 	void initSettingsTabs();
 	int currentSelectedScale();
-  private slots:
+	void processShortcut(int key);
+private slots:
 	void lineEditReturnPressed();
 	void treeSearchItemActivated(QTreeWidgetItem *item, int i);
 	void showSearchResultsContextMenu(const QPoint &point);

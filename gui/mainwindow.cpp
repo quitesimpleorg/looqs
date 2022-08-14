@@ -341,6 +341,85 @@ bool MainWindow::indexerTabActive()
 	return ui->tabWidget->currentIndex() == 2;
 }
 
+void MainWindow::processShortcut(int key)
+{
+	if(key == Qt::Key_L)
+	{
+		ui->txtSearch->setFocus();
+		ui->txtSearch->selectAll();
+	}
+	if(key == Qt::Key_W)
+	{
+		ui->txtSearch->setFocus();
+		QString currentText = ui->txtSearch->text().trimmed();
+		int index = currentText.lastIndexOf(QRegularExpression("[\\s\\)]"));
+		if(index != -1)
+		{
+			bool isFilter = (index == currentText.length() - 1);
+			currentText.remove(index + 1, currentText.length() - index - 1);
+			if(isFilter)
+			{
+				index = currentText.lastIndexOf(' ', index);
+				if(index == -1)
+				{
+					index = 0;
+				}
+				currentText.remove(index, currentText.length());
+			}
+			if(currentText.length() > 0)
+			{
+				currentText += ' ';
+			}
+			ui->txtSearch->setText(currentText);
+		}
+		else
+		{
+			ui->txtSearch->clear();
+		}
+		return;
+	}
+	if(key == Qt::Key_F)
+	{
+		ui->txtSearch->setFocus();
+		QString currentText = ui->txtSearch->text().trimmed();
+		int index = currentText.lastIndexOf(')');
+		if(index != -1)
+		{
+			bool isFilter = (index == currentText.length() - 1);
+			if(!isFilter)
+			{
+				ui->txtSearch->setSelection(index + 2, ui->txtSearch->text().length() - index - 1);
+			}
+			else
+			{
+				int begin = currentText.lastIndexOf('(', index - 1);
+				if(begin != -1)
+				{
+					ui->txtSearch->setSelection(begin + 1, index - begin - 1);
+				}
+			}
+		}
+		else
+		{
+			int spaceIndex = currentText.lastIndexOf(' ');
+			int colonIndex = currentText.lastIndexOf(':');
+			if(colonIndex > spaceIndex)
+			{
+				int target = currentText.indexOf(' ', colonIndex);
+				if(target == -1)
+				{
+					target = ui->txtSearch->text().size() - colonIndex;
+				}
+				ui->txtSearch->setSelection(colonIndex + 1, target - 1);
+			}
+			else
+			{
+				ui->txtSearch->setSelection(spaceIndex + 1, ui->txtSearch->text().size() - spaceIndex - 1);
+			}
+		}
+	}
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
 	bool quit =
@@ -352,12 +431,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 	if(event->modifiers() & Qt::ControlModifier)
 	{
-
-		if(event->key() == Qt::Key_L)
-		{
-			ui->txtSearch->setFocus();
-			ui->txtSearch->selectAll();
-		}
+		processShortcut(event->key());
 	}
 	QWidget::keyPressEvent(event);
 }
