@@ -343,6 +343,24 @@ bool MainWindow::indexerTabActive()
 
 void MainWindow::processShortcut(int key)
 {
+	if(key == Qt::Key_Tab || key == Qt::Key_Backtab)
+	{
+		int tabIndex = ui->tabWidget->currentIndex();
+		if(key == Qt::Key_Tab)
+		{
+			++tabIndex;
+		}
+		if(key == Qt::Key_Backtab)
+		{
+			--tabIndex;
+		}
+		tabIndex = tabIndex % ui->tabWidget->count();
+		if(tabIndex < 0)
+		{
+			tabIndex = ui->tabWidget->count() - 1;
+		}
+		ui->tabWidget->setCurrentIndex(tabIndex);
+	}
 	if(key == Qt::Key_L)
 	{
 		ui->txtSearch->setFocus();
@@ -376,7 +394,6 @@ void MainWindow::processShortcut(int key)
 		{
 			ui->txtSearch->clear();
 		}
-		return;
 	}
 	if(key == Qt::Key_F)
 	{
@@ -427,12 +444,15 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 	if(quit)
 	{
 		qApp->quit();
+		return;
 	}
 
 	if(event->modifiers() & Qt::ControlModifier)
 	{
 		processShortcut(event->key());
+		return;
 	}
+
 	QWidget::keyPressEvent(event);
 }
 
