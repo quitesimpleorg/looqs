@@ -1,8 +1,23 @@
 # looqs: Release notes
+## 2022-08-14 - v0.6
+This release features multiple fixes and enhancements.
+
+Bad news first: It drops a trivial trigger that appeared to work quite fine, but silently may cause "unpredictability" of the sqlite FTS5 index ( [9422a5b494](https://github.com/quitesimpleorg/looqs/commit/9422a5b494dabd0f1324dc2f92a34c3036137414) ). As a result, FTS queries may return weird and unexplainable results. This is not reasonably automatically recoverable by looqs. I strongly recommend creating a clean, new database. All previous versions are affected. To do that, go to "Settings" -> checking "Remove old database on save" -> "Save settings and restart". Alternatively, specify a new path to keep the old database.
+
+CHANGES:
+
+ - GUI: Add line numbers and context lines to plaintext previews
+ - GUI: Fix case where previews for old queries would have still been visible if new query would not create previews
+ - GUI: Add CTRL + F, CTRL+W, CTRL+Tab, CTRL+Shift+Tab shortcuts (see user manual)
+ - GUI: Add checkbox in "Settings" tab allowing to delete database.
+ - General: Fix wrong regexes that caused query errors with chars like -
+ - General: Drop trigger sending incomplete sqlite fts5 deletion command, causing undefined index behaviour
+
 ## 2022-07-30 - v0.5.1
 
 CHANGES:
-	- gui: Fix regression in implicit paths queries introduced in previous version
+
+ - gui: Fix regression in implicit paths queries introduced in previous version
 
 ## 2022-07-29 - v0.5
 This release features multiple fixes and enhancements.

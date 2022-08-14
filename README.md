@@ -1,10 +1,9 @@
 # looqs - Full-text search with previews for your files
-looqs is a tool that creates a full-text search index for your files. It allows you to look at previews where your
-search terms have been found, as shown in the screenshots below.
+looqs is a tool that creates a full-text search index for your files. It allows you to look at previews where your search terms have been found, as shown in the screenshots below.
 
 ## Screenshots
 ### Preview
-looqs allow you to look inside files. It marks what you have searched for.
+looqs allows you to look inside files. It highlights what you have searched for.
 
 ![Screenshot looqs](https://garage.quitesimple.org/assets/looqs/orwell.png)
 ![Screenshot looqs search fstream](https://garage.quitesimple.org/assets/looqs/fstream_write.png)
@@ -29,7 +28,7 @@ There is no need to write the long form of filters. There are also booleans avai
 The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state of the GUI.
 
 ## Current status
-Latest version: 2022-07-30, v0.5.1
+Latest version: 2022-08-14, v0.6
 
 Please see [Changelog](CHANGELOG.md) for a human readable list of changes.
 
