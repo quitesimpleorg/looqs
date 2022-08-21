@@ -75,6 +75,7 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath)
 	ui->btnOpenFailed->setSizePolicy(policy);
 
 	ui->txtSearch->installEventFilter(this);
+	ui->scrollArea->viewport()->installEventFilter(this);
 
 	this->ipcClientThread.start();
 }
@@ -491,6 +492,32 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 				/* Off by one on purpose so Key_Up decrements it again and lands at
 				 * the last entry */
 				this->currentSearchHistoryIndex = this->searchHistory.size();
+			}
+		}
+	}
+	if(object == ui->scrollArea->viewport())
+	{
+		if(event->type() == QEvent::Wheel)
+		{
+			QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
+			if(wheelEvent->modifiers() & Qt::ControlModifier)
+			{
+				if(wheelEvent->angleDelta().y() > 0)
+				{
+					if(ui->comboScale->currentIndex() < ui->comboScale->count() - 1)
+					{
+						ui->comboScale->setCurrentIndex(ui->comboScale->currentIndex() + 1);
+					}
+				}
+
+				else
+				{
+					if(ui->comboScale->currentIndex() > 0)
+					{
+						ui->comboScale->setCurrentIndex(ui->comboScale->currentIndex() - 1);
+					}
+				}
+				return true;
 			}
 		}
 	}
