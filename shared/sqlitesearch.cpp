@@ -78,12 +78,17 @@ QString SqliteSearch::escapeFtsArgument(QString ftsArg)
 		if(value.isEmpty())
 		{
 			value = m.captured(2);
+			if(value.endsWith('*'))
+			{
+				value = value.mid(0, value.size() - 1);
+			}
+			result += "\"" + value + "\"*";
 		}
 		else
 		{
 			value = "\"\"" + value + "\"\"";
+			result += "\"" + value + "\" ";
 		}
-		result += "\"" + value + "\" ";
 	}
 	return result;
 }
