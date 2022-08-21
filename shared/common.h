@@ -9,6 +9,7 @@
 #define SETTINGS_KEY_EXCLUDEDPATHS "excludedpaths"
 #define SETTINGS_KEY_MOUNTPATHS "mountpaths"
 #define SETTINGS_KEY_PREVIEWSPERPAGE "previewsPerPage"
+#define SETTINGS_KEY_SEARCHHISTORY "searchhistory"
 
 namespace Common
 {

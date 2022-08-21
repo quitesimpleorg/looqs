@@ -30,6 +30,9 @@ class MainWindow : public QMainWindow
 	void beginSearch(const QString &query);
 	void startPdfPreviewGeneration(QVector<SearchResult> paths, double scalefactor);
 
+  protected:
+	void closeEvent(QCloseEvent *event) override;
+
   private:
 	DatabaseFactory *dbFactory;
 	SqliteDbService *dbService;

@@ -60,6 +60,10 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath)
 	QString ignorePatterns = settings.value("ignorePatterns").toString();
 	ui->txtIgnorePatterns->setText(ignorePatterns);
 
+	QStringList searchHistoryList = settings.value(SETTINGS_KEY_SEARCHHISTORY).toStringList();
+	this->searchHistory = searchHistoryList.toVector();
+	this->currentSearchHistoryIndex = this->searchHistory.size();
+
 	ui->spinPreviewPage->setValue(1);
 	ui->spinPreviewPage->setMinimum(1);
 
@@ -988,4 +992,12 @@ MainWindow::~MainWindow()
 	delete this->dbFactory;
 	delete this->indexer;
 	delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	QStringList list = this->searchHistory.toList();
+	QSettings settings;
+	settings.setValue(SETTINGS_KEY_SEARCHHISTORY, list);
+	settings.sync();
 }
