@@ -10,6 +10,7 @@
 #define SETTINGS_KEY_MOUNTPATHS "mountpaths"
 #define SETTINGS_KEY_PREVIEWSPERPAGE "previewsPerPage"
 #define SETTINGS_KEY_SEARCHHISTORY "searchhistory"
+#define SETTINGS_KEY_PREVIEWS_SCROLL_HORIZONTALLY "horizontalscroll"
 
 namespace Common
 {

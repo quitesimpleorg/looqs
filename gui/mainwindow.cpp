@@ -585,6 +585,9 @@ void MainWindow::initSettingsTabs()
 	ui->txtSettingMountPaths->setText(mountPaths);
 	ui->spinSettingNumerPerPages->setValue(numPagesPerPreview);
 	ui->txtSettingDatabasePath->setText(databasePath);
+	bool horizontalScroll = settings.value(SETTINGS_KEY_PREVIEWS_SCROLL_HORIZONTALLY).toBool();
+	ui->radioScrollHorizontally->setChecked(horizontalScroll);
+	ui->radioScrollVertically->setChecked(!horizontalScroll);
 }
 
 void MainWindow::saveSettings()
@@ -612,6 +615,7 @@ void MainWindow::saveSettings()
 	settings.setValue(SETTINGS_KEY_MOUNTPATHS, mountPaths);
 	settings.setValue(SETTINGS_KEY_PREVIEWSPERPAGE, ui->spinSettingNumerPerPages->value());
 	settings.setValue(SETTINGS_KEY_DBPATH, databasePath);
+	settings.setValue(SETTINGS_KEY_PREVIEWS_SCROLL_HORIZONTALLY, ui->radioScrollHorizontally->isChecked());
 
 	settings.sync();
 
@@ -866,7 +870,17 @@ void MainWindow::makePreviews(int page)
 	}
 	qDeleteAll(ui->scrollAreaWidgetContents->children());
 
-	ui->scrollAreaWidgetContents->setLayout(new QHBoxLayout());
+	QSettings settings;
+	bool horizontalScroll = settings.value(SETTINGS_KEY_PREVIEWS_SCROLL_HORIZONTALLY, false).toBool();
+	if(horizontalScroll)
+	{
+		ui->scrollAreaWidgetContents->setLayout(new QHBoxLayout());
+	}
+	else
+	{
+		ui->scrollAreaWidgetContents->setLayout(new QVBoxLayout());
+		ui->scrollAreaWidgetContents->layout()->setAlignment(Qt::AlignCenter);
+	}
 	ui->previewProcessBar->setMaximum(this->previewableSearchResults.size());
 	processedPdfPreviews = 0;
 

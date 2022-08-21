@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1280</width>
-    <height>855</height>
+    <height>888</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
        <enum>QTabWidget::South</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="resultsTab">
        <attribute name="title">
@@ -82,7 +82,7 @@
              <x>0</x>
              <y>0</y>
              <width>1244</width>
-             <height>565</height>
+             <height>598</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout"/>
@@ -543,6 +543,19 @@
          </widget>
         </item>
         <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <widget class="QGroupBox" name="Misc">
           <property name="title">
            <string>Misc</string>
@@ -551,7 +564,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_9">
              <item>
-              <widget class="QLabel" name="label_4">
+              <widget class="QLabel" name="lblMaxNumbersPreviewPages">
                <property name="text">
                 <string>Max number of previews per 'page' in 'Previews' tab: </string>
                </property>
@@ -575,21 +588,46 @@
              </item>
             </layout>
            </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
+             <item>
+              <widget class="QLabel" name="lblScrollModeForPreviews">
+               <property name="text">
+                <string>Scroll mode for previews:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioScrollVertically">
+               <property name="text">
+                <string>Vertically</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="radioScrollHorizontally">
+               <property name="text">
+                <string>Horizontally</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_6">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
           </layout>
          </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
         <item>
          <widget class="QPushButton" name="btnSaveSettings">
