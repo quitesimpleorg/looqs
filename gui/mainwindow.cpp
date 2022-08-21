@@ -70,6 +70,8 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath)
 	policy.setRetainSizeWhenHidden(true);
 	ui->btnOpenFailed->setSizePolicy(policy);
 
+	ui->txtSearch->installEventFilter(this);
+
 	this->ipcClientThread.start();
 }
 
@@ -437,6 +439,60 @@ void MainWindow::processShortcut(int key)
 	}
 }
 
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
+{
+	if(object == ui->txtSearch && !searchHistory.empty())
+	{
+		if(event->type() == QEvent::KeyPress)
+		{
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+			if(keyEvent->key() == Qt::Key_Up)
+			{
+				if(this->currentSavedSearchText.isEmpty())
+				{
+					this->currentSavedSearchText = ui->txtSearch->text();
+				}
+				if(this->currentSearchHistoryIndex <= 0)
+				{
+					return true;
+				}
+				--this->currentSearchHistoryIndex;
+				QString text = this->searchHistory.at(this->currentSearchHistoryIndex);
+				ui->txtSearch->setText(text);
+				return true;
+			}
+			else if(keyEvent->key() == Qt::Key_Down)
+			{
+				if(this->currentSearchHistoryIndex == searchHistory.size() - 1)
+				{
+					if(!this->currentSavedSearchText.isEmpty())
+					{
+						ui->txtSearch->setText(this->currentSavedSearchText);
+						this->currentSavedSearchText.clear();
+						++this->currentSearchHistoryIndex;
+					}
+					return true;
+				}
+				if(this->currentSearchHistoryIndex < searchHistory.size() - 1)
+				{
+					++this->currentSearchHistoryIndex;
+					QString text = this->searchHistory.at(this->currentSearchHistoryIndex);
+					ui->txtSearch->setText(text);
+				}
+				return true;
+			}
+			else
+			{
+				this->currentSavedSearchText.clear();
+				/* Off by one on purpose so Key_Up decrements it again and lands at
+				 * the last entry */
+				this->currentSearchHistoryIndex = this->searchHistory.size();
+			}
+		}
+	}
+	return QMainWindow::eventFilter(object, event);
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
 	bool quit =
@@ -600,6 +656,14 @@ void MainWindow::lineEditReturnPressed()
 		ui->tabWidget->setCurrentIndex(0);
 	}
 	// TODO: validate q;
+	while(this->searchHistory.size() > 30)
+	{
+		this->searchHistory.removeFirst();
+	}
+	this->searchHistory.append(q);
+	this->currentSearchHistoryIndex = this->searchHistory.size();
+	this->currentSavedSearchText.clear();
+
 	ui->treeResultsList->clear();
 	ui->lblSearchResults->setText("Searching...");
 	this->ui->txtSearch->setEnabled(false);

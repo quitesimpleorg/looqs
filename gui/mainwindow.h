@@ -64,7 +64,11 @@ class MainWindow : public QMainWindow
 	void initSettingsTabs();
 	int currentSelectedScale();
 	void processShortcut(int key);
-private slots:
+	bool eventFilter(QObject *object, QEvent *event);
+	QVector<QString> searchHistory;
+	int currentSearchHistoryIndex = 0;
+	QString currentSavedSearchText;
+  private slots:
 	void lineEditReturnPressed();
 	void treeSearchItemActivated(QTreeWidgetItem *item, int i);
 	void showSearchResultsContextMenu(const QPoint &point);
