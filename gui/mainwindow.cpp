@@ -215,6 +215,7 @@ void MainWindow::connectSignals()
 				this->ui->previewProcessBar->setValue(this->ui->previewProcessBar->maximum());
 				this->ui->spinPreviewPage->setEnabled(true);
 				this->ui->comboPreviewFiles->setEnabled(true);
+				ui->txtSearch->setEnabled(true);
 			});
 	connect(&ipcPreviewClient, &IPCPreviewClient::error, this,
 			[this](QString msg)
@@ -955,6 +956,7 @@ void MainWindow::makePreviews(int page)
 	++this->currentPreviewGeneration;
 	this->ui->spinPreviewPage->setEnabled(false);
 	this->ui->comboPreviewFiles->setEnabled(false);
+	this->ui->txtSearch->setEnabled(false);
 	emit startIpcPreviews(renderConfig, targets);
 }
 
