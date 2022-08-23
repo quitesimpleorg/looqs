@@ -6,7 +6,7 @@ class SearchResult
 {
   public:
 	FileData fileData;
-	QVector<unsigned int> pages;
+	unsigned int page;
 	bool wasContentSearch = false;
 };
 

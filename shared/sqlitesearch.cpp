@@ -194,7 +194,7 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 				sortSql = "ORDER BY rank";
 			}
 		}
-		prepSql = "SELECT file.path AS path,  content.page AS pages, file.mtime AS mtime, file.size AS size, "
+		prepSql = "SELECT file.path AS path,  content.page AS page, file.mtime AS mtime, file.size AS size, "
 				  "file.filetype AS filetype FROM file INNER JOIN content ON file.id = content.fileid " +
 				  joinSql + " WHERE 1=1 AND " + whereSql + " " + sortSql;
 	}
@@ -204,7 +204,7 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 		{
 			sortSql = "ORDER BY file.mtime DESC";
 		}
-		prepSql = "SELECT file.path AS path, '0' as pages,  file.mtime AS mtime, file.size AS size, file.filetype AS "
+		prepSql = "SELECT file.path AS path, '0' as page,  file.mtime AS mtime, file.size AS size, file.filetype AS "
 				  "filetype FROM file WHERE  1=1 AND " +
 				  whereSql + " " + sortSql;
 	}
@@ -247,15 +247,7 @@ QVector<SearchResult> SqliteSearch::search(const LooqsQuery &query)
 		result.fileData.mtime = dbQuery.value("mtime").toUInt();
 		result.fileData.size = dbQuery.value("size").toUInt();
 		result.fileData.filetype = dbQuery.value("filetype").toChar();
-		QString pages = dbQuery.value("pages").toString();
-		QStringList pagesList = pages.split(",");
-		for(QString &page : pagesList)
-		{
-			if(page != "")
-			{
-				result.pages.append(page.toUInt());
-			}
-		}
+		result.page = dbQuery.value("page").toUInt();
 		result.wasContentSearch = contentSearch;
 		results.append(result);
 	}

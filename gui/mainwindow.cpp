@@ -944,12 +944,8 @@ void MainWindow::makePreviews(int page)
 		}
 		RenderTarget renderTarget;
 		renderTarget.path = sr.fileData.absPath;
-
-		for(unsigned int pagenum : sr.pages)
-		{
-			renderTarget.page = (int)pagenum;
-			targets.append(renderTarget);
-		}
+		renderTarget.page = (int)sr.page;
+		targets.append(renderTarget);
 	}
 	int numpages = ceil(static_cast<double>(targets.size()) / previewsPerPage);
 	ui->spinPreviewPage->setMaximum(numpages);
