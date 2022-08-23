@@ -198,7 +198,14 @@ void MainWindow::connectSignals()
 	connect(ui->btnSaveSettings, &QPushButton::clicked, this, &MainWindow::saveSettings);
 	connect(ui->btnOpenFailed, &QPushButton::clicked, this, &MainWindow::exportFailedPaths);
 	connect(
-		ui->comboPreviewFiles, qOverload<int>(&QComboBox::currentIndexChanged), this, [&]() { makePreviews(1); },
+		ui->comboPreviewFiles, qOverload<int>(&QComboBox::currentIndexChanged), this,
+		[&]()
+		{
+			if(this->previewTabActive())
+			{
+				makePreviews(1);
+			}
+		},
 		Qt::QueuedConnection);
 	connect(&ipcPreviewClient, &IPCPreviewClient::previewReceived, this, &MainWindow::previewReceived,
 			Qt::QueuedConnection);
