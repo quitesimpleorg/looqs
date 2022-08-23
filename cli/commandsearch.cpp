@@ -33,11 +33,18 @@ int CommandSearch::handle(QStringList arguments)
 
 	try
 	{
+
+		QHash<QString, bool> seenMap;
 		auto results = dbService->search(query);
 
-		for(SearchResult &result : results)
+		for(const SearchResult &result : results)
 		{
-			Logger::info() << result.fileData.absPath << Qt::endl;
+			const QString &absPath = result.fileData.absPath;
+			if(!seenMap.contains(absPath))
+			{
+				seenMap[absPath] = true;
+				Logger::info() << absPath << Qt::endl;
+			}
 		}
 	}
 	catch(LooqsGeneralException &e)

@@ -808,19 +808,25 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	ui->comboPreviewFiles->setVisible(true);
 
 	bool hasDeleted = false;
+	QHash<QString, bool> seenMap;
 	for(const SearchResult &result : results)
 	{
-		QFileInfo pathInfo(result.fileData.absPath);
+		const QString &absPath = result.fileData.absPath;
+		QFileInfo pathInfo(absPath);
 
-		QString fileName = pathInfo.fileName();
-		QTreeWidgetItem *item = new QTreeWidgetItem(ui->treeResultsList);
+		if(!seenMap.contains(absPath))
+		{
+			seenMap[absPath] = true;
+			QString fileName = pathInfo.fileName();
+			QTreeWidgetItem *item = new QTreeWidgetItem(ui->treeResultsList);
 
-		QDateTime dt = QDateTime::fromSecsSinceEpoch(result.fileData.mtime);
-		item->setIcon(0, iconProvider.icon(pathInfo));
-		item->setText(0, fileName);
-		item->setText(1, result.fileData.absPath);
-		item->setText(2, dt.toString(Qt::ISODate));
-		item->setText(3, this->locale().formattedDataSize(result.fileData.size));
+			QDateTime dt = QDateTime::fromSecsSinceEpoch(result.fileData.mtime);
+			item->setIcon(0, iconProvider.icon(pathInfo));
+			item->setText(0, fileName);
+			item->setText(1, absPath);
+			item->setText(2, dt.toString(Qt::ISODate));
+			item->setText(3, this->locale().formattedDataSize(result.fileData.size));
+		}
 		bool exists = pathInfo.exists();
 		if(exists)
 		{
@@ -843,6 +849,7 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 			hasDeleted = true;
 		}
 	}
+
 	ui->treeResultsList->resizeColumnToContents(0);
 	ui->treeResultsList->resizeColumnToContents(1);
 	ui->treeResultsList->resizeColumnToContents(2);

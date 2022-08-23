@@ -194,10 +194,9 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 				sortSql = "ORDER BY rank";
 			}
 		}
-		prepSql =
-			"SELECT file.path AS path, group_concat(content.page) AS pages, file.mtime AS mtime, file.size AS size, "
-			"file.filetype AS filetype FROM file INNER JOIN content ON file.id = content.fileid " +
-			joinSql + " WHERE 1=1 AND " + whereSql + " GROUP BY file.path  " + sortSql;
+		prepSql = "SELECT file.path AS path,  content.page AS pages, file.mtime AS mtime, file.size AS size, "
+				  "file.filetype AS filetype FROM file INNER JOIN content ON file.id = content.fileid " +
+				  joinSql + " WHERE 1=1 AND " + whereSql + " " + sortSql;
 	}
 	else
 	{
