@@ -1,5 +1,6 @@
 #include <QMutexLocker>
 #include <QPainter>
+#include <QRegularExpression>
 #include "previewgeneratorpdf.h"
 
 static QMutex cacheMutex;
@@ -17,6 +18,7 @@ Poppler::Document *PreviewGeneratorPdf::document(QString path)
 		return nullptr;
 	}
 	result->setRenderHint(Poppler::Document::TextAntialiasing);
+
 	QMutexLocker locker(&cacheMutex);
 	documentcache.insert(path, result);
 	locker.unlock();
@@ -45,7 +47,8 @@ QSharedPointer<PreviewResult> PreviewGeneratorPdf::generate(RenderConfig config,
 	QImage img = pdfPage->renderToImage(config.scaleX, config.scaleY);
 	for(QString &word : config.wordsToHighlight)
 	{
-		QList<QRectF> rects = pdfPage->search(word, Poppler::Page::SearchFlag::IgnoreCase);
+		QList<QRectF> rects =
+			pdfPage->search(word, Poppler::Page::SearchFlag::IgnoreCase | Poppler::Page::SearchFlag::WholeWords);
 		for(QRectF &rect : rects)
 		{
 			QPainter painter(&img);
