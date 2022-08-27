@@ -806,6 +806,7 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	ui->comboPreviewFiles->clear();
 	ui->comboPreviewFiles->addItem("All previews");
 	ui->comboPreviewFiles->setVisible(true);
+	ui->lblTotalPreviewPagesCount->setText("");
 
 	bool hasDeleted = false;
 	QHash<QString, bool> seenMap;
@@ -816,7 +817,6 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 
 		if(!seenMap.contains(absPath))
 		{
-			seenMap[absPath] = true;
 			QString fileName = pathInfo.fileName();
 			QTreeWidgetItem *item = new QTreeWidgetItem(ui->treeResultsList);
 
@@ -830,17 +830,18 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 		bool exists = pathInfo.exists();
 		if(exists)
 		{
-			if(!result.wasContentSearch)
+			if(result.wasContentSearch)
 			{
-				continue;
-			}
-
-			if(!pathInfo.suffix().contains("htm")) // hack until we can preview them properly...
-			{
-				if(PreviewGenerator::get(pathInfo) != nullptr)
+				if(!pathInfo.suffix().contains("htm")) // hack until we can preview them properly...
 				{
-					this->previewableSearchResults.append(result);
-					ui->comboPreviewFiles->addItem(result.fileData.absPath);
+					if(PreviewGenerator::get(pathInfo) != nullptr)
+					{
+						this->previewableSearchResults.append(result);
+						if(!seenMap.contains(result.fileData.absPath))
+						{
+							ui->comboPreviewFiles->addItem(result.fileData.absPath);
+						}
+					}
 				}
 			}
 		}
@@ -848,6 +849,7 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 		{
 			hasDeleted = true;
 		}
+		seenMap[absPath] = true;
 	}
 
 	ui->treeResultsList->resizeColumnToContents(0);
@@ -863,6 +865,7 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	}
 
 	QString statusText = "Results: " + QString::number(results.size()) + " files";
+	statusText += ", previewable: " + QString::number(this->previewableSearchResults.count());
 	if(hasDeleted)
 	{
 		statusText += " WARNING: Some files are inaccessible. No preview available for those. Index may be out of sync";
