@@ -11,13 +11,17 @@ class IPCPreviewWorker : public QObject
 	Q_OBJECT
   private:
 	QFutureWatcher<QByteArray> previewWorkerWatcher;
+	QLocalSocket *peer;
+	bool cleaned = false;
 
   public:
-	IPCPreviewWorker();
-	void start(RenderConfig config, const QVector<RenderTarget> &targets, QLocalSocket *peer);
+	IPCPreviewWorker(QLocalSocket *peer);
+	void start(RenderConfig config, const QVector<RenderTarget> &targets);
 	void stop();
+  private slots:
+	void shutdownSocket();
+
   signals:
-	void previewGenerated(QByteArray);
 	void finished();
 };
 
