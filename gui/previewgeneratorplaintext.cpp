@@ -1,4 +1,5 @@
 #include <QTextStream>
+#include <QRegularExpression>
 
 #include "previewgeneratorplaintext.h"
 #include "previewresultplaintext.h"
@@ -74,9 +75,18 @@ QString PreviewGeneratorPlainText::generatePreviewText(QString content, RenderCo
 	return header + resulText.replace("\n", "<br>").mid(0, 1000);
 }
 
+struct Snippet
+{
+	/* Contains each line number and line of the snippet*/
+	QString snippetText;
+
+	/* How many times a word occurs in the snippetText */
+	QHash<QString, int> wordCountMap;
+};
+
 QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in, RenderConfig config, QString fileName)
 {
-	QString resultText;
+	QVector<Snippet> snippets;
 	const unsigned int contextLinesCount = 2;
 	LimitQueue<QString> queue(contextLinesCount);
 	QString currentLine;
@@ -85,38 +95,58 @@ QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in,
 	/* How many lines to read after a line with a match (like grep -A ) */
 	int justReadLinesCount = -1;
 
-	auto appendLine = [&resultText](int lineNumber, QString &line)
-	{ resultText.append(QString("<b>%1</b>%2<br>").arg(lineNumber).arg(line)); };
+	struct Snippet currentSnippet;
 
-	QHash<QString, int> countmap;
-	QString header = "<b>" + fileName + "</b> ";
+	auto appendLine = [&currentSnippet, &config](int lineNumber, QString &line)
+	{
+		int foundWordsCount = 0;
+		for(QString &word : config.wordsToHighlight)
+		{
+			QRegularExpression searchRegex("\\b" + word + "\\b");
+			if(line.contains(searchRegex))
+			{
+				currentSnippet.wordCountMap[word] = currentSnippet.wordCountMap.value(word, 0) + 1;
+				line.replace(searchRegex, "<span style=\"background-color: yellow;\">" + word + "</span>");
+				++foundWordsCount;
+			}
+		}
+		currentSnippet.snippetText.append(QString("<b>%1</b>%2<br>").arg(lineNumber).arg(line));
+		return foundWordsCount;
+	};
 
-	unsigned int snippetsCount = 0;
 	unsigned int lineCount = 0;
-	while(in.readLineInto(&currentLine) && snippetsCount < MAX_SNIPPETS)
+	while(in.readLineInto(&currentLine))
 	{
 		++lineCount;
 		bool matched = false;
 		if(justReadLinesCount > 0)
 		{
-			appendLine(lineCount, currentLine);
-			--justReadLinesCount;
+
+			int result = appendLine(lineCount, currentLine);
+			if(justReadLinesCount == 1 && result > 0)
+			{
+				justReadLinesCount = contextLinesCount;
+			}
+			else
+			{
+				--justReadLinesCount;
+			}
+
 			continue;
 		}
 		if(justReadLinesCount == 0)
 		{
-			resultText += "---<br>";
+			currentSnippet.snippetText += "---<br>";
 			justReadLinesCount = -1;
-			++snippetsCount;
+			snippets.append(currentSnippet);
+			currentSnippet = {};
 		}
 		for(QString &word : config.wordsToHighlight)
 		{
-			if(currentLine.contains(word, Qt::CaseInsensitive))
+			if(currentLine.contains(QRegularExpression("\\b" + word + "\\b")))
 			{
-				countmap[word] = countmap.value(word, 0) + 1;
 				matched = true;
-				currentLine.replace(word, "<span style=\"background-color: yellow;\">" + word + "</span>",
-									Qt::CaseInsensitive);
+				break;
 			}
 		}
 		if(matched)
@@ -125,7 +155,6 @@ QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in,
 			{
 				int queuedLineCount = lineCount - queue.size();
 				QString queuedLine = queue.dequeue();
-
 				appendLine(queuedLineCount, queuedLine);
 			}
 			appendLine(lineCount, currentLine);
@@ -137,13 +166,77 @@ QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in,
 		}
 	}
 
+	if(!currentSnippet.snippetText.isEmpty())
+	{
+		currentSnippet.snippetText += "---<br>";
+		snippets.append(currentSnippet);
+	}
+
+	std::sort(snippets.begin(), snippets.end(),
+			  [](Snippet &a, Snippet &b)
+			  {
+				  int differentWordsA = 0;
+				  int totalWordsA = 0;
+				  int differentWordsB = 0;
+				  int totalWordsB = 0;
+				  for(int count : a.wordCountMap.values())
+				  {
+					  if(count > 0)
+					  {
+						  ++differentWordsA;
+					  }
+					  totalWordsA += count;
+				  }
+				  for(int count : b.wordCountMap.values())
+				  {
+					  if(count > 0)
+					  {
+						  ++differentWordsB;
+					  }
+					  totalWordsB += count;
+				  }
+
+				  if(differentWordsA > differentWordsB)
+				  {
+					  return true;
+				  }
+				  if(differentWordsA == differentWordsB)
+				  {
+					  return totalWordsA > totalWordsB;
+				  }
+				  return false;
+			  });
+
+	QString resultText = "";
+
+	unsigned int snippetsCount = 0;
+
+	QString header = "<b>" + fileName + "</b> ";
+
+	QHash<QString, int> totalWordCountMap;
+	bool isTruncated = false;
+	for(Snippet &snippet : snippets)
+	{
+		if(snippetsCount++ < MAX_SNIPPETS)
+		{
+			resultText += snippet.snippetText;
+		}
+		else
+		{
+			isTruncated = true;
+		}
+		for(auto it = snippet.wordCountMap.keyValueBegin(); it != snippet.wordCountMap.keyValueEnd(); it++)
+		{
+			totalWordCountMap[it->first] = totalWordCountMap.value(it->first, 0) + it->second;
+		}
+	}
+	if(isTruncated)
+	{
+		header += "(truncated) ";
+	}
 	for(QString &word : config.wordsToHighlight)
 	{
-		header += word + ": " + QString::number(countmap[word]) + " ";
-	}
-	if(snippetsCount == MAX_SNIPPETS)
-	{
-		header += "(truncated)";
+		header += word + ": " + QString::number(totalWordCountMap[word]) + " ";
 	}
 	header += "<hr>";
 
