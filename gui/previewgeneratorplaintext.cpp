@@ -58,6 +58,7 @@ QString PreviewGeneratorPlainText::generatePreviewText(QString content, RenderCo
 		++i;
 	}
 
+	resulText = resulText.toHtmlEscaped();
 	QString header = "<b>" + fileName + "</b> ";
 	for(QString &word : config.wordsToHighlight)
 	{
@@ -112,7 +113,6 @@ QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in,
 			if(containsRegex || contains)
 			{
 				currentSnippet.wordCountMap[word] = currentSnippet.wordCountMap.value(word, 0) + 1;
-
 				QString replacementString = "<span style=\"background-color: yellow;\">" + word + "</span>";
 				if(containsRegex)
 				{
@@ -132,6 +132,7 @@ QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in,
 	unsigned int lineCount = 0;
 	while(in.readLineInto(&currentLine))
 	{
+		currentLine = currentLine.toHtmlEscaped();
 		++lineCount;
 		bool matched = false;
 		if(justReadLinesCount > 0)
