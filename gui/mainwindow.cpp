@@ -678,6 +678,7 @@ void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned
 		previewLayout->setMargin(0);
 		previewLayout->insertStretch(0, 1);
 		previewLayout->insertStretch(-1, 1);
+		previewLayout->setAlignment(Qt::AlignCenter);
 		QWidget *previewWidget = new QWidget();
 
 		previewWidget->setLayout(previewLayout);
