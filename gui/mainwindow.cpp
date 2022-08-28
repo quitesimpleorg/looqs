@@ -15,6 +15,7 @@
 #include <QFileDialog>
 #include <QScreen>
 #include <QProgressDialog>
+#include <QDesktopWidget>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "clicklabel.h"
@@ -647,6 +648,7 @@ void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned
 		headerLabel->setText(QString("Path: ") + preview->getDocumentPath());
 
 		ClickLabel *label = dynamic_cast<ClickLabel *>(preview->createPreviewWidget());
+		label->setMaximumWidth(QApplication::desktop()->availableGeometry().width() - 200);
 
 		QVBoxLayout *previewLayout = new QVBoxLayout();
 
