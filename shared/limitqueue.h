@@ -6,11 +6,11 @@ template <class T> class LimitQueue
 {
   protected:
 	QQueue<T> queue;
-	unsigned int limit = 0;
+	int limit = 0;
 
   public:
 	LimitQueue();
-	LimitQueue(unsigned int limit)
+	LimitQueue(int limit)
 	{
 		this->limit = limit;
 	}
@@ -34,7 +34,7 @@ template <class T> class LimitQueue
 		return queue.dequeue();
 	}
 
-	void setLimit(unsigned int limit)
+	void setLimit(int limit)
 	{
 		this->limit = limit;
 	}

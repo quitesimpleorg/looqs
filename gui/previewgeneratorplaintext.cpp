@@ -88,7 +88,7 @@ struct Snippet
 QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in, RenderConfig config, QString fileName)
 {
 	QVector<Snippet> snippets;
-	const unsigned int contextLinesCount = 2;
+	const int contextLinesCount = 2;
 	LimitQueue<QString> queue(contextLinesCount);
 	QString currentLine;
 	currentLine.reserve(512);
