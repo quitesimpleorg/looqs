@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1280</width>
-    <height>888</height>
+    <height>923</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
        <enum>QTabWidget::South</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="resultsTab">
        <attribute name="title">
@@ -82,7 +82,7 @@
              <x>0</x>
              <y>0</y>
              <width>1244</width>
-             <height>598</height>
+             <height>633</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout"/>
@@ -165,7 +165,7 @@
           <item>
            <widget class="QComboBox" name="comboPreviewFiles">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
