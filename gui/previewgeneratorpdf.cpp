@@ -49,6 +49,10 @@ QSharedPointer<PreviewResult> PreviewGeneratorPdf::generate(RenderConfig config,
 	{
 		QList<QRectF> rects =
 			pdfPage->search(word, Poppler::Page::SearchFlag::IgnoreCase | Poppler::Page::SearchFlag::WholeWords);
+		if(rects.empty())
+		{
+			rects = pdfPage->search(word, Poppler::Page::SearchFlag::IgnoreCase);
+		}
 		for(QRectF &rect : rects)
 		{
 			QPainter painter(&img);

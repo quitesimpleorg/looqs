@@ -103,10 +103,25 @@ QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in,
 		for(QString &word : config.wordsToHighlight)
 		{
 			QRegularExpression searchRegex("\\b" + word + "\\b");
-			if(line.contains(searchRegex))
+			bool containsRegex = line.contains(searchRegex);
+			bool contains = false;
+			if(!containsRegex)
+			{
+				contains = line.contains(word, Qt::CaseInsensitive);
+			}
+			if(containsRegex || contains)
 			{
 				currentSnippet.wordCountMap[word] = currentSnippet.wordCountMap.value(word, 0) + 1;
-				line.replace(searchRegex, "<span style=\"background-color: yellow;\">" + word + "</span>");
+
+				QString replacementString = "<span style=\"background-color: yellow;\">" + word + "</span>";
+				if(containsRegex)
+				{
+					line.replace(searchRegex, replacementString);
+				}
+				else
+				{
+					line.replace(word, replacementString, Qt::CaseInsensitive);
+				}
 				++foundWordsCount;
 			}
 		}
@@ -143,7 +158,7 @@ QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in,
 		}
 		for(QString &word : config.wordsToHighlight)
 		{
-			if(currentLine.contains(QRegularExpression("\\b" + word + "\\b")))
+			if(currentLine.contains(word, Qt::CaseInsensitive))
 			{
 				matched = true;
 				break;
