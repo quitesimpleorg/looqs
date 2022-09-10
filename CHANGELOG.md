@@ -1,4 +1,20 @@
 # looqs: Release notes
+## 2022-09-10 - v0.7
+
+CHANGES:
+
+ - GUI: Add vertical scroll option, default to it. Most feedback considered horizontal scrolling unnatural.
+ - GUI: Previews: Improve plaintext preview snippet selection by prioritizing those which contain the most search terms
+ - GUI: Previews: Only highlight whole words, not parts in words.
+ - GUI: Previews: Don't treat text wrapped inside '<' '>' in plaintext files as HTMl tags which caused such text to get lost in previews.
+ - GUI: Avoid triggering preview generation in some cases even when previews tab is not the active one
+ - GUI: Implement a search history. Allow going up/down with arrow keys in the search field.
+ - GUI: Previews: Allow CTRL + mouse wheel to zoom in on previews
+ - General: Fix an incorrect sqlite query which caused the ranking information of search results to be lost. "All files" filter in the previews tab therefore now orders by the seemingly most relevant pages, across all documents.
+ - General: Fix handling of content search queries with prefix terms (those ending in '*').
+ - GUI: Show how many results are previewable.
+ - GUI: Refactor to improve stability of sandboxed IPC worker in order to avoid rare segfaults.
+
 ## 2022-08-14 - v0.6
 This release features multiple fixes and enhancements.
 
