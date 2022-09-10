@@ -47,15 +47,22 @@ you can quickly perform content searches in paths containing 'docs'.
 
 **CTRL + W**: Removes the last filter. If we take above's example "p:(docs) c:(invoice credit card)" again, then CTRL + W kills "c:(invoice credit card)".
 
+The arrow keys (up and down) can be used to go back and forward in the search history.
+
 ### Configuring PDF viewer
 It's most convenient if, when you click on a preview, the PDF reader opens the page you clicked. For that, looqs needs to know which viewer you want to launch.
 
 It tries to auto detect some common viewers. You must set the value in the "Settings" tab yourself if the
 default does not work for you. In the command line options, "%f" represents the filepath, "%p" the page number.
 
-### Preview tab
-The preview tab shows previews. It marks your search keywords too. Click on a preview to open the file.
+### Previews tab
+The 'previews' tab shows previews. It marks your search keywords too. Click on a preview to open the file.
 A right click on a preview allows you to copy the file path, or to open the containing folder.
+
+When the combobox is set to "All previews", the previews are ordered by relevance from all documents/pages.
+
+By default, a vertical scrolling is active. In the settings, it can be changed to horizontal scroll, which may be
+preferred by users of (larger) wide screen monitors.
 
 ### Syncing index
 Over time, files get deleted or their content changes. Go to **looqs** -> **Sync index**. looqs will reindex the content of files which have been changed. Files that cannot be found anymore will be removed from the index.
