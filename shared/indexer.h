@@ -72,6 +72,8 @@ class Indexer : public QObject
 	IndexResult currentIndexResult;
 	void launchWorker(ConcurrentQueue<QString> &queue, int batchsize);
 
+	QTime lastProgressReportTime = QTime::currentTime();
+
   public:
 	bool isRunning();
 

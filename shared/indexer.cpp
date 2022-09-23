@@ -152,12 +152,14 @@ void Indexer::processFileScanResult(FileScanResult result)
 		++this->currentIndexResult.erroredPaths;
 	}
 
-	if(currentScanProcessedCount++ == progressReportThreshold)
+	QTime currentTime = QTime::currentTime();
+	if(currentScanProcessedCount++ == progressReportThreshold || this->lastProgressReportTime.secsTo(currentTime) >= 10)
 	{
 		emit indexProgress(this->currentIndexResult.total(), this->currentIndexResult.addedPaths,
 						   this->currentIndexResult.skippedPaths, this->currentIndexResult.erroredPaths,
 						   this->dirScanner->pathCount());
 		currentScanProcessedCount = 0;
+		this->lastProgressReportTime = currentTime;
 	}
 }
 
