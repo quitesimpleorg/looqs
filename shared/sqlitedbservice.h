@@ -13,6 +13,7 @@ class SqliteDbService
 {
   private:
 	DatabaseFactory *dbFactory = nullptr;
+	bool insertToFTS(bool useTrigrams, QSqlDatabase &db, int fileid, QVector<PageData> &pageData);
 
   public:
 	SqliteDbService(DatabaseFactory &dbFactory);

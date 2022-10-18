@@ -110,6 +110,44 @@ unsigned int SqliteDbService::getFiles(QVector<FileData> &results, QString wildC
 	return processedRows;
 }
 
+bool SqliteDbService::insertToFTS(bool useTrigrams, QSqlDatabase &db, int fileid, QVector<PageData> &pageData)
+{
+	QString ftsInsertStatement;
+	QString contentInsertStatement;
+	if(useTrigrams)
+	{
+		ftsInsertStatement = "INSERT INTO fts_trigram(content) VALUES(?)";
+		contentInsertStatement = "INSERT INTO content(fileid, page, fts_trigramid) VALUES(?, ?, last_insert_rowid())";
+	}
+	else
+	{
+		ftsInsertStatement = "INSERT INTO fts(content) VALUES(?)";
+		contentInsertStatement = "INSERT INTO content(fileid, page, ftsid) VALUES(?, ?, last_insert_rowid())";
+	}
+
+	for(const PageData &data : pageData)
+	{
+		QSqlQuery ftsQuery(db);
+		ftsQuery.prepare(ftsInsertStatement);
+		ftsQuery.addBindValue(data.content);
+		if(!ftsQuery.exec())
+		{
+			Logger::error() << "Failed fts insertion " << ftsQuery.lastError() << Qt::endl;
+			return false;
+		}
+		QSqlQuery contentQuery(db);
+		contentQuery.prepare(contentInsertStatement);
+		contentQuery.addBindValue(fileid);
+		contentQuery.addBindValue(data.pagenumber);
+		if(!contentQuery.exec())
+		{
+			Logger::error() << "Failed content insertion " << contentQuery.lastError() << Qt::endl;
+			return false;
+		}
+	}
+	return true;
+}
+
 SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &pageData)
 {
 	QString absPath = fileInfo.absoluteFilePath();
@@ -149,24 +187,18 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &
 	}
 
 	int lastid = inserterQuery.lastInsertId().toInt();
-	for(const PageData &data : pageData)
+	if(!insertToFTS(false, db, lastid, pageData))
 	{
-		QSqlQuery ftsQuery(db);
-		ftsQuery.prepare("INSERT INTO fts(content) VALUES(?)");
-		ftsQuery.addBindValue(data.content);
-		ftsQuery.exec();
-		QSqlQuery contentQuery(db);
-		contentQuery.prepare("INSERT INTO content(fileid, page, ftsid) VALUES(?, ?, last_insert_rowid())");
-		contentQuery.addBindValue(lastid);
-		contentQuery.addBindValue(data.pagenumber);
-		if(!contentQuery.exec())
-		{
-			db.rollback();
-			Logger::error() << "Failed content insertion " << contentQuery.lastError() << Qt::endl;
-			return DBFAIL;
-		}
+		db.rollback();
+		Logger::error() << "Failed to insert data to FTS index " << Qt::endl;
+		return DBFAIL;
 	}
-
+	if(!insertToFTS(true, db, lastid, pageData))
+	{
+		db.rollback();
+		Logger::error() << "Failed to insert data to FTS index " << Qt::endl;
+		return DBFAIL;
+	}
 	if(!db.commit())
 	{
 		db.rollback();
