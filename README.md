@@ -30,6 +30,8 @@ The screenshots in this section may occasionally be slightly outdated, but they 
 ## Current status
 Latest version: 2022-09-10, v0.7
 
+Please keep in mind: looqs is still at an early stage and may exhibit some weirdness and contain bugs.
+
 Please see [Changelog](CHANGELOG.md) for a human readable list of changes.
 
 
