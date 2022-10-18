@@ -141,9 +141,7 @@ QPair<QString, QVector<QString>> SqliteSearch::createSql(const Token &token)
 	}
 	if(token.type == FILTER_CONTENT_CONTAINS)
 	{
-		return {" content.id IN (SELECT fts.ROWID FROM fts WHERE fts.content MATCH ? ORDER BY "
-				"rank) ",
-				{escapeFtsArgument(value)}};
+		return {" fts MATCH ? ", {escapeFtsArgument(value)}};
 	}
 	throw LooqsGeneralException("Unknown token passed (should not happen)");
 }
@@ -163,26 +161,14 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 	auto tokens = query.getTokens();
 	for(const Token &token : tokens)
 	{
-		if(token.type == FILTER_CONTENT_CONTAINS)
-		{
-			if(!ftsAlreadyJoined)
-			{
-				joinSql += " INNER JOIN fts ON content.ftsid = fts.ROWID ";
-				ftsAlreadyJoined = true;
-			}
-			whereSql += " fts.content MATCH ? ";
-			bindValues.append(escapeFtsArgument(token.value));
-		}
-		else
-		{
-			auto sql = createSql(token);
-			whereSql += sql.first;
-			bindValues.append(sql.second);
-		}
+		auto sql = createSql(token);
+		whereSql += sql.first;
+		bindValues.append(sql.second);
 	}
 
 	QString prepSql;
 	QString sortSql = createSortSql(query.getSortConditions());
+	int bindIterations = 1;
 	if(isContentSearch)
 	{
 		if(sortSql.isEmpty())
@@ -190,12 +176,24 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 			if(std::find_if(tokens.begin(), tokens.end(),
 							[](const Token &t) -> bool { return t.type == FILTER_CONTENT_CONTAINS; }) != tokens.end())
 			{
-				sortSql = "ORDER BY rank";
+				sortSql = "ORDER BY prio, rank";
 			}
 		}
-		prepSql = "SELECT file.path AS path,  content.page AS page, file.mtime AS mtime, file.size AS size, "
-				  "file.filetype AS filetype FROM file INNER JOIN content ON file.id = content.fileid " +
-				  joinSql + " WHERE 1=1 AND " + whereSql + " " + sortSql;
+		QString whereSqlTrigram = whereSql;
+		whereSqlTrigram.replace("fts MATCH", "fts_trigram MATCH"); // A bit dirty...
+		prepSql =
+			"SELECT DISTINCT path, page, mtime, size, filetype FROM ("
+			"SELECT file.path AS path,  content.page AS page, file.mtime AS mtime, file.size AS size, "
+			"file.filetype AS filetype, 0 AS prio, fts.rank AS rank FROM file INNER JOIN content ON file.id = "
+			"content.fileid "
+			"INNER JOIN fts ON content.ftsid = fts.ROWID WHERE 1=1 AND " +
+			whereSql +
+			"UNION ALL SELECT file.path AS path,  content.page AS page, file.mtime AS mtime, file.size AS size, "
+			"file.filetype AS filetype, 1 as prio, fts_trigram.rank AS rank FROM file INNER JOIN content ON file.id = "
+			"content.fileid " +
+			"INNER JOIN fts_trigram ON content.fts_trigramid = fts_trigram.ROWID WHERE 1=1 AND " + whereSqlTrigram +
+			" ) " + sortSql;
+		++bindIterations;
 	}
 	else
 	{
@@ -215,11 +213,14 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 
 	QSqlQuery dbquery(*db);
 	dbquery.prepare(prepSql);
-	for(const QString &value : bindValues)
+	for(int i = 0; i < bindIterations; i++)
 	{
-		if(value != "")
+		for(const QString &value : bindValues)
 		{
-			dbquery.addBindValue(value);
+			if(value != "")
+			{
+				dbquery.addBindValue(value);
+			}
 		}
 	}
 	return dbquery;
