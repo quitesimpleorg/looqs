@@ -643,7 +643,6 @@ void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned
 	{
 		QString docPath = preview->getDocumentPath();
 		auto previewPage = preview->getPage();
-
 		ClickLabel *headerLabel = new ClickLabel();
 		headerLabel->setText(QString("Path: ") + preview->getDocumentPath());
 
@@ -685,7 +684,24 @@ void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned
 
 		previewWidget->setLayout(previewLayout);
 
-		ui->scrollAreaWidgetContents->layout()->addWidget(previewWidget);
+		QBoxLayout *layout = static_cast<QBoxLayout *>(ui->scrollAreaWidgetContents->layout());
+		int pos = previewOrder[docPath + QString::number(previewPage)];
+		if(pos <= layout->count())
+		{
+			layout->insertWidget(pos, previewWidget);
+			for(auto it = previewWidgetOrderCache.constKeyValueBegin();
+				it != previewWidgetOrderCache.constKeyValueEnd(); it++)
+			{
+				if(it->first <= layout->count())
+				{
+					layout->insertWidget(it->first, it->second);
+				}
+			}
+		}
+		else
+		{
+			previewWidgetOrderCache[pos] = previewWidget;
+		}
 	}
 }
 
@@ -938,6 +954,10 @@ void MainWindow::makePreviews(int page)
 	renderConfig.scaleY = QGuiApplication::primaryScreen()->physicalDotsPerInchY() * (currentScale / 100.);
 	renderConfig.wordsToHighlight = wordsToHighlight;
 
+	this->previewOrder.clear();
+	this->previewWidgetOrderCache.clear();
+
+	int previewPos = 0;
 	QVector<RenderTarget> targets;
 	for(SearchResult &sr : this->previewableSearchResults)
 	{
@@ -952,6 +972,7 @@ void MainWindow::makePreviews(int page)
 		renderTarget.path = sr.fileData.absPath;
 		renderTarget.page = (int)sr.page;
 		targets.append(renderTarget);
+		this->previewOrder[renderTarget.path + QString::number(renderTarget.page)] = previewPos++;
 	}
 	int numpages = ceil(static_cast<double>(targets.size()) / previewsPerPage);
 	ui->spinPreviewPage->setMaximum(numpages);

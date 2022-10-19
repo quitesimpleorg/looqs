@@ -71,6 +71,10 @@ class MainWindow : public QMainWindow
 	QVector<QString> searchHistory;
 	int currentSearchHistoryIndex = 0;
 	QString currentSavedSearchText;
+	QHash<QString, int> previewOrder; /* Quick lookup for the order a preview should have */
+	QMap<int, QWidget *>
+		previewWidgetOrderCache /* Saves those that arrived out of order to be inserted later at the correct pos */;
+
   private slots:
 	void lineEditReturnPressed();
 	void treeSearchItemActivated(QTreeWidgetItem *item, int i);
