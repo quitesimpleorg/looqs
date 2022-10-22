@@ -28,11 +28,12 @@ There is no need to write the long form of filters. There are also booleans avai
 The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state of the GUI.
 
 ## Current status
-Latest version: 2022-09-10, v0.7
+Latest version: 2022-10-22, v0.8
 
 Please keep in mind: looqs is still at an early stage and may exhibit some weirdness and contain bugs.
 
-Please see [Changelog](CHANGELOG.md) for a human readable list of changes.
+Please see [Changelog](CHANGELOG.md) for a human readable list of changes. For download instructions, see
+further down this document.
 
 
 ## Goals and principles
@@ -96,7 +97,7 @@ The GUI is located in `gui/looqs-gui`, the binary for the CLI is in `cli/looqs`
 ## Packages
 At this point, looqs is not in any official distro package repo, but I maintain some packages.
 
-### Ubuntu 22.04
+### Ubuntu 22.04, 22.10
 Latest release can be installed using apt from the repo.
 ```
 # First, obtain key, assume it's trusted.

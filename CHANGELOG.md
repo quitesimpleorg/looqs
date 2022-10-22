@@ -1,4 +1,15 @@
 # looqs: Release notes
+
+## 2022-10-22 - v0.8
+
+CHANGES:
+ - For new, not previously indexed files, start creating an additional index using sqlite's experimental trigram tokenizer. Thanks to that, we can now match substrings >= 3 of an unicode sequence. Results of the usual index are prioritized.
+ - GUI: Ensure order of previews matches ranking exactly. Previously, it depended simply on the time preview generators took, i. e. it was more or less a race.
+ - Report progress more often during indexing, so users don't get the impression that it's stuck when processing dirs with large documents.
+ - Fix a regression that caused phrase queries to be broken
+ - Minor improvements
+ - Add packages: Ubuntu 22.10.
+
 ## 2022-09-10 - v0.7
 
 CHANGES:
