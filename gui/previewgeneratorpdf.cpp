@@ -7,10 +7,12 @@ static QMutex cacheMutex;
 
 Poppler::Document *PreviewGeneratorPdf::document(QString path)
 {
+	QMutexLocker locker(&cacheMutex);
 	if(documentcache.contains(path))
 	{
 		return documentcache.value(path);
 	}
+	locker.unlock();
 	Poppler::Document *result = Poppler::Document::load(path);
 	if(result == nullptr)
 	{
@@ -19,7 +21,7 @@ Poppler::Document *PreviewGeneratorPdf::document(QString path)
 	}
 	result->setRenderHint(Poppler::Document::TextAntialiasing);
 
-	QMutexLocker locker(&cacheMutex);
+	locker.relock();
 	documentcache.insert(path, result);
 	locker.unlock();
 	return result;
