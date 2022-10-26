@@ -157,7 +157,6 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 		throw LooqsGeneralException("Nothing to search for supplied");
 	}
 
-	bool ftsAlreadyJoined = false;
 	auto tokens = query.getTokens();
 	for(const Token &token : tokens)
 	{
