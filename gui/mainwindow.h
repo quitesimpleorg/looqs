@@ -44,9 +44,9 @@ class MainWindow : public QMainWindow
 	QHash<QString, int> previewOrder; /* Quick lookup for the order a preview should have */
 	QMap<int, QWidget *>
 		previewWidgetOrderCache /* Saves those that arrived out of order to be inserted later at the correct pos */;
-	bool previewDirty;
-	int previewsPerPage;
-	unsigned int processedPdfPreviews;
+	bool previewDirty = false;
+	int previewsPerPage = 20;
+	unsigned int processedPdfPreviews = 0;
 	unsigned int currentPreviewGeneration = 1;
 
 	void connectSignals();
