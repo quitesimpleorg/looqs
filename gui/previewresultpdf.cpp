@@ -30,7 +30,7 @@ QByteArray PreviewResultPdf::serialize() const
 
 QSharedPointer<PreviewResultPdf> PreviewResultPdf::deserialize(QByteArray &ba)
 {
-	PreviewResultPdf *result = new PreviewResultPdf();
+	QSharedPointer<PreviewResultPdf> result(new PreviewResultPdf());
 	PreviewResultType type;
 
 	QDataStream stream{&ba, QIODevice::ReadOnly};
@@ -40,5 +40,5 @@ QSharedPointer<PreviewResultPdf> PreviewResultPdf::deserialize(QByteArray &ba)
 		throw std::runtime_error("Invalid byte array: Not a pdf preview");
 	}
 	stream >> result->documentPath >> result->page >> result->previewImage;
-	return QSharedPointer<PreviewResultPdf>(result);
+	return result;
 }
