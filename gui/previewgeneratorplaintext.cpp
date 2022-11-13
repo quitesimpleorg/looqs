@@ -103,7 +103,7 @@ QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in,
 		int foundWordsCount = 0;
 		for(QString &word : config.wordsToHighlight)
 		{
-			QRegularExpression searchRegex("\\b" + word + "\\b");
+			QRegularExpression searchRegex("\\b" + QRegularExpression::escape(word) + "\\b");
 			bool containsRegex = line.contains(searchRegex);
 			bool contains = false;
 			if(!containsRegex)
