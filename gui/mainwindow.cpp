@@ -940,12 +940,12 @@ void MainWindow::makePreviews(int page)
 			}
 		}
 	}
-	int end = previewsPerPage;
-	int begin = page * previewsPerPage - previewsPerPage;
-	if(begin < 0)
+	int length = previewsPerPage;
+	int beginOffset = page * previewsPerPage - previewsPerPage;
+	if(beginOffset < 0)
 	{
 		// Should not happen actually
-		begin = 0;
+		beginOffset = 0;
 	}
 
 	int currentScale = currentSelectedScale();
@@ -972,11 +972,14 @@ void MainWindow::makePreviews(int page)
 		renderTarget.path = sr.fileData.absPath;
 		renderTarget.page = (int)sr.page;
 		targets.append(renderTarget);
-		this->previewOrder[renderTarget.path + QString::number(renderTarget.page)] = previewPos++;
+
+		int pos = previewPos - beginOffset;
+		this->previewOrder[renderTarget.path + QString::number(renderTarget.page)] = pos;
+		++previewPos;
 	}
 	int numpages = ceil(static_cast<double>(targets.size()) / previewsPerPage);
 	ui->spinPreviewPage->setMaximum(numpages);
-	targets = targets.mid(begin, end);
+	targets = targets.mid(beginOffset, length);
 
 	ui->lblTotalPreviewPagesCount->setText(QString::number(numpages));
 	ui->previewProcessBar->setMaximum(targets.count());
