@@ -1,5 +1,11 @@
 # looqs: Release notes
 
+## 2022-11-19 - v0.8.1
+
+CHANGES:
+ - Fix regression causing previews in second (and higher) result page to not render
+ - Minor improvements
+
 ## 2022-10-22 - v0.8
 
 CHANGES:

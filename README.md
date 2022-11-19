@@ -28,7 +28,7 @@ There is no need to write the long form of filters. There are also booleans avai
 The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state of the GUI.
 
 ## Current status
-Latest version: 2022-10-22, v0.8
+Latest version: 2022-11-19, v0.8.1
 
 Please keep in mind: looqs is still at an early stage and may exhibit some weirdness and contain bugs.
 
