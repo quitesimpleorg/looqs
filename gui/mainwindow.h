@@ -56,7 +56,7 @@ class MainWindow : public QMainWindow
 	void keyPressEvent(QKeyEvent *event) override;
 	void handleSearchResults(const QVector<SearchResult> &results);
 	void handleSearchError(QString error);
-	void createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo);
+	void createSearchResultMenu(QMenu &menu, const QFileInfo &fileInfo);
 	void openDocument(QString path, int num);
 	void openFile(QString path);
 	void initSettingsTabs();

@@ -661,7 +661,7 @@ void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned
 		{
 			QFileInfo fileInfo{docPath};
 			QMenu menu("labeRightClick", this);
-			createSearchResutlMenu(menu, fileInfo);
+			createSearchResultMenu(menu, fileInfo);
 			menu.addAction("Copy page number",
 						   [previewPage] { QGuiApplication::clipboard()->setText(QString::number(previewPage)); });
 			menu.exec(QCursor::pos());
@@ -998,7 +998,7 @@ void MainWindow::handleSearchError(QString error)
 	ui->lblSearchResults->setText("Error:" + error);
 }
 
-void MainWindow::createSearchResutlMenu(QMenu &menu, const QFileInfo &fileInfo)
+void MainWindow::createSearchResultMenu(QMenu &menu, const QFileInfo &fileInfo)
 {
 	menu.addAction("Copy filename to clipboard",
 				   [&fileInfo] { QGuiApplication::clipboard()->setText(fileInfo.fileName()); });
@@ -1062,7 +1062,7 @@ void MainWindow::showSearchResultsContextMenu(const QPoint &point)
 	}
 	QFileInfo pathinfo(item->text(1));
 	QMenu menu("SearchResults", this);
-	createSearchResutlMenu(menu, pathinfo);
+	createSearchResultMenu(menu, pathinfo);
 	menu.exec(QCursor::pos());
 }
 
