@@ -44,18 +44,28 @@ int CommandAdd::handle(QStringList arguments)
 						"Continue adding files, don't exit on first error. If this option is not given, looqs will "
 						"exit asap, but it's possible that a few files will still be processed. "
 						"Set -t 1 to avoid this behavior, but processing will be slower. "},
+					   {{"n", "no-content"}, "Only add paths to database. Do not index content"},
+					   {{"f", "fill-content"}, "Index content for files previously indexed with -n"},
+					   {"tags", "Comma-separated list of tags to assign"},
 					   {{"t", "threads"}, "Number of threads to use.", "threads"}});
-
 	parser.addHelpOption();
 	parser.addPositionalArgument("add", "Add paths to the index",
 								 "add [paths...]. If no path is given, read from stdin, one path per line.");
 
 	parser.process(arguments);
 	this->keepGoing = parser.isSet("continue");
+	bool pathsOnly = parser.isSet("no-content");
+	bool fillContent = parser.isSet("fill-content");
 	if(parser.isSet("threads"))
 	{
 		QString threadsCount = parser.value("threads");
 		QThreadPool::globalInstance()->setMaxThreadCount(threadsCount.toInt());
+	}
+
+	if(pathsOnly && fillContent)
+	{
+		Logger::error() << "Invalid options: -n and -f cannot both be set";
+		return EXIT_FAILURE;
 	}
 
 	QStringList files = parser.positionalArguments();

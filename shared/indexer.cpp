@@ -98,6 +98,7 @@ void Indexer::launchWorker(ConcurrentQueue<QString> &queue, int batchsize)
 	FileScanWorker *runnable = new FileScanWorker(*this->db, queue, batchsize, this->workerCancellationToken);
 	connect(runnable, &FileScanWorker::result, this, &Indexer::processFileScanResult);
 	connect(runnable, &FileScanWorker::finished, this, &Indexer::processFinishedWorker);
+	runnable->setFileSaverOptions(this->fileSaverOptions);
 	++this->runningWorkers;
 	QThreadPool::globalInstance()->start(runnable);
 }

@@ -19,7 +19,7 @@ class SqliteDbService
 
   public:
 	SqliteDbService(DatabaseFactory &dbFactory);
-	SaveFileResult saveFile(QFileInfo fileInfo, QVector<PageData> &pageData);
+	SaveFileResult saveFile(QFileInfo fileInfo, QVector<PageData> &pageData, bool pathsOnly);
 	unsigned int getFiles(QVector<FileData> &results, QString wildCardPattern, int offset, int limit);
 	bool deleteFile(QString path);
 	bool fileExistsInDatabase(QString path);

@@ -164,11 +164,15 @@ bool SqliteDbService::insertToFTS(bool useTrigrams, QSqlDatabase &db, int fileid
 	return true;
 }
 
-SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &pageData)
+SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &pageData, bool pathsOnly)
 {
 	QString absPath = fileInfo.absoluteFilePath();
 	auto mtime = fileInfo.lastModified().toSecsSinceEpoch();
-	QChar fileType = fileInfo.isDir() ? 'd' : 'f';
+	QChar fileType = fileInfo.isDir() ? 'd' : 'c';
+	if(pathsOnly)
+	{
+		fileType = 'f';
+	}
 
 	QSqlDatabase db = dbFactory->forCurrentThread();
 	QSqlQuery delQuery(db);
@@ -202,19 +206,23 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &
 		return DBFAIL;
 	}
 
-	int lastid = inserterQuery.lastInsertId().toInt();
-	if(!insertToFTS(false, db, lastid, pageData))
+	if(!pathsOnly)
 	{
-		db.rollback();
-		Logger::error() << "Failed to insert data to FTS index " << Qt::endl;
-		return DBFAIL;
+		int lastid = inserterQuery.lastInsertId().toInt();
+		if(!insertToFTS(false, db, lastid, pageData))
+		{
+			db.rollback();
+			Logger::error() << "Failed to insert data to FTS index " << Qt::endl;
+			return DBFAIL;
+		}
+		if(!insertToFTS(true, db, lastid, pageData))
+		{
+			db.rollback();
+			Logger::error() << "Failed to insert data to FTS index " << Qt::endl;
+			return DBFAIL;
+		}
 	}
-	if(!insertToFTS(true, db, lastid, pageData))
-	{
-		db.rollback();
-		Logger::error() << "Failed to insert data to FTS index " << Qt::endl;
-		return DBFAIL;
-	}
+
 	if(!db.commit())
 	{
 		db.rollback();

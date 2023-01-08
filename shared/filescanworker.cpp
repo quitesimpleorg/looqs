@@ -12,6 +12,7 @@ FileScanWorker::FileScanWorker(SqliteDbService &db, ConcurrentQueue<QString> &qu
 void FileScanWorker::run()
 {
 	FileSaver saver{*this->dbService};
+	saver.setFileSaverOptions(this->fileSaverOptions);
 	auto paths = queue->dequeue(batchsize);
 	for(QString &path : paths)
 	{
@@ -33,4 +34,9 @@ void FileScanWorker::run()
 		}
 	}
 	emit finished();
+}
+
+void FileScanWorker::setFileSaverOptions(FileSaverOptions options)
+{
+	this->fileSaverOptions = options;
 }

@@ -119,11 +119,29 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 		{
 			if(canonicalPath.startsWith(excludedPath))
 			{
+				if(this->fileSaverOptions.verbose)
+				{
+					Logger::info() << "Skipped due to excluded path";
+				}
 				return SKIPPED;
 			}
 		}
 
-		if(fileInfo.size() > 0)
+		bool mustFillContent = this->fileSaverOptions.fillPathsOnlyWithContent;
+		if(!mustFillContent)
+		{
+			mustFillContent = !this->fileSaverOptions.pathsOnly;
+			if(mustFillContent)
+			{
+				auto filetype = this->dbService->queryFileType(fileInfo.absolutePath());
+				if(filetype)
+				{
+					mustFillContent = filetype.value() == 'c';
+				}
+			}
+		}
+
+		if(fileInfo.size() > 0 && mustFillContent)
 		{
 			QProcess process;
 			QStringList args;
@@ -158,7 +176,7 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 			}
 		}
 	}
-	SaveFileResult result = this->dbService->saveFile(fileInfo, pageData);
+	SaveFileResult result = this->dbService->saveFile(fileInfo, pageData, this->fileSaverOptions.pathsOnly);
 	if(result == OK && processorReturnCode == OK_WASEMPTY)
 	{
 		return OK_WASEMPTY;
