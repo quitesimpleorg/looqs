@@ -28,7 +28,7 @@ void enableIpcSandbox()
 	policy->namespace_options = EXILE_UNSHARE_USER | EXILE_UNSHARE_MOUNT | EXILE_UNSHARE_NETWORK;
 	policy->no_new_privs = 1;
 	policy->drop_caps = 1;
-	policy->vow_promises = exile_vows_from_str("thread cpath rpath unix stdio proc error");
+	policy->vow_promises = exile_vows_from_str("thread cpath rpath wpath unix stdio proc error");
 	policy->mount_path_policies_to_chroot = 1;
 
 	QString ipcSocketPath = Common::ipcSocketPath();
