@@ -6,9 +6,9 @@ class FileSaverOptions
   public:
 	bool verbose = false;
 	bool keepGoing = false;
-	bool pathsOnly = false;
+	bool metadataOnly = false;
 	/* Whether those previously explicitly without content should be filled */
-	bool fillPathsOnlyWithContent = false;
+	bool fillExistingContentless = false;
 };
 
 #endif // FILESAVEROPTIONS_H

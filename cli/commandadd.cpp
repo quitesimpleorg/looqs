@@ -83,8 +83,8 @@ int CommandAdd::handle(QStringList arguments)
 
 	FileSaverOptions fileSaverOptions;
 	fileSaverOptions.keepGoing = keepGoing;
-	fileSaverOptions.fillPathsOnlyWithContent = fillContent;
-	fileSaverOptions.pathsOnly = pathsOnly;
+	fileSaverOptions.fillExistingContentless = fillContent;
+	fileSaverOptions.metadataOnly = pathsOnly;
 	fileSaverOptions.verbose = false;
 
 	indexer = new Indexer(*this->dbService);

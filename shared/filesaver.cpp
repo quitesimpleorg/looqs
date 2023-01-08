@@ -127,10 +127,10 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 			}
 		}
 
-		bool mustFillContent = this->fileSaverOptions.fillPathsOnlyWithContent;
+		bool mustFillContent = this->fileSaverOptions.fillExistingContentless;
 		if(!mustFillContent)
 		{
-			mustFillContent = !this->fileSaverOptions.pathsOnly;
+			mustFillContent = !this->fileSaverOptions.metadataOnly;
 			if(mustFillContent)
 			{
 				auto filetype = this->dbService->queryFileType(fileInfo.absolutePath());
@@ -176,7 +176,7 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 			}
 		}
 	}
-	SaveFileResult result = this->dbService->saveFile(fileInfo, pageData, this->fileSaverOptions.pathsOnly);
+	SaveFileResult result = this->dbService->saveFile(fileInfo, pageData, this->fileSaverOptions.metadataOnly);
 	if(result == OK && processorReturnCode == OK_WASEMPTY)
 	{
 		return OK_WASEMPTY;
