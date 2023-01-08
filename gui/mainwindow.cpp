@@ -222,16 +222,18 @@ void MainWindow::connectSignals()
 				qCritical() << msg << Qt::endl;
 				QMessageBox::critical(this, "IPC error", msg);
 			});
-
-	/*connect(this, &MainWindow::startIpcPreviews, &previewCoordinator, &IPCPreviewClient::startGeneration,
-			Qt::QueuedConnection);
-	connect(this, &MainWindow::stopIpcPreviews, &ipcPreviewClient, &IPCPreviewClient::stopGeneration,
-			Qt::QueuedConnection); */
+	connect(ui->radioMetadataOnly, &QRadioButton::toggled, this,
+			[this](bool toggled)
+			{
+				if(toggled)
+				{
+					this->ui->chkFillContentForContentless->setChecked(false);
+				};
+			});
 }
 
 void MainWindow::exportFailedPaths()
 {
-
 	QString filename =
 		QString("/tmp/looqs_indexresult_failed_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hhmmss"));
 	QFile outFile(filename);
@@ -312,6 +314,15 @@ void MainWindow::startIndexing()
 	this->indexer->setTargetPaths(paths);
 	QString ignorePatterns = ui->txtIgnorePatterns->text();
 	this->indexer->setIgnorePattern(ignorePatterns.split(";"));
+
+	FileSaverOptions options;
+	options.fillExistingContentless =
+		ui->chkFillContentForContentless->isEnabled() && ui->chkFillContentForContentless->isChecked();
+	options.metadataOnly = ui->radioMetadataOnly->isChecked();
+	options.verbose = false;
+	options.keepGoing = true;
+
+	this->indexer->setFileSaverOptions(options);
 	this->indexer->beginIndexing();
 	QSettings settings;
 	settings.setValue("indexPaths", pathSettingsValue);
