@@ -22,7 +22,6 @@
 #include "../shared/sqlitesearch.h"
 #include "../shared/looqsgeneralexception.h"
 #include "../shared/common.h"
-#include "ipcpreviewclient.h"
 #include "previewgenerator.h"
 #include "aboutdialog.h"
 
@@ -32,8 +31,7 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath)
 	this->progressDialog.cancel(); // because constructing it shows it, quite weird
 	ui->setupUi(this);
 	setWindowTitle(QCoreApplication::applicationName());
-	this->ipcPreviewClient.moveToThread(&this->ipcClientThread);
-	this->ipcPreviewClient.setSocketPath(socketPath);
+
 	QSettings settings;
 
 	this->dbFactory = new DatabaseFactory(Common::databasePath());
@@ -78,7 +76,7 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath)
 	ui->txtSearch->installEventFilter(this);
 	ui->scrollArea->viewport()->installEventFilter(this);
 
-	this->ipcClientThread.start();
+	this->previewCoordinator.setSocketPath(socketPath);
 }
 
 void MainWindow::addPathToIndex()
@@ -208,9 +206,9 @@ void MainWindow::connectSignals()
 			}
 		},
 		Qt::QueuedConnection);
-	connect(&ipcPreviewClient, &IPCPreviewClient::previewReceived, this, &MainWindow::previewReceived,
+	connect(&previewCoordinator, &PreviewCoordinator::previewReady, this, &MainWindow::previewReceived,
 			Qt::QueuedConnection);
-	connect(&ipcPreviewClient, &IPCPreviewClient::finished, this,
+	connect(&previewCoordinator, &PreviewCoordinator::completedGeneration, this,
 			[&]
 			{
 				this->ui->previewProcessBar->setValue(this->ui->previewProcessBar->maximum());
@@ -218,17 +216,17 @@ void MainWindow::connectSignals()
 				this->ui->comboPreviewFiles->setEnabled(true);
 				ui->txtSearch->setEnabled(true);
 			});
-	connect(&ipcPreviewClient, &IPCPreviewClient::error, this,
+	connect(&previewCoordinator, &PreviewCoordinator::error, this,
 			[this](QString msg)
 			{
 				qCritical() << msg << Qt::endl;
 				QMessageBox::critical(this, "IPC error", msg);
 			});
 
-	connect(this, &MainWindow::startIpcPreviews, &ipcPreviewClient, &IPCPreviewClient::startGeneration,
+	/*connect(this, &MainWindow::startIpcPreviews, &previewCoordinator, &IPCPreviewClient::startGeneration,
 			Qt::QueuedConnection);
 	connect(this, &MainWindow::stopIpcPreviews, &ipcPreviewClient, &IPCPreviewClient::stopGeneration,
-			Qt::QueuedConnection);
+			Qt::QueuedConnection); */
 }
 
 void MainWindow::exportFailedPaths()
@@ -632,13 +630,17 @@ void MainWindow::saveSettings()
 	qApp->quit();
 }
 
-void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned int previewGeneration)
+void MainWindow::previewReceived()
 {
-	if(previewGeneration < this->currentPreviewGeneration)
-	{
-		return;
-	}
 	this->ui->previewProcessBar->setValue(this->ui->previewProcessBar->value() + 1);
+	QBoxLayout *layout = static_cast<QBoxLayout *>(ui->scrollAreaWidgetContents->layout());
+	int index = layout->count();
+	if(index > 0)
+	{
+		--index;
+	}
+	QSharedPointer<PreviewResult> preview = this->previewCoordinator.resultAt(index);
+
 	if(!preview.isNull() && preview->hasPreview())
 	{
 		QString docPath = preview->getDocumentPath();
@@ -684,24 +686,7 @@ void MainWindow::previewReceived(QSharedPointer<PreviewResult> preview, unsigned
 
 		previewWidget->setLayout(previewLayout);
 
-		QBoxLayout *layout = static_cast<QBoxLayout *>(ui->scrollAreaWidgetContents->layout());
-		int pos = previewOrder[docPath + QString::number(previewPage)];
-		if(pos <= layout->count())
-		{
-			layout->insertWidget(pos, previewWidget);
-			for(auto it = previewWidgetOrderCache.constKeyValueBegin();
-				it != previewWidgetOrderCache.constKeyValueEnd(); it++)
-			{
-				if(it->first <= layout->count())
-				{
-					layout->insertWidget(it->first, it->second);
-				}
-			}
-		}
-		else
-		{
-			previewWidgetOrderCache[pos] = previewWidget;
-		}
+		layout->insertWidget(index, previewWidget);
 	}
 }
 
@@ -818,7 +803,6 @@ void MainWindow::lineEditReturnPressed()
 
 void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 {
-	this->previewableSearchResults.clear();
 	qDeleteAll(ui->scrollAreaWidgetContents->children());
 
 	ui->treeResultsList->clear();
@@ -826,6 +810,8 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	ui->comboPreviewFiles->addItem("All previews");
 	ui->comboPreviewFiles->setVisible(true);
 	ui->lblTotalPreviewPagesCount->setText("");
+
+	this->previewCoordinator.init(results);
 
 	bool hasDeleted = false;
 	QHash<QString, bool> seenMap;
@@ -847,26 +833,20 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 			item->setText(3, this->locale().formattedDataSize(result.fileData.size));
 		}
 		bool exists = pathInfo.exists();
-		if(exists)
-		{
-			if(result.wasContentSearch)
-			{
-				if(!pathInfo.suffix().contains("htm")) // hack until we can preview them properly...
-				{
-					if(PreviewGenerator::get(pathInfo) != nullptr)
-					{
-						this->previewableSearchResults.append(result);
-						if(!seenMap.contains(result.fileData.absPath))
-						{
-							ui->comboPreviewFiles->addItem(result.fileData.absPath);
-						}
-					}
-				}
-			}
-		}
-		else
+		if(!exists)
 		{
 			hasDeleted = true;
+		}
+		seenMap[absPath] = true;
+	}
+
+	seenMap.clear();
+	for(const SearchResult &result : this->previewCoordinator.getPreviewableSearchResults())
+	{
+		const QString &absPath = result.fileData.absPath;
+		if(!seenMap.contains(absPath))
+		{
+			ui->comboPreviewFiles->addItem(absPath);
 		}
 		seenMap[absPath] = true;
 	}
@@ -874,7 +854,8 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	ui->treeResultsList->resizeColumnToContents(0);
 	ui->treeResultsList->resizeColumnToContents(1);
 	ui->treeResultsList->resizeColumnToContents(2);
-	previewDirty = !this->previewableSearchResults.empty();
+
+	previewDirty = this->previewCoordinator.previewableCount() > 0;
 
 	ui->spinPreviewPage->setValue(1);
 
@@ -884,7 +865,7 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 	}
 
 	QString statusText = "Results: " + QString::number(results.size()) + " files";
-	statusText += ", previewable: " + QString::number(this->previewableSearchResults.count());
+	statusText += ", previewable: " + QString::number(this->previewCoordinator.previewableCount());
 	if(hasDeleted)
 	{
 		statusText += " WARNING: Some files are inaccessible. No preview available for those. Index may be out of sync";
@@ -901,7 +882,7 @@ int MainWindow::currentSelectedScale()
 
 void MainWindow::makePreviews(int page)
 {
-	if(this->previewableSearchResults.empty())
+	if(this->previewCoordinator.previewableCount() == 0)
 	{
 		return;
 	}
@@ -918,8 +899,7 @@ void MainWindow::makePreviews(int page)
 		ui->scrollAreaWidgetContents->setLayout(new QVBoxLayout());
 		ui->scrollAreaWidgetContents->layout()->setAlignment(Qt::AlignCenter);
 	}
-	ui->previewProcessBar->setMaximum(this->previewableSearchResults.size());
-	processedPdfPreviews = 0;
+	ui->previewProcessBar->setMaximum(this->previewCoordinator.previewableCount());
 
 	QVector<QString> wordsToHighlight;
 	QRegularExpression extractor(R"#("([^"]*)"|([^\s]+))#");
@@ -954,12 +934,9 @@ void MainWindow::makePreviews(int page)
 	renderConfig.scaleY = QGuiApplication::primaryScreen()->physicalDotsPerInchY() * (currentScale / 100.);
 	renderConfig.wordsToHighlight = wordsToHighlight;
 
-	this->previewOrder.clear();
-	this->previewWidgetOrderCache.clear();
-
 	int previewPos = 0;
 	QVector<RenderTarget> targets;
-	for(SearchResult &sr : this->previewableSearchResults)
+	for(const SearchResult &sr : this->previewCoordinator.getPreviewableSearchResults())
 	{
 		if(ui->comboPreviewFiles->currentIndex() != 0)
 		{
@@ -971,11 +948,8 @@ void MainWindow::makePreviews(int page)
 		RenderTarget renderTarget;
 		renderTarget.path = sr.fileData.absPath;
 		renderTarget.page = (int)sr.page;
-		targets.append(renderTarget);
 
-		int pos = previewPos - beginOffset;
-		this->previewOrder[renderTarget.path + QString::number(renderTarget.page)] = pos;
-		++previewPos;
+		targets.append(renderTarget);
 	}
 	int numpages = ceil(static_cast<double>(targets.size()) / previewsPerPage);
 	ui->spinPreviewPage->setMaximum(numpages);
@@ -985,12 +959,12 @@ void MainWindow::makePreviews(int page)
 	ui->previewProcessBar->setMaximum(targets.count());
 	ui->previewProcessBar->setMinimum(0);
 	ui->previewProcessBar->setValue(0);
-	ui->previewProcessBar->setVisible(this->previewableSearchResults.size() > 0);
-	++this->currentPreviewGeneration;
+	ui->previewProcessBar->setVisible(this->previewCoordinator.previewableCount() > 0);
 	this->ui->spinPreviewPage->setEnabled(false);
 	this->ui->comboPreviewFiles->setEnabled(false);
 	this->ui->txtSearch->setEnabled(false);
-	emit startIpcPreviews(renderConfig, targets);
+
+	this->previewCoordinator.startGeneration(renderConfig, targets);
 }
 
 void MainWindow::handleSearchError(QString error)
@@ -1006,11 +980,12 @@ void MainWindow::createSearchResultMenu(QMenu &menu, const QFileInfo &fileInfo)
 				   [&fileInfo] { QGuiApplication::clipboard()->setText(fileInfo.absoluteFilePath()); });
 	menu.addAction("Open containing folder", [this, &fileInfo] { this->openFile(fileInfo.absolutePath()); });
 
+	auto previewables = this->previewCoordinator.getPreviewableSearchResults();
 	auto result =
-		std::find_if(this->previewableSearchResults.begin(), this->previewableSearchResults.end(),
+		std::find_if(previewables.begin(), previewables.end(),
 					 [this, &fileInfo](SearchResult &a) { return fileInfo.absoluteFilePath() == a.fileData.absPath; });
 
-	if(result != this->previewableSearchResults.end())
+	if(result != previewables.end())
 	{
 		menu.addAction("Show previews for this file",
 					   [this, &fileInfo]
@@ -1069,7 +1044,6 @@ void MainWindow::showSearchResultsContextMenu(const QPoint &point)
 MainWindow::~MainWindow()
 {
 	syncerThread.terminate();
-	ipcClientThread.terminate();
 	delete this->indexSyncer;
 	delete this->dbService;
 	delete this->dbFactory;

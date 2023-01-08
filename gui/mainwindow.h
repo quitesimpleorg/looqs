@@ -12,7 +12,7 @@
 #include <QProgressDialog>
 #include "../shared/looqsquery.h"
 #include "../shared/indexsyncer.h"
-#include "ipcpreviewclient.h"
+#include "previewcoordinator.h"
 #include "indexer.h"
 namespace Ui
 {
@@ -27,8 +27,9 @@ class MainWindow : public QMainWindow
 	DatabaseFactory *dbFactory;
 	SqliteDbService *dbService;
 	Ui::MainWindow *ui;
-	IPCPreviewClient ipcPreviewClient;
-	QThread ipcClientThread;
+
+	PreviewCoordinator previewCoordinator;
+
 	QThread syncerThread;
 	Indexer *indexer;
 	IndexSyncer *indexSyncer;
@@ -36,18 +37,12 @@ class MainWindow : public QMainWindow
 	QFileIconProvider iconProvider;
 	QSqlDatabase db;
 	QFutureWatcher<QVector<SearchResult>> searchWatcher;
-	QVector<SearchResult> previewableSearchResults;
 	LooqsQuery contentSearchQuery;
 	QVector<QString> searchHistory;
 	int currentSearchHistoryIndex = 0;
 	QString currentSavedSearchText;
-	QHash<QString, int> previewOrder; /* Quick lookup for the order a preview should have */
-	QMap<int, QWidget *>
-		previewWidgetOrderCache /* Saves those that arrived out of order to be inserted later at the correct pos */;
 	bool previewDirty = false;
 	int previewsPerPage = 20;
-	unsigned int processedPdfPreviews = 0;
-	unsigned int currentPreviewGeneration = 1;
 
 	void connectSignals();
 	void makePreviews(int page);
@@ -69,7 +64,7 @@ class MainWindow : public QMainWindow
 	void treeSearchItemActivated(QTreeWidgetItem *item, int i);
 	void showSearchResultsContextMenu(const QPoint &point);
 	void tabChanged();
-	void previewReceived(QSharedPointer<PreviewResult> preview, unsigned int previewGeneration);
+	void previewReceived();
 	void comboScaleChanged(int i);
 	void spinPreviewPageValueChanged(int val);
 	void startIndexing();
