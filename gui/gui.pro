@@ -34,6 +34,7 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
       clicklabel.cpp \
+    previewcoordinator.cpp \
     previewgenerator.cpp \
     previewgeneratormapfunctor.cpp \
     previewgeneratorodt.cpp \
@@ -54,6 +55,7 @@ HEADERS += \
     ipcserver.h \
         mainwindow.h \
     clicklabel.h \
+    previewcoordinator.h \
     previewgenerator.h \
     previewgeneratormapfunctor.h \
     previewgeneratorodt.h \
