@@ -20,6 +20,8 @@ Poppler::Document *PreviewGeneratorPdf::document(QString path)
 		return nullptr;
 	}
 	result->setRenderHint(Poppler::Document::TextAntialiasing);
+	result->setRenderHint(Poppler::Document::TextHinting);
+	result->setRenderHint(Poppler::Document::TextSlightHinting);
 
 	locker.relock();
 	documentcache.insert(path, result);
