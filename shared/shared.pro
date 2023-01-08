@@ -74,6 +74,7 @@ HEADERS += sqlitesearch.h \
     encodingdetector.h \
     filedata.h \
     filesaver.h \
+    filesaveroptions.h \
     filescanworker.h \
     indexer.h \
     indexsyncer.h \

@@ -38,18 +38,17 @@ SaveFileResult FileSaver::updateFile(QString path)
 	return saveFile(info);
 }
 
-int FileSaver::addFiles(const QVector<QString> paths, bool keepGoing, bool verbose)
+int FileSaver::addFiles(const QVector<QString> paths)
 {
-	return processFiles(paths, std::bind(&FileSaver::addFile, this, std::placeholders::_1), keepGoing, verbose);
+	return processFiles(paths, std::bind(&FileSaver::addFile, this, std::placeholders::_1));
 }
 
-int FileSaver::updateFiles(const QVector<QString> paths, bool keepGoing, bool verbose)
+int FileSaver::updateFiles(const QVector<QString> paths)
 {
-	return processFiles(paths, std::bind(&FileSaver::updateFile, this, std::placeholders::_1), keepGoing, verbose);
+	return processFiles(paths, std::bind(&FileSaver::updateFile, this, std::placeholders::_1));
 }
 
-int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFileResult(QString path)> saverFunc,
-							bool keepGoing, bool verbose)
+int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFileResult(QString path)> saverFunc)
 {
 	std::atomic<bool> terminate{false};
 	std::atomic<int> processedCount{0};
@@ -60,7 +59,7 @@ int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFile
 								  {
 									  return;
 								  }
-								  if(verbose)
+								  if(this->fileSaverOptions.verbose)
 								  {
 									  Logger::info() << "Processing " << path << Qt::endl;
 								  }
@@ -68,7 +67,7 @@ int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFile
 								  if(result == DBFAIL || result == PROCESSFAIL)
 								  {
 									  Logger::error() << "Failed to process " << path << Qt::endl;
-									  if(!keepGoing)
+									  if(!this->fileSaverOptions.keepGoing)
 									  {
 										  terminate = true;
 									  }
@@ -76,7 +75,7 @@ int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFile
 								  else
 								  {
 									  ++processedCount;
-									  if(verbose)
+									  if(this->fileSaverOptions.verbose)
 									  {
 										  if(result == SKIPPED)
 										  {

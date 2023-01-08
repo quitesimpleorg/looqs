@@ -7,19 +7,14 @@ IndexSyncer::IndexSyncer(SqliteDbService &dbService)
 	this->dbService = &dbService;
 }
 
+void IndexSyncer::setFileSaverOptions(FileSaverOptions options)
+{
+	fileSaverOptions = options;
+}
+
 void IndexSyncer::setDryRun(bool dryRun)
 {
 	this->dryRun = dryRun;
-}
-
-void IndexSyncer::setVerbose(bool verbose)
-{
-	this->verbose = verbose;
-}
-
-void IndexSyncer::setKeepGoing(bool keepGoing)
-{
-	this->keepGoing = keepGoing;
 }
 
 void IndexSyncer::setRemoveDeletedFromIndex(bool removeDeletedFromIndex)
@@ -35,7 +30,7 @@ void IndexSyncer::setPattern(QString pattern)
 void IndexSyncer::sync()
 {
 	this->stopToken.store(false, std::memory_order_relaxed);
-	FileSaver saver(*this->dbService);
+
 	QVector<FileData> files;
 	int offset = 0;
 	int limit = 10000;
@@ -87,7 +82,7 @@ void IndexSyncer::sync()
 						if(!this->dbService->deleteFile(fileData.absPath))
 						{
 							emit error("Error: Failed to delete " + fileData.absPath + " from the index");
-							if(!this->keepGoing)
+							if(!this->fileSaverOptions.keepGoing)
 							{
 								emit finished(totalUpdatesFilesCount, totalDeletedFilesCount, totalErroredFilesCount);
 								return;
@@ -104,13 +99,15 @@ void IndexSyncer::sync()
 			}
 		}
 
-		unsigned int updatedFilesCount = saver.updateFiles(filePathsToUpdate, keepGoing, verbose);
+		FileSaver saver(*this->dbService);
+		saver.setFileSaverOptions(this->fileSaverOptions);
+		unsigned int updatedFilesCount = saver.updateFiles(filePathsToUpdate);
 		unsigned int shouldHaveUpdatedCount = static_cast<unsigned int>(filePathsToUpdate.size());
 		if(updatedFilesCount != shouldHaveUpdatedCount)
 		{
 
 			totalErroredFilesCount += (shouldHaveUpdatedCount - updatedFilesCount);
-			if(!keepGoing)
+			if(!this->fileSaverOptions.keepGoing)
 			{
 				QString errorMsg = QString("Failed to update all files selected for updating in this batch. Updated") +
 								   updatedFilesCount + "out of" + shouldHaveUpdatedCount + "selected for updating";

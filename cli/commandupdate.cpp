@@ -40,8 +40,12 @@ int CommandUpdate::handle(QStringList arguments)
 
 	bool hasErrors = false;
 	IndexSyncer *syncer = new IndexSyncer(*this->dbService);
-	syncer->setKeepGoing(keepGoing);
-	syncer->setVerbose(verbose);
+
+	FileSaverOptions fileOptions;
+	fileOptions.keepGoing = keepGoing;
+	fileOptions.verbose = verbose;
+
+	syncer->setFileSaverOptions(fileOptions);
 	syncer->setPattern(pattern);
 	syncer->setDryRun(dryRun);
 	syncer->setRemoveDeletedFromIndex(deleteMissing);

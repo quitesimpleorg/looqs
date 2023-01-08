@@ -264,8 +264,11 @@ void MainWindow::startIndexSync()
 	progressDialog.setValue(0);
 	progressDialog.open();
 
-	indexSyncer->setKeepGoing(true);
-	indexSyncer->setVerbose(false);
+	FileSaverOptions options;
+	options.keepGoing = true;
+	options.verbose = false;
+
+	indexSyncer->setFileSaverOptions(options);
 	indexSyncer->setDryRun(false);
 	indexSyncer->setRemoveDeletedFromIndex(true);
 

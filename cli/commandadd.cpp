@@ -71,9 +71,16 @@ int CommandAdd::handle(QStringList arguments)
 		}
 	}
 
+	FileSaverOptions fileSaverOptions;
+	fileSaverOptions.keepGoing = keepGoing;
+	fileSaverOptions.fillPathsOnlyWithContent = fillContent;
+	fileSaverOptions.pathsOnly = pathsOnly;
+	fileSaverOptions.verbose = false;
+
 	indexer = new Indexer(*this->dbService);
+	indexer->setFileSaverOptions(fileSaverOptions);
+
 	indexer->setTargetPaths(files.toVector());
-	indexer->setKeepGoing(keepGoing);
 
 	connect(indexer, &Indexer::pathsCountChanged, this,
 			[](int pathsCount) { Logger::info() << "Found paths: " << pathsCount << Qt::endl; });

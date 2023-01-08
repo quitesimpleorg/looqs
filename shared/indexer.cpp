@@ -73,16 +73,6 @@ void Indexer::setTargetPaths(QVector<QString> pathsToScan)
 	this->pathsToScan = pathsToScan;
 }
 
-void Indexer::setVerbose(bool verbose)
-{
-	this->verbose = verbose;
-}
-
-void Indexer::setKeepGoing(bool keepGoing)
-{
-	this->keepGoing = keepGoing;
-}
-
 void Indexer::requestCancellation()
 {
 	this->dirScanner->cancel();
@@ -123,7 +113,7 @@ void Indexer::processFileScanResult(FileScanResult result)
 	if(isErrorSaveFileResult(result.second))
 	{
 		this->currentIndexResult.results.append(result);
-		if(!keepGoing)
+		if(!this->fileSaverOptions.keepGoing)
 		{
 			this->requestCancellation();
 			emit finished();
@@ -132,7 +122,7 @@ void Indexer::processFileScanResult(FileScanResult result)
 	}
 	else
 	{
-		if(verbose)
+		if(this->fileSaverOptions.verbose)
 		{
 			this->currentIndexResult.results.append(result);
 		}
@@ -174,4 +164,9 @@ void Indexer::processFinishedWorker()
 	{
 		emit finished();
 	}
+}
+
+void Indexer::setFileSaverOptions(FileSaverOptions options)
+{
+	this->fileSaverOptions = options;
 }

@@ -52,8 +52,7 @@ class Indexer : public QObject
 {
 	Q_OBJECT
   protected:
-	bool verbose = false;
-	bool keepGoing = true;
+	FileSaverOptions fileSaverOptions;
 	SqliteDbService *db;
 
 	int progressReportThreshold = 50;
@@ -80,8 +79,8 @@ class Indexer : public QObject
 	void beginIndexing();
 	void setIgnorePattern(QStringList ignorePattern);
 	void setTargetPaths(QVector<QString> pathsToScan);
-	void setVerbose(bool verbose);
-	void setKeepGoing(bool keepGoing);
+
+	void setFileSaverOptions(FileSaverOptions options);
 
 	void requestCancellation();
 

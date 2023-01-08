@@ -1,16 +1,15 @@
 #ifndef INDEXSYNCER_H
 #define INDEXSYNCER_H
 #include "sqlitedbservice.h"
-
+#include "filesaveroptions.h"
 class IndexSyncer : public QObject
 {
 	Q_OBJECT
   private:
 	SqliteDbService *dbService = nullptr;
-	bool keepGoing = true;
+	FileSaverOptions fileSaverOptions;
 	bool removeDeletedFromIndex = true;
 	bool dryRun = false;
-	bool verbose = false;
 	QString pattern;
 
 	std::atomic<bool> stopToken{false};
@@ -18,12 +17,12 @@ class IndexSyncer : public QObject
   public:
 	IndexSyncer(SqliteDbService &dbService);
 
+	void setFileSaverOptions(FileSaverOptions options);
+
   public slots:
 	void sync();
 	void cancel();
 	void setDryRun(bool dryRun);
-	void setVerbose(bool verbose);
-	void setKeepGoing(bool keepGoing);
 	void setRemoveDeletedFromIndex(bool removeDeletedFromIndex);
 	void setPattern(QString pattern);
 
