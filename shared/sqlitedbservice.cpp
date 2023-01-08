@@ -29,6 +29,22 @@ QVector<SearchResult> SqliteDbService::search(const LooqsQuery &query)
 	return searcher.search(query);
 }
 
+std::optional<QChar> SqliteDbService::queryFileType(QString absPath)
+{
+	auto query = QSqlQuery(dbFactory->forCurrentThread());
+	query.prepare("SELECT filetype FROM file WHERE path = ?");
+	query.addBindValue(absPath);
+	if(!query.exec())
+	{
+		throw LooqsGeneralException("Error while trying to query for file type: " + query.lastError().text());
+	}
+	if(!query.next())
+	{
+		return {};
+	}
+	return query.value(0).toChar();
+}
+
 bool SqliteDbService::fileExistsInDatabase(QString path)
 {
 	auto query = QSqlQuery(dbFactory->forCurrentThread());

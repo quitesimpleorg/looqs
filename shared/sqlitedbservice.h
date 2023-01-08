@@ -1,6 +1,8 @@
 #ifndef SQLITEDBSERVICE_H
 #define SQLITEDBSERVICE_H
 #include <QFileInfo>
+#include <optional>
+
 #include "databasefactory.h"
 #include "utils.h"
 #include "pagedata.h"
@@ -23,6 +25,8 @@ class SqliteDbService
 	bool fileExistsInDatabase(QString path);
 	bool fileExistsInDatabase(QString path, qint64 mtime);
 	QVector<SearchResult> search(const LooqsQuery &query);
+
+	std::optional<QChar> queryFileType(QString absPath);
 };
 
 #endif // SQLITEDBSERVICE_H
