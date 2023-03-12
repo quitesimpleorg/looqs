@@ -91,14 +91,6 @@ class LooqsQuery
 		this->sortConditions = sortConditions;
 		updateTokensMask();
 	}
-
-	LooqsQuery(const LooqsQuery &o)
-	{
-		this->tokens = o.tokens;
-		this->sortConditions = o.sortConditions;
-		this->tokensMask = o.tokensMask;
-		this->limit = o.limit;
-	}
 };
 
 #endif // LOOQSQUERY_H
