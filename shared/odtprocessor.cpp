@@ -3,7 +3,7 @@
 #include "odtprocessor.h"
 #include "tagstripperprocessor.h"
 
-QVector<PageData> OdtProcessor::process(const QByteArray &data) const
+QVector<PageData> OdtProcessor::process(const QByteArray & /*data*/) const
 {
 	throw LooqsGeneralException("Not implemented yet");
 }

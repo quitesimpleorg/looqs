@@ -24,7 +24,7 @@ QSharedPointer<PreviewResult> PreviewGeneratorOdt::generate(RenderConfig config,
 		throw LooqsGeneralException("Error while reading content.xml of " + documentPath);
 	}
 	TagStripperProcessor tsp;
-	QString content = tsp.process(entireContent).first().content;
+	QString content = tsp.process(entireContent).constFirst().content;
 
 	PreviewGeneratorPlainText plainTextGenerator;
 	result->setText(plainTextGenerator.generatePreviewText(content, config, info.fileName()));

@@ -38,7 +38,6 @@ int CommandUpdate::handle(QStringList arguments)
 		QThreadPool::globalInstance()->setMaxThreadCount(threadsCount.toInt());
 	}
 
-	bool hasErrors = false;
 	IndexSyncer *syncer = new IndexSyncer(*this->dbService);
 
 	FileSaverOptions fileOptions;
@@ -64,7 +63,7 @@ int CommandUpdate::handle(QStringList arguments)
 		/* TODO: updated not printed, handled be verbose in FileSaver, but this can be improved */
 	}
 	connect(syncer, &IndexSyncer::finished, this,
-			[&](unsigned int totalUpdated, unsigned int totalRemoved, unsigned int totalErrors)
+			[this, dryRun, keepGoing](unsigned int totalUpdated, unsigned int totalRemoved, unsigned int totalErrors)
 			{
 				Logger::info() << "Syncing finished" << Qt::endl;
 
@@ -76,7 +75,7 @@ int CommandUpdate::handle(QStringList arguments)
 				}
 
 				int retval = 0;
-				if(hasErrors && !keepGoing)
+				if(this->hasErrors && !keepGoing)
 				{
 					retval = 1;
 				}
@@ -86,7 +85,7 @@ int CommandUpdate::handle(QStringList arguments)
 			[&](QString error)
 			{
 				Logger::error() << error << Qt::endl;
-				hasErrors = true;
+				this->hasErrors = true;
 			});
 
 	this->autoFinish = false;

@@ -2,7 +2,6 @@
 #define LOOQSQUERY_H
 #include <QString>
 #include <QVector>
-#include "looqsgeneralexception.h"
 #include "token.h"
 /* Fields that can be queried or sorted */
 enum QueryField
@@ -46,7 +45,7 @@ class LooqsQuery
 	void addToken(Token t);
 	void updateTokensMask()
 	{
-		for(const Token &t : tokens)
+		for(const Token &t : qAsConst(tokens))
 		{
 			this->tokensMask |= t.type;
 		}

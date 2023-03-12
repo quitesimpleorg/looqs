@@ -4,6 +4,9 @@
 #include "filesaver.h"
 class CommandUpdate : public Command
 {
+  protected:
+	bool hasErrors = false;
+
   public:
 	using Command::Command;
 	int handle(QStringList arguments) override;

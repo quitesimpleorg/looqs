@@ -1,5 +1,3 @@
-#include "paralleldirscanner.h"
-
 #include <QRunnable>
 #include <QMutex>
 #include <QDirIterator>
@@ -7,7 +5,7 @@
 #include <QThreadPool>
 #include <functional>
 #include "dirscanworker.h"
-#include "logger.h"
+#include "paralleldirscanner.h"
 
 ParallelDirScanner::ParallelDirScanner()
 {

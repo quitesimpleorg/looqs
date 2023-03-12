@@ -1,6 +1,5 @@
 #include <QCommandLineParser>
 #include "commandlist.h"
-#include "databasefactory.h"
 #include "logger.h"
 
 int CommandList::handle(QStringList arguments)

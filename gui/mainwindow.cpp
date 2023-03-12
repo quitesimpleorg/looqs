@@ -22,7 +22,6 @@
 #include "../shared/sqlitesearch.h"
 #include "../shared/looqsgeneralexception.h"
 #include "../shared/common.h"
-#include "previewgenerator.h"
 #include "aboutdialog.h"
 
 MainWindow::MainWindow(QWidget *parent, QString socketPath)
@@ -148,7 +147,7 @@ void MainWindow::connectSignals()
 	connect(this->indexer, &Indexer::finished, this, &MainWindow::finishIndexing);
 
 	connect(ui->lstPaths->selectionModel(), &QItemSelectionModel::selectionChanged, this,
-			[&](const QItemSelection &selected, const QItemSelection &deselected)
+			[&](const QItemSelection & /*selected*/, const QItemSelection & /*deselected*/)
 			{ ui->btnDeletePath->setEnabled(this->ui->lstPaths->selectedItems().count() > 0); });
 
 	connect(ui->btnDeletePath, &QPushButton::clicked, this, [&] { qDeleteAll(ui->lstPaths->selectedItems()); });
@@ -168,30 +167,29 @@ void MainWindow::connectSignals()
 				}
 			});
 	connect(ui->menuAboutAction, &QAction::triggered, this,
-			[this](bool checked)
+			[this](bool /*checked*/)
 			{
 				AboutDialog aboutDialog(this);
 
 				aboutDialog.exec();
 			});
 	connect(ui->menuAboutQtAction, &QAction::triggered, this,
-			[this](bool checked) { QMessageBox::aboutQt(this, "About Qt"); });
+			[this](bool /*checked*/) { QMessageBox::aboutQt(this, "About Qt"); });
 	connect(ui->menuSyncIndexAction, &QAction::triggered, this, &MainWindow::startIndexSync);
 	connect(ui->menuOpenUserManualAction, &QAction::triggered, this,
-			[this]() { QDesktopServices::openUrl(Common::userManualUrl()); });
+			[]() { QDesktopServices::openUrl(Common::userManualUrl()); });
 
-	connect(indexSyncer, &IndexSyncer::finished, this,
-			[&](unsigned int totalUpdated, unsigned int totalDeleted, unsigned int totalErrored)
-			{
-				this->progressDialog.cancel();
+	connect(
+		indexSyncer, &IndexSyncer::finished, this,
+		[&](unsigned int totalUpdated, unsigned int totalDeleted, unsigned int totalErrored)
+		{
+			this->progressDialog.cancel();
 
-				QMessageBox::information(
-					this, "Syncing finished",
-					QString("Syncing finished\n\nTotal updated: %1\nTotal deleted: %2\nTotal errors: %3\n")
-						.arg(QString::number(totalUpdated))
-						.arg(QString::number(totalDeleted))
-						.arg(QString::number(totalErrored)));
-			});
+			QMessageBox::information(
+				this, "Syncing finished",
+				QString("Syncing finished\n\nTotal updated: %1\nTotal deleted: %2\nTotal errors: %3\n")
+					.arg(QString::number(totalUpdated), QString::number(totalDeleted), QString::number(totalErrored)));
+		});
 	connect(this, &MainWindow::beginIndexSync, indexSyncer, &IndexSyncer::sync);
 	connect(&this->progressDialog, &QProgressDialog::canceled, indexSyncer, &IndexSyncer::cancel);
 	connect(ui->btnSaveSettings, &QPushButton::clicked, this, &MainWindow::saveSettings);
@@ -352,7 +350,7 @@ void MainWindow::finishIndexing()
 	}
 }
 
-void MainWindow::comboScaleChanged(int i)
+void MainWindow::comboScaleChanged(int /*i*/)
 {
 	QSettings scaleSetting;
 	scaleSetting.setValue("currentScale", ui->comboScale->currentText());
@@ -398,7 +396,8 @@ void MainWindow::processShortcut(int key)
 	{
 		ui->txtSearch->setFocus();
 		QString currentText = ui->txtSearch->text().trimmed();
-		int index = currentText.lastIndexOf(QRegularExpression("[\\s\\)]"));
+		static QRegularExpression separatorRegex("[\\s\\)]");
+		int index = currentText.lastIndexOf(separatorRegex);
 		if(index != -1)
 		{
 			bool isFilter = (index == currentText.length() - 1);
@@ -678,7 +677,7 @@ void MainWindow::previewReceived()
 			QFileInfo fileInfo{docPath};
 			QMenu menu("labeRightClick", this);
 			createSearchResultMenu(menu, fileInfo);
-			menu.addAction("Copy page number",
+			menu.addAction("Copy page number", this,
 						   [previewPage] { QGuiApplication::clipboard()->setText(QString::number(previewPage)); });
 			menu.exec(QCursor::pos());
 		};
@@ -916,7 +915,7 @@ void MainWindow::makePreviews(int page)
 	ui->previewProcessBar->setMaximum(this->previewCoordinator.previewableCount());
 
 	QVector<QString> wordsToHighlight;
-	QRegularExpression extractor(R"#("([^"]*)"|([^\s]+))#");
+	static QRegularExpression extractor(R"#("([^"]*)"|([^\s]+))#");
 	for(const Token &token : this->contentSearchQuery.getTokens())
 	{
 		if(token.type == FILTER_CONTENT_CONTAINS)
@@ -948,7 +947,6 @@ void MainWindow::makePreviews(int page)
 	renderConfig.scaleY = QGuiApplication::primaryScreen()->physicalDotsPerInchY() * (currentScale / 100.);
 	renderConfig.wordsToHighlight = wordsToHighlight;
 
-	int previewPos = 0;
 	QVector<RenderTarget> targets;
 	for(const SearchResult &sr : this->previewCoordinator.getPreviewableSearchResults())
 	{
@@ -988,20 +986,20 @@ void MainWindow::handleSearchError(QString error)
 
 void MainWindow::createSearchResultMenu(QMenu &menu, const QFileInfo &fileInfo)
 {
-	menu.addAction("Copy filename to clipboard",
+	menu.addAction("Copy filename to clipboard", this,
 				   [&fileInfo] { QGuiApplication::clipboard()->setText(fileInfo.fileName()); });
-	menu.addAction("Copy full path to clipboard",
+	menu.addAction("Copy full path to clipboard", this,
 				   [&fileInfo] { QGuiApplication::clipboard()->setText(fileInfo.absoluteFilePath()); });
-	menu.addAction("Open containing folder", [this, &fileInfo] { this->openFile(fileInfo.absolutePath()); });
+	menu.addAction("Open containing folder", this, [this, &fileInfo] { this->openFile(fileInfo.absolutePath()); });
 
 	auto previewables = this->previewCoordinator.getPreviewableSearchResults();
 	auto result =
 		std::find_if(previewables.begin(), previewables.end(),
-					 [this, &fileInfo](SearchResult &a) { return fileInfo.absoluteFilePath() == a.fileData.absPath; });
+					 [&fileInfo](SearchResult &a) { return fileInfo.absoluteFilePath() == a.fileData.absPath; });
 
 	if(result != previewables.end())
 	{
-		menu.addAction("Show previews for this file",
+		menu.addAction("Show previews for this file", this,
 					   [this, &fileInfo]
 					   {
 						   ui->tabWidget->setCurrentIndex(1);
@@ -1037,7 +1035,7 @@ void MainWindow::openFile(QString path)
 	QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }
 
-void MainWindow::treeSearchItemActivated(QTreeWidgetItem *item, int i)
+void MainWindow::treeSearchItemActivated(QTreeWidgetItem *item, int /*i*/)
 {
 	openFile(item->text(1));
 }
@@ -1065,7 +1063,7 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent * /*event*/)
 {
 	QStringList list = this->searchHistory.toList();
 	QSettings settings;

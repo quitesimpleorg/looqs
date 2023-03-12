@@ -195,7 +195,7 @@ QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in,
 				  int totalWordsA = 0;
 				  int differentWordsB = 0;
 				  int totalWordsB = 0;
-				  for(int count : a.wordCountMap.values())
+				  for(int count : qAsConst(a.wordCountMap))
 				  {
 					  if(count > 0)
 					  {
@@ -203,7 +203,7 @@ QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in,
 					  }
 					  totalWordsA += count;
 				  }
-				  for(int count : b.wordCountMap.values())
+				  for(int count : qAsConst(b.wordCountMap))
 				  {
 					  if(count > 0)
 					  {

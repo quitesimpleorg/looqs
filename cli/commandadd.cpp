@@ -23,7 +23,7 @@ void CommandAdd::indexerFinished()
 	if(failedPathsCount > 0)
 	{
 		Logger::info() << "Failed paths: " << Qt::endl;
-		for(QString paths : result.failedPaths())
+		for(const QString &paths : result.failedPaths())
 		{
 			Logger::info() << paths << Qt::endl;
 		}
@@ -95,8 +95,8 @@ int CommandAdd::handle(QStringList arguments)
 	connect(indexer, &Indexer::pathsCountChanged, this,
 			[](int pathsCount) { Logger::info() << "Found paths: " << pathsCount << Qt::endl; });
 	connect(indexer, &Indexer::indexProgress, this,
-			[](int pathsCount, unsigned int added, unsigned int skipped, unsigned int failed, unsigned int totalCount)
-			{ Logger::info() << "Processed files: " << pathsCount << Qt::endl; });
+			[](int pathsCount, unsigned int /*added*/, unsigned int /*skipped*/, unsigned int /*failed*/,
+			   unsigned int /*totalCount*/) { Logger::info() << "Processed files: " << pathsCount << Qt::endl; });
 	connect(indexer, &Indexer::finished, this, &CommandAdd::indexerFinished);
 
 	this->autoFinish = false;

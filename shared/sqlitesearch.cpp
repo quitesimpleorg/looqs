@@ -69,7 +69,7 @@ QString SqliteSearch::createSortSql(const QVector<SortCondition> sortConditions)
 QString SqliteSearch::escapeFtsArgument(QString ftsArg)
 {
 	QString result;
-	QRegularExpression extractor(R"#("([^"]*)"|([^\s]+))#");
+	static QRegularExpression extractor(R"#("([^"]*)"|([^\s]+))#");
 	QRegularExpressionMatchIterator i = extractor.globalMatch(ftsArg);
 	while(i.hasNext())
 	{
@@ -149,7 +149,6 @@ QPair<QString, QVector<QString>> SqliteSearch::createSql(const Token &token)
 QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 {
 	QString whereSql;
-	QString joinSql;
 	QVector<QString> bindValues;
 	bool isContentSearch = (query.getTokensMask() & FILTER_CONTENT) == FILTER_CONTENT;
 	if(query.getTokens().isEmpty())
