@@ -25,10 +25,22 @@ SaveFileResult FileSaver::addFile(QString path)
 	QString absPath = info.absoluteFilePath();
 
 	auto mtime = info.lastModified().toSecsSinceEpoch();
-	if(this->dbService->fileExistsInDatabase(absPath, mtime))
+
+	bool exists = false;
+	if(this->fileSaverOptions.fillExistingContentless)
+	{
+		exists = this->dbService->fileExistsInDatabase(absPath, mtime, 'c');
+	}
+	else
+	{
+		exists = this->dbService->fileExistsInDatabase(absPath, mtime);
+	}
+
+	if(exists)
 	{
 		return SKIPPED;
 	}
+
 	return saveFile(info);
 }
 
@@ -134,10 +146,7 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 			if(mustFillContent)
 			{
 				auto filetype = this->dbService->queryFileType(fileInfo.absolutePath());
-				if(filetype)
-				{
-					mustFillContent = filetype.value() == 'c';
-				}
+				mustFillContent = !filetype.has_value() || filetype.value() == 'c';
 			}
 		}
 
