@@ -17,6 +17,9 @@ class SqliteDbService
 	DatabaseFactory *dbFactory = nullptr;
 	bool insertToFTS(bool useTrigrams, QSqlDatabase &db, int fileid, QVector<PageData> &pageData);
 
+	QSqlQuery exec(QString query, std::initializer_list<QVariant> args);
+	bool execBool(QString querystr, std::initializer_list<QVariant> args);
+
   public:
 	SqliteDbService(DatabaseFactory &dbFactory);
 	SaveFileResult saveFile(QFileInfo fileInfo, QVector<PageData> &pageData, bool pathsOnly);
@@ -24,6 +27,7 @@ class SqliteDbService
 	bool deleteFile(QString path);
 	bool fileExistsInDatabase(QString path);
 	bool fileExistsInDatabase(QString path, qint64 mtime);
+	bool fileExistsInDatabase(QString path, qint64 mtime, QChar filetype);
 	QVector<SearchResult> search(const LooqsQuery &query);
 
 	std::optional<QChar> queryFileType(QString absPath);

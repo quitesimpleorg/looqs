@@ -5,22 +5,6 @@
 #include "sqlitedbservice.h"
 #include "filedata.h"
 #include "logger.h"
-bool SqliteDbService::fileExistsInDatabase(QString path, qint64 mtime)
-{
-	auto query = QSqlQuery(dbFactory->forCurrentThread());
-	query.prepare("SELECT 1 FROM file WHERE path = ? and mtime = ?");
-	query.addBindValue(path);
-	query.addBindValue(mtime);
-	if(!query.exec())
-	{
-		throw LooqsGeneralException("Error while trying to query for file existance: " + query.lastError().text());
-	}
-	if(!query.next())
-	{
-		return false;
-	}
-	return query.value(0).toBool();
-}
 
 QVector<SearchResult> SqliteDbService::search(const LooqsQuery &query)
 {
@@ -31,13 +15,7 @@ QVector<SearchResult> SqliteDbService::search(const LooqsQuery &query)
 
 std::optional<QChar> SqliteDbService::queryFileType(QString absPath)
 {
-	auto query = QSqlQuery(dbFactory->forCurrentThread());
-	query.prepare("SELECT filetype FROM file WHERE path = ?");
-	query.addBindValue(absPath);
-	if(!query.exec())
-	{
-		throw LooqsGeneralException("Error while trying to query for file type: " + query.lastError().text());
-	}
+	auto query = exec("SELECT filetype FROM file WHERE path = ?", {absPath});
 	if(!query.next())
 	{
 		return {};
@@ -47,18 +25,17 @@ std::optional<QChar> SqliteDbService::queryFileType(QString absPath)
 
 bool SqliteDbService::fileExistsInDatabase(QString path)
 {
-	auto query = QSqlQuery(dbFactory->forCurrentThread());
-	query.prepare("SELECT 1 FROM file WHERE path = ?");
-	query.addBindValue(path);
-	if(!query.exec())
-	{
-		throw LooqsGeneralException("Error while trying to query for file existance: " + query.lastError().text());
-	}
-	if(!query.next())
-	{
-		return false;
-	}
-	return query.value(0).toBool();
+	return execBool("SELECT 1 FROM file WHERE path = ?", {path});
+}
+
+bool SqliteDbService::fileExistsInDatabase(QString path, qint64 mtime)
+{
+	return execBool("SELECT 1 FROM file WHERE path = ? AND mtime = ?", {path, mtime});
+}
+
+bool SqliteDbService::fileExistsInDatabase(QString path, qint64 mtime, QChar fileType)
+{
+	return execBool("SELECT 1 FROM file WHERE path = ? AND mtime = ? AND filetype = ?", {path, mtime, fileType});
 }
 
 SqliteDbService::SqliteDbService(DatabaseFactory &dbFactory)
@@ -162,6 +139,31 @@ bool SqliteDbService::insertToFTS(bool useTrigrams, QSqlDatabase &db, int fileid
 		}
 	}
 	return true;
+}
+
+QSqlQuery SqliteDbService::exec(QString querystr, std::initializer_list<QVariant> args)
+{
+	auto query = QSqlQuery(dbFactory->forCurrentThread());
+	query.prepare(querystr);
+	for(const QVariant &v : args)
+	{
+		query.addBindValue(v);
+	}
+	if(!query.exec())
+	{
+		throw LooqsGeneralException("Error while exec(): " + query.lastError().text() + " for query: " + querystr);
+	}
+	return query;
+}
+
+bool SqliteDbService::execBool(QString querystr, std::initializer_list<QVariant> args)
+{
+	auto query = exec(querystr, args);
+	if(!query.next())
+	{
+		return false;
+	}
+	return query.value(0).toBool();
 }
 
 SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &pageData, bool pathsOnly)
