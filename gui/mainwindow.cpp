@@ -877,6 +877,8 @@ void MainWindow::handleSearchResults(const QVector<SearchResult> &results)
 		makePreviews(1);
 	}
 
+	ui->tabWidget->setTabEnabled(1, previewDirty);
+
 	QString statusText = "Results: " + QString::number(results.size()) + " files";
 	statusText += ", previewable: " + QString::number(this->previewCoordinator.previewableCount());
 	if(hasDeleted)
