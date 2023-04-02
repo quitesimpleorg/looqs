@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
 															   Logger::error() << error << Qt::endl;
 															   QMessageBox::critical(nullptr, "Error during upgrade",
 																					 error);
-															   qApp->quit();
+															   exit(EXIT_FAILURE);
 														   }
 
 								 );
