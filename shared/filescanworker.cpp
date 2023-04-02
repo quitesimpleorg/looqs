@@ -21,11 +21,18 @@ void FileScanWorker::run()
 		{
 			sfr = saver.addFile(path);
 		}
+		catch(LooqsGeneralException &e)
+		{
+			Logger::error() << e.message << Qt::endl;
+			sfr = PROCESSFAIL;
+		}
+
 		catch(std::exception &e)
 		{
-			Logger::error() << e.what();
+			Logger::error() << e.what() << Qt::endl;
 			sfr = PROCESSFAIL; // well...
 		}
+
 		emit result({path, sfr});
 		if(stopToken->load(std::memory_order_relaxed)) // TODO: relaxed should suffice here, but recheck
 		{
