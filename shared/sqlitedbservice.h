@@ -28,6 +28,8 @@ class SqliteDbService
 	bool fileExistsInDatabase(QString path);
 	bool fileExistsInDatabase(QString path, qint64 mtime);
 	bool fileExistsInDatabase(QString path, qint64 mtime, QChar filetype);
+	bool addTag(QString tag, QString path);
+	bool addTag(QString tag, const QVector<QString> &paths);
 	QVector<SearchResult> search(const LooqsQuery &query);
 
 	std::optional<QChar> queryFileType(QString absPath);

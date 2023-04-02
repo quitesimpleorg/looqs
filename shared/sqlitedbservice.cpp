@@ -2,6 +2,7 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QSqlError>
+#include "looqsgeneralexception.h"
 #include "sqlitedbservice.h"
 #include "filedata.h"
 #include "logger.h"
@@ -232,4 +233,57 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &
 		return DBFAIL;
 	}
 	return OK;
+}
+
+bool SqliteDbService::addTag(QString tag, QString path)
+{
+	QVector<QString> paths;
+	paths.append(path);
+	return addTag(tag, paths);
+}
+
+bool SqliteDbService::addTag(QString tag, const QVector<QString> &paths)
+{
+	QSqlDatabase db = dbFactory->forCurrentThread();
+	QSqlQuery tagQuery(db);
+	QSqlQuery fileTagQuery(db);
+
+	tagQuery.prepare("INSERT OR IGNORE INTO tag (name) VALUES(?)");
+	tagQuery.addBindValue(tag);
+
+	fileTagQuery.prepare("INSERT INTO filetag(fileid, tagid) VALUES((SELECT id FROM file WHERE path = ?), (SELECT id "
+						 "FROM tag WHERE name = ?))");
+	fileTagQuery.bindValue(1, tag);
+	if(!db.transaction())
+	{
+		Logger::error() << "Failed to open transaction to add paths for tag " << tag << " : " << db.lastError()
+						<< Qt::endl;
+		return false;
+	}
+	if(!tagQuery.exec())
+	{
+		db.rollback();
+		Logger::error() << "Failed INSERT query" << tagQuery.lastError() << Qt::endl;
+		return false;
+	}
+
+	for(const QString &path : paths)
+	{
+		fileTagQuery.bindValue(0, path);
+		if(!fileTagQuery.exec())
+		{
+			db.rollback();
+			Logger::error() << "Failed to add paths to tag" << Qt::endl;
+			return false;
+		}
+	}
+
+	if(!db.commit())
+	{
+		db.rollback();
+		Logger::error() << "Failed to commit tag insertion transaction" << db.lastError() << Qt::endl;
+		return false;
+	}
+
+	return true;
 }
