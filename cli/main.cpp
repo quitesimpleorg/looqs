@@ -21,6 +21,7 @@
 #include "commandupdate.h"
 #include "commandsearch.h"
 #include "commandlist.h"
+#include "commandtag.h"
 #include "databasefactory.h"
 #include "logger.h"
 #include "sandboxedprocessor.h"
@@ -31,7 +32,7 @@
 void printUsage(QString argv0)
 {
 	qInfo() << "Usage:" << argv0 << "command";
-	qInfo() << "Valid commands: add, update, delete, search, list. Each command has a --help option.";
+	qInfo() << "Valid commands: add, update, search, delete, tag, list. Each command has a --help option.";
 }
 
 Command *commandFromName(QString name, SqliteDbService &dbService)
@@ -55,6 +56,10 @@ Command *commandFromName(QString name, SqliteDbService &dbService)
 	if(name == "list")
 	{
 		return new CommandList(dbService);
+	}
+	if(name == "tag")
+	{
+		return new CommandTag(dbService);
 	}
 
 	return nullptr;

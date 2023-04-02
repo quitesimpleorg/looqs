@@ -1,6 +1,5 @@
 #include <QCommandLineParser>
 #include "commandsearch.h"
-#include "databasefactory.h"
 #include "logger.h"
 
 int CommandSearch::handle(QStringList arguments)
