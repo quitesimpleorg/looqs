@@ -104,6 +104,96 @@ unsigned int SqliteDbService::getFiles(QVector<FileData> &results, QString wildC
 	return processedRows;
 }
 
+QVector<QString> SqliteDbService::getTags()
+{
+	QVector<QString> result;
+	auto query = QSqlQuery(dbFactory->forCurrentThread());
+	query.prepare("SELECT name FROM tag ORDER by name ASC");
+	query.setForwardOnly(true);
+	if(!query.exec())
+	{
+		throw LooqsGeneralException("Error while trying to retrieve tags from database: " + query.lastError().text());
+	}
+	while(query.next())
+	{
+		QString tagname = query.value(0).toString();
+		result.append(tagname);
+	}
+	return result;
+}
+
+QVector<QString> SqliteDbService::getTagsForPath(QString path)
+{
+	QVector<QString> result;
+	auto query = QSqlQuery(dbFactory->forCurrentThread());
+	query.prepare("SELECT name FROM tag INNER JOIN filetag ON tag.id = filetag.tagid INNER JOIN file ON filetag.fileid "
+				  "= file.id WHERE file.path = ? ORDER BY name ASC");
+	query.addBindValue(path);
+	query.setForwardOnly(true);
+	if(!query.exec())
+	{
+		throw LooqsGeneralException("Error while trying to retrieve tags from database: " + query.lastError().text());
+	}
+	while(query.next())
+	{
+		QString tagname = query.value(0).toString();
+		result.append(tagname);
+	}
+	return result;
+}
+
+bool SqliteDbService::setTags(QString path, const QSet<QString> &tags)
+{
+	QSqlDatabase db = dbFactory->forCurrentThread();
+	if(!db.transaction())
+	{
+		Logger::error() << "Failed to open transaction for " << path << " : " << db.lastError() << Qt::endl;
+		return false;
+	}
+
+	QSqlQuery deletionQuery = QSqlQuery(db);
+	deletionQuery.prepare("DELETE FROM filetag WHERE fileid = (SELECT id FROM file WHERE path = ?)");
+	deletionQuery.addBindValue(path);
+	if(!deletionQuery.exec())
+	{
+		db.rollback();
+		Logger::error() << "Failed to delete existing tags " << deletionQuery.lastError() << Qt::endl;
+		return false;
+	}
+
+	for(const QString &tag : tags)
+	{
+		QSqlQuery tagQuery = QSqlQuery(db);
+		tagQuery.prepare("INSERT OR IGNORE INTO tag (name) VALUES(?)");
+		tagQuery.addBindValue(tag.toLower());
+		if(!tagQuery.exec())
+		{
+			db.rollback();
+			Logger::error() << "Failed to insert tag " << tagQuery.lastError() << Qt::endl;
+			return false;
+		}
+		QSqlQuery fileTagQuery(db);
+		fileTagQuery.prepare(
+			"INSERT INTO filetag(fileid, tagid) VALUES((SELECT id FROM file WHERE path = ?), (SELECT id "
+			"FROM tag WHERE name = ?))");
+		fileTagQuery.bindValue(0, path);
+		fileTagQuery.bindValue(1, tag);
+		if(!fileTagQuery.exec())
+		{
+			db.rollback();
+			Logger::error() << "Failed to assign tag to file" << Qt::endl;
+			return false;
+		}
+	}
+	if(!db.commit())
+	{
+		db.rollback();
+		Logger::error() << "Failed to commit transaction when saving tags" << Qt::endl;
+		return false;
+	}
+	return true;
+}
+
 bool SqliteDbService::insertToFTS(bool useTrigrams, QSqlDatabase &db, int fileid, QVector<PageData> &pageData)
 {
 	QString ftsInsertStatement;
@@ -247,6 +337,8 @@ bool SqliteDbService::addTag(QString tag, const QVector<QString> &paths)
 	QSqlDatabase db = dbFactory->forCurrentThread();
 	QSqlQuery tagQuery(db);
 	QSqlQuery fileTagQuery(db);
+
+	tag = tag.toLower();
 
 	tagQuery.prepare("INSERT OR IGNORE INTO tag (name) VALUES(?)");
 	tagQuery.addBindValue(tag);

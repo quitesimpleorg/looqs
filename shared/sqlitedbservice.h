@@ -23,13 +23,19 @@ class SqliteDbService
   public:
 	SqliteDbService(DatabaseFactory &dbFactory);
 	SaveFileResult saveFile(QFileInfo fileInfo, QVector<PageData> &pageData, bool pathsOnly);
-	unsigned int getFiles(QVector<FileData> &results, QString wildCardPattern, int offset, int limit);
+
 	bool deleteFile(QString path);
 	bool fileExistsInDatabase(QString path);
 	bool fileExistsInDatabase(QString path, qint64 mtime);
 	bool fileExistsInDatabase(QString path, qint64 mtime, QChar filetype);
+	unsigned int getFiles(QVector<FileData> &results, QString wildCardPattern, int offset, int limit);
+
 	bool addTag(QString tag, QString path);
 	bool addTag(QString tag, const QVector<QString> &paths);
+	QVector<QString> getTags();
+	QVector<QString> getTagsForPath(QString path);
+	bool setTags(QString path, const QSet<QString> &tags);
+
 	QVector<SearchResult> search(const LooqsQuery &query);
 
 	std::optional<QChar> queryFileType(QString absPath);
