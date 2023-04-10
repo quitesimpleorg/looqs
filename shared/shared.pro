@@ -60,6 +60,7 @@ SOURCES += sqlitesearch.cpp \
     processor.cpp \
     sandboxedprocessor.cpp \
     sqlitedbservice.cpp \
+    tagmanager.cpp \
     tagstripperprocessor.cpp \
     utils.cpp \
     ../submodules/exile.h/exile.c \
@@ -93,6 +94,7 @@ HEADERS += sqlitesearch.h \
     savefileresult.h \
     searchresult.h \
     sqlitedbservice.h \
+    tagmanager.h \
     tagstripperprocessor.h \
     token.h \
     common.h \
