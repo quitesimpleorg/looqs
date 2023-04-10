@@ -1,6 +1,7 @@
 #include <QCommandLineParser>
 #include "commandtag.h"
 #include "logger.h"
+#include "tagmanager.h"
 
 int CommandTag::handle(QStringList arguments)
 {
@@ -52,7 +53,8 @@ int CommandTag::handle(QStringList arguments)
 			paths[i] = absolutePath;
 		}
 
-		bool result = this->dbService->addTag(tag, paths);
+		TagManager tagManager{*this->dbService};
+		bool result = tagManager.addPathsToTag(tag, paths);
 		if(!result)
 		{
 			Logger::error() << "Failed to assign tags" << Qt::endl;
