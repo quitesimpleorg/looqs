@@ -143,6 +143,11 @@ QPair<QString, QVector<QString>> SqliteSearch::createSql(const Token &token)
 	{
 		return {" fts MATCH ? ", {escapeFtsArgument(value)}};
 	}
+	if(token.type == FILTER_TAG_ASSIGNED)
+	{
+		return {" file.id IN (SELECT fileid FROM filetag WHERE tagid = (SELECT id FROM tag WHERE name = ?)) ",
+				{value.toLower()}};
+	}
 	throw LooqsGeneralException("Unknown token passed (should not happen)");
 }
 
@@ -179,18 +184,18 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 		}
 		QString whereSqlTrigram = whereSql;
 		whereSqlTrigram.replace("fts MATCH", "fts_trigram MATCH"); // A bit dirty...
-		prepSql =
-			"SELECT DISTINCT path, page, mtime, size, filetype FROM ("
-			"SELECT file.path AS path,  content.page AS page, file.mtime AS mtime, file.size AS size, "
-			"file.filetype AS filetype, 0 AS prio, fts.rank AS rank FROM file INNER JOIN content ON file.id = "
-			"content.fileid "
-			"INNER JOIN fts ON content.ftsid = fts.ROWID WHERE 1=1 AND " +
-			whereSql +
-			"UNION ALL SELECT file.path AS path,  content.page AS page, file.mtime AS mtime, file.size AS size, "
-			"file.filetype AS filetype, 1 as prio, fts_trigram.rank AS rank FROM file INNER JOIN content ON file.id = "
-			"content.fileid " +
-			"INNER JOIN fts_trigram ON content.fts_trigramid = fts_trigram.ROWID WHERE 1=1 AND " + whereSqlTrigram +
-			" ) " + sortSql;
+		prepSql = "SELECT DISTINCT path, page, mtime, size, filetype FROM ("
+				  "SELECT file.path AS path,  content.page AS page, file.mtime AS mtime, file.size AS size, "
+				  "file.filetype AS filetype, 0 AS prio, fts.rank AS rank FROM file INNER JOIN content ON file.id = "
+				  "content.fileid "
+				  "INNER JOIN fts ON content.ftsid = fts.ROWID WHERE 1=1 AND " +
+				  whereSql +
+				  "UNION ALL SELECT file.path AS path,  content.page AS page, file.mtime AS mtime, file.size AS size, "
+				  "file.filetype AS filetype, 1 as prio, fts_trigram.rank AS rank FROM file INNER JOIN content ON "
+				  "file.id = "
+				  "content.fileid " +
+				  "INNER JOIN fts_trigram ON content.fts_trigramid = fts_trigram.ROWID WHERE 1=1 AND " +
+				  whereSqlTrigram + " ) " + sortSql;
 		++bindIterations;
 	}
 	else
