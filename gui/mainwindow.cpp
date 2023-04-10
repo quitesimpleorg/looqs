@@ -293,6 +293,7 @@ void MainWindow::startIndexing()
 	if(this->indexer->isRunning())
 	{
 		ui->btnStartIndexing->setEnabled(false);
+
 		ui->btnStartIndexing->setText("Start indexing");
 		this->indexer->requestCancellation();
 		return;
@@ -302,6 +303,8 @@ void MainWindow::startIndexing()
 	ui->resultsTab->setEnabled(false);
 	ui->settingsTab->setEnabled(false);
 	ui->txtPathScanAdd->setEnabled(false);
+	ui->btnAddPath->setEnabled(false);
+	ui->btnChoosePath->setEnabled(false);
 	ui->txtSearch->setEnabled(false);
 	ui->previewProcessBar->setValue(0);
 	ui->previewProcessBar->setVisible(true);
@@ -349,6 +352,8 @@ void MainWindow::finishIndexing()
 	ui->resultsTab->setEnabled(true);
 	ui->settingsTab->setEnabled(true);
 	ui->txtPathScanAdd->setEnabled(true);
+	ui->btnAddPath->setEnabled(true);
+	ui->btnChoosePath->setEnabled(true);
 	ui->txtSearch->setEnabled(true);
 	if(result.erroredPaths > 0)
 	{
