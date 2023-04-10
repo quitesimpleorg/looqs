@@ -14,6 +14,7 @@
 #include "../shared/indexsyncer.h"
 #include "previewcoordinator.h"
 #include "indexer.h"
+#include "tagmanager.h"
 namespace Ui
 {
 class MainWindow;
@@ -39,6 +40,9 @@ class MainWindow : public QMainWindow
 	QFutureWatcher<QVector<SearchResult>> searchWatcher;
 	LooqsQuery contentSearchQuery;
 	QVector<QString> searchHistory;
+
+	TagManager *tagManager;
+
 	int currentSearchHistoryIndex = 0;
 	QString currentSavedSearchText;
 	bool previewDirty = false;

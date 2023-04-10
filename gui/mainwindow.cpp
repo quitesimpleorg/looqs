@@ -16,6 +16,9 @@
 #include <QScreen>
 #include <QProgressDialog>
 #include <QDesktopWidget>
+#include <QWidgetAction>
+#include <QInputDialog>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "clicklabel.h"
@@ -42,6 +45,9 @@ MainWindow::MainWindow(QWidget *parent, QString socketPath)
 
 	indexer = new Indexer(*(this->dbService));
 	indexer->setParent(this);
+
+	tagManager = new TagManager(*(this->dbService));
+
 	connectSignals();
 	ui->treeResultsList->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 	ui->tabWidget->setCurrentIndex(0);
@@ -1008,6 +1014,65 @@ void MainWindow::createSearchResultMenu(QMenu &menu, const QFileInfo &fileInfo)
 						   this->ui->comboPreviewFiles->setCurrentText(fileInfo.absoluteFilePath());
 					   });
 	}
+
+	QMenu *tagMenu = menu.addMenu("Tag file with: ");
+	QVector<QString> allTags = this->dbService->getTags();
+	QHash<QString, bool> fileTags;
+
+	QString path = fileInfo.absoluteFilePath();
+
+	for(const QString &fileTag : this->dbService->getTagsForPath(path))
+	{
+		fileTags[fileTag] = true;
+	}
+
+	for(const QString &tag : allTags)
+	{
+		QCheckBox *checkBox = new QCheckBox(tagMenu);
+		QWidgetAction *checkableAction = new QWidgetAction(tagMenu);
+		checkableAction->setDefaultWidget(checkBox);
+		checkBox->setText(tag);
+		checkBox->setChecked(fileTags.contains(tag));
+		tagMenu->addAction(checkableAction);
+
+		connect(checkBox, &QCheckBox::stateChanged, this,
+				[this, checkBox, path]
+				{
+					QVector<QString> currentTags = this->dbService->getTagsForPath(path);
+					QString checkBoxText = checkBox->text();
+					if(checkBox->isChecked())
+					{
+						if(!this->tagManager->addTagsToPath(path, {checkBoxText}))
+						{
+							QMessageBox::critical(this, "Error while adding tag",
+												  "An error occured while trying to add the tag");
+						}
+					}
+					else
+					{
+						if(!this->tagManager->removeTagsForPath(path, {checkBoxText}))
+						{
+							QMessageBox::critical(this, "Error while removing tag",
+												  "An error occured while trying to remove the tag");
+						}
+					}
+				});
+	}
+
+	tagMenu->addAction("Add new tags", this,
+					   [this, path]
+					   {
+						   bool ok;
+						   QString text =
+							   QInputDialog::getText(this, tr("Enter new tags"), tr("New tags (comma separated):"),
+													 QLineEdit::Normal, "", &ok);
+
+						   if(ok && !this->tagManager->addTagsToPath(path, text, ','))
+						   {
+							   QMessageBox::critical(this, "Error while trying to add tags",
+													 "An error occured while trying to add tags");
+						   }
+					   });
 }
 
 void MainWindow::openDocument(QString path, int num)
@@ -1062,6 +1127,7 @@ MainWindow::~MainWindow()
 	delete this->dbService;
 	delete this->dbFactory;
 	delete this->indexer;
+	delete this->tagManager;
 	delete ui;
 }
 
