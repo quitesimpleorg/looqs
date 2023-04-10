@@ -285,6 +285,10 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 			{
 				tokenType = FILTER_CONTENT_PAGE;
 			}
+			else if(filtername == "t" || filtername == "tag")
+			{
+				tokenType = FILTER_TAG_ASSIGNED;
+			}
 			// TODO: given this is not really a "filter", this feels slightly misplaced here
 			else if(filtername == "sort")
 			{
