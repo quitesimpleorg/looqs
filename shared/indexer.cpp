@@ -111,6 +111,20 @@ void Indexer::dirScanProgress(int current, int total)
 
 void Indexer::processFileScanResult(FileScanResult result)
 {
+	/* TODO: OK_WASEMPTY might need a special list */
+	if(result.second == OK || result.second == OK_WASEMPTY)
+	{
+		++this->currentIndexResult.addedPaths;
+	}
+	else if(result.second == SKIPPED)
+	{
+		++this->currentIndexResult.skippedPaths;
+	}
+	else
+	{
+		++this->currentIndexResult.erroredPaths;
+	}
+
 	if(isErrorSaveFileResult(result.second))
 	{
 		this->currentIndexResult.results.append(result);
@@ -127,20 +141,6 @@ void Indexer::processFileScanResult(FileScanResult result)
 		{
 			this->currentIndexResult.results.append(result);
 		}
-	}
-
-	/* TODO: OK_WASEMPTY might need a special list */
-	if(result.second == OK || result.second == OK_WASEMPTY)
-	{
-		++this->currentIndexResult.addedPaths;
-	}
-	else if(result.second == SKIPPED)
-	{
-		++this->currentIndexResult.skippedPaths;
-	}
-	else
-	{
-		++this->currentIndexResult.erroredPaths;
 	}
 
 	QTime currentTime = QTime::currentTime();
