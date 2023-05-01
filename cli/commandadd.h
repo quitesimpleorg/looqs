@@ -13,6 +13,8 @@ class CommandAdd : public Command
 	bool keepGoing = true;
 
   protected:
+	IndexResult currentResult;
+
   public:
 	using Command::Command;
 

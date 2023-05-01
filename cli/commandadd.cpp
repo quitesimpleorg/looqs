@@ -45,6 +45,7 @@ int CommandAdd::handle(QStringList arguments)
 						"exit asap, but it's possible that a few files will still be processed. "
 						"Set -t 1 to avoid this behavior, but processing will be slower. "},
 					   {{"n", "no-content"}, "Only add paths to database. Do not index content"},
+					   {{"v", "verbose"}, "Print paths of files being processed"},
 					   {{"f", "fill-content"}, "Index content for files previously indexed with -n"},
 					   {"tags", "Comma-separated list of tags to assign"},
 					   {{"t", "threads"}, "Number of threads to use.", "threads"}});
@@ -56,6 +57,8 @@ int CommandAdd::handle(QStringList arguments)
 	this->keepGoing = parser.isSet("continue");
 	bool pathsOnly = parser.isSet("no-content");
 	bool fillContent = parser.isSet("fill-content");
+	bool verbose = parser.isSet("verbose");
+
 	if(parser.isSet("threads"))
 	{
 		QString threadsCount = parser.value("threads");
@@ -85,18 +88,43 @@ int CommandAdd::handle(QStringList arguments)
 	fileSaverOptions.keepGoing = keepGoing;
 	fileSaverOptions.fillExistingContentless = fillContent;
 	fileSaverOptions.metadataOnly = pathsOnly;
-	fileSaverOptions.verbose = false;
+	fileSaverOptions.verbose = verbose;
 
 	indexer = new Indexer(*this->dbService);
 	indexer->setFileSaverOptions(fileSaverOptions);
 
 	indexer->setTargetPaths(files.toVector());
 
+	if(verbose)
+	{
+		indexer->setProgressReportThreshold(1);
+	}
+
 	connect(indexer, &Indexer::pathsCountChanged, this,
 			[](int pathsCount) { Logger::info() << "Found paths: " << pathsCount << Qt::endl; });
 	connect(indexer, &Indexer::indexProgress, this,
-			[](int pathsCount, unsigned int /*added*/, unsigned int /*skipped*/, unsigned int /*failed*/,
-			   unsigned int /*totalCount*/) { Logger::info() << "Processed files: " << pathsCount << Qt::endl; });
+			[verbose, this](int pathsCount, unsigned int /*added*/, unsigned int /*skipped*/, unsigned int /*failed*/,
+							unsigned int /*totalCount*/)
+			{
+				Logger::info() << "Processed files: " << pathsCount << Qt::endl;
+				if(verbose)
+				{
+					IndexResult indexResult = indexer->getResult();
+					int newlyAdded = indexResult.results.count() - currentResult.results.count();
+					if(newlyAdded > 0)
+					{
+						int newOffset = indexResult.results.count() - newlyAdded;
+						for(int i = newOffset; i < indexResult.results.count(); i++)
+						{
+							auto result = indexResult.results.at(i);
+							Logger::info() << SaveFileResultToString(result.second) << result.first << Qt::endl;
+						}
+					}
+					this->currentResult = indexResult;
+				}
+			}
+
+	);
 	connect(indexer, &Indexer::finished, this, &CommandAdd::indexerFinished);
 
 	this->autoFinish = false;
