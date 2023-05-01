@@ -171,3 +171,8 @@ void Indexer::setFileSaverOptions(FileSaverOptions options)
 {
 	this->fileSaverOptions = options;
 }
+
+void Indexer::setProgressReportThreshold(int threshold)
+{
+	this->progressReportThreshold = threshold;
+}

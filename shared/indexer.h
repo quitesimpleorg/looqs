@@ -82,6 +82,8 @@ class Indexer : public QObject
 
 	void setFileSaverOptions(FileSaverOptions options);
 
+	void setProgressReportThreshold(int threshold);
+
 	void requestCancellation();
 
 	Indexer(SqliteDbService &db);
