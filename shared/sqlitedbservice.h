@@ -34,7 +34,10 @@ class SqliteDbService
 	bool addTag(QString tag, const QVector<QString> &paths);
 	QVector<QString> getTags();
 	QVector<QString> getTagsForPath(QString path);
+	QVector<QString> getPathsForTag(QString path);
 	bool setTags(QString path, const QSet<QString> &tags);
+	bool removePathsForTag(QString tag, const QVector<QString> &paths);
+	bool deleteTag(QString tag);
 
 	QVector<SearchResult> search(const LooqsQuery &query);
 

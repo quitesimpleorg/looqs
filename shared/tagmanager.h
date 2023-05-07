@@ -17,9 +17,11 @@ class TagManager
 	bool addPathsToTag(QString tag, const QVector<QString> &paths);
 	bool removeTagsForPath(QString path, const QSet<QString> &tags);
 
+	bool removePathsForTag(QString tag, const QVector<QString> &paths);
 	bool deleteTag(QString tag);
 
 	QVector<QString> getTags(QString path);
+	QVector<QString> getTags();
 	QVector<QString> getPaths(QString tag);
 };
 

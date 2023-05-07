@@ -4,6 +4,9 @@
 
 class CommandTag : public Command
 {
+  protected:
+	bool ensureAbsolutePaths(const QVector<QString> &paths, QVector<QString> &absolutePaths);
+
   public:
 	using Command::Command;
 

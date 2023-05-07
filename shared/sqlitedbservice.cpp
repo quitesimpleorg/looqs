@@ -142,6 +142,27 @@ QVector<QString> SqliteDbService::getTagsForPath(QString path)
 	return result;
 }
 
+QVector<QString> SqliteDbService::getPathsForTag(QString tag)
+{
+	QVector<QString> result;
+	auto query = QSqlQuery(dbFactory->forCurrentThread());
+	query.prepare(
+		"SELECT file.path FROM tag INNER JOIN filetag ON tag.id = filetag.tagid INNER JOIN file ON filetag.fileid "
+		"= file.id WHERE tag.name = ?");
+	query.addBindValue(tag.toLower());
+	query.setForwardOnly(true);
+	if(!query.exec())
+	{
+		throw LooqsGeneralException("Error while trying to retrieve paths from database: " + query.lastError().text());
+	}
+	while(query.next())
+	{
+		QString path = query.value(0).toString();
+		result.append(path);
+	}
+	return result;
+}
+
 bool SqliteDbService::setTags(QString path, const QSet<QString> &tags)
 {
 	QSqlDatabase db = dbFactory->forCurrentThread();
@@ -377,5 +398,70 @@ bool SqliteDbService::addTag(QString tag, const QVector<QString> &paths)
 		return false;
 	}
 
+	return true;
+}
+
+bool SqliteDbService::removePathsForTag(QString tag, const QVector<QString> &paths)
+{
+	QSqlDatabase db = dbFactory->forCurrentThread();
+	QSqlQuery tagQuery(db);
+	QSqlQuery fileTagQuery(db);
+
+	tag = tag.toLower();
+
+	fileTagQuery.prepare(
+		"DELETE FROM filetag WHERE fileid = (SELECT id FROM file WHERE path = ?) AND tagid = (SELECT id "
+		"FROM tag WHERE name = ?)");
+
+	fileTagQuery.bindValue(1, tag);
+	for(const QString &path : paths)
+	{
+		fileTagQuery.bindValue(0, path);
+		if(!fileTagQuery.exec())
+		{
+			Logger::error() << "An error occured while trying to remove paths from tag assignment" << Qt::endl;
+			return false;
+		}
+	}
+	return true;
+}
+
+bool SqliteDbService::deleteTag(QString tag)
+{
+	QSqlDatabase db = dbFactory->forCurrentThread();
+	if(!db.transaction())
+	{
+		Logger::error() << "Failed to open transaction while trying to delete tag " << tag << " : " << db.lastError()
+						<< Qt::endl;
+		return false;
+	}
+
+	tag = tag.toLower();
+	QSqlQuery assignmentDeleteQuery(db);
+	assignmentDeleteQuery.prepare("DELETE FROM filetag WHERE tagid = (SELECT id FROM tag WHERE name = ?)");
+	assignmentDeleteQuery.addBindValue(tag);
+	if(!assignmentDeleteQuery.exec())
+	{
+		db.rollback();
+		Logger::error() << "Error while trying to delete tag: " << db.lastError() << Qt::endl;
+		return false;
+	}
+
+	QSqlQuery deleteTagQuery(db);
+	deleteTagQuery.prepare("DELETE FROM tag WHERE name = ?");
+	deleteTagQuery.addBindValue(tag);
+	if(!deleteTagQuery.exec())
+	{
+		db.rollback();
+		Logger::error() << "Error while trying to delete tag: " << db.lastError() << Qt::endl;
+		return false;
+	}
+
+	if(!db.commit())
+	{
+		db.rollback();
+		Logger::error() << "Error while trying to delete tag: " << db.lastError() << Qt::endl;
+		return false;
+	}
 	return true;
 }

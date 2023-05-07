@@ -28,6 +28,31 @@ bool TagManager::removeTagsForPath(QString path, const QSet<QString> &tags)
 	return this->dbService->setTags(path, newTags);
 }
 
+bool TagManager::removePathsForTag(QString tag, const QVector<QString> &paths)
+{
+	return this->dbService->removePathsForTag(tag, paths);
+}
+
+bool TagManager::deleteTag(QString tag)
+{
+	return this->dbService->deleteTag(tag);
+}
+
+QVector<QString> TagManager::getTags(QString path)
+{
+	return this->dbService->getTagsForPath(path);
+}
+
+QVector<QString> TagManager::getTags()
+{
+	return this->dbService->getTags();
+}
+
+QVector<QString> TagManager::getPaths(QString tag)
+{
+	return this->dbService->getPathsForTag(tag);
+}
+
 bool TagManager::addTagsToPath(QString path, QString tagstring, QChar delim)
 {
 	auto splitted = tagstring.split(delim);
