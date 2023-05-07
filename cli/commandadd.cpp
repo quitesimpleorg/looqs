@@ -41,13 +41,13 @@ int CommandAdd::handle(QStringList arguments)
 {
 	QCommandLineParser parser;
 	parser.addOptions({{{"c", "continue"},
-						"Continue adding files, don't exit on first error. If this option is not given, looqs will "
-						"exit asap, but it's possible that a few files will still be processed. "
+						"Continue adding files, don't exit on first error. Exit code will be 0. If this option is not "
+						"given, looqs will "
+						"exit asap, but it's possible that a few files will still be processed."
 						"Set -t 1 to avoid this behavior, but processing will be slower. "},
 					   {{"n", "no-content"}, "Only add paths to database. Do not index content"},
 					   {{"v", "verbose"}, "Print paths of files being processed"},
 					   {{"f", "fill-content"}, "Index content for files previously indexed with -n"},
-					   {"tags", "Comma-separated list of tags to assign"},
 					   {{"t", "threads"}, "Number of threads to use.", "threads"}});
 	parser.addHelpOption();
 	parser.addPositionalArgument("add", "Add paths to the index",
