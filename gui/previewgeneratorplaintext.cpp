@@ -246,17 +246,21 @@ QString PreviewGeneratorPlainText::generateLineBasedPreviewText(QTextStream &in,
 			totalWordCountMap[it->first] = totalWordCountMap.value(it->first, 0) + it->second;
 		}
 	}
-	if(isTruncated)
+	if(!resultText.isEmpty())
 	{
-		header += "(truncated) ";
-	}
-	for(QString &word : config.wordsToHighlight)
-	{
-		header += word + ": " + QString::number(totalWordCountMap[word]) + " ";
-	}
-	header += "<hr>";
+		if(isTruncated)
+		{
+			header += "(truncated) ";
+		}
+		for(QString &word : config.wordsToHighlight)
+		{
+			header += word + ": " + QString::number(totalWordCountMap[word]) + " ";
+		}
+		header += "<hr>";
 
-	return header + resultText;
+		resultText = header + resultText;
+	}
+	return resultText;
 }
 
 QSharedPointer<PreviewResult> PreviewGeneratorPlainText::generate(RenderConfig config, QString documentPath,
