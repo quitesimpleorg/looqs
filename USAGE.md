@@ -165,6 +165,8 @@ A number of search filters are available.
 | path.begins:(term) | pb:(term) |  Filters path beginning with the specified term |
 | contains:(terms) | c:(terms) | Full-text search, also understands quotes |
 | limit:(integer) | - | Limits the number of results. The default is 1000. Say "limit:0" to see all results |
+| tag:(tagname) | t:(tagname) | Filter for files that have been tagged with the corresponding tag |
+
 Filters can be combined. The booleans AND and OR are supported. Negations can be applied too, except for c:(). Negations are specified with "!".
 The AND boolean is implicit and thus entering it strictly optional.
 
@@ -177,11 +179,5 @@ Examples:
 |p:(notes) (pe:(odt) OR pe:(docx)) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|Finds files such as notes.docx, notes.odt but also any .docs and .odt when the path contains the string 'notes'|
 |memcpy !(pe:(.c) OR pe:(.cpp))| Performs a FTS search for 'memcpy' but excludes .cpp and .c files.|
 |c:("I think, therefore")|Performs a FTS search for the phrase "I think, therefore".|
-|c:("invoice") Downloads|This query is equivalent to c:("invoice") p:("Downloads")|
-
-
-
-
-
-
-
+|c:("invoice") Downloads|Equivalent to c:("invoice") p:("Downloads")|
+|p:(Downloads) invoice|Equivalent to c:("invoice") p:("Downloads")|

@@ -28,7 +28,7 @@ There is no need to write the long form of filters. There are also booleans avai
 The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state of the GUI.
 
 ## Current status
-Latest version: 2022-11-19, v0.8.1
+Latest version: 2023-05-07, v0.9
 
 Please keep in mind: looqs is still at an early stage and may exhibit some weirdness and contain bugs.
 
@@ -76,7 +76,7 @@ To build on Ubuntu and Debian, clone the repo and then run:
 ```
 git submodule init
 git submodule update
-sudo apt install build-essential qtbase5-dev libpoppler-qt5-dev libuchardet-dev libquazip5-dev
+sudo apt install build-essential qtbase5-dev libqt5sql5-sqlite libpoppler-qt5-dev libuchardet-dev libquazip5-dev
 qmake
 make
 ```
@@ -97,7 +97,9 @@ The GUI is located in `gui/looqs-gui`, the binary for the CLI is in `cli/looqs`
 ## Packages
 At this point, looqs is not in any official distro package repo, but I maintain some packages.
 
-### Ubuntu 22.04, 22.10
+
+
+### Ubuntu 23.04, 22.10, 22.04
 Latest release can be installed using apt from the repo.
 ```
 # First, obtain key, assume it's trusted.
@@ -108,6 +110,8 @@ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/repo.quitesimple.org.gpg] ht
 sudo apt-get update
 sudo apt-get install looqs
 ```
+### Gentoo (EXPERIMENTAL)
+Available in this overlay: https://github.com/quitesimpleorg/quitesimple-overlay
 
 ### Prebuilt tarball (distro-agnostic) (EXPERIMENTAL)
 looqs is also distributed as a tarball containing prebuilt binaries and its library dependencies. The tarball is
@@ -134,7 +138,7 @@ An AppImage may accompany the tarball in the future.
 
 
 ### Other distros
-I'll probably add a package for voidlinux at some point and maybe will provide a Gentoo ebuild. However, I would appreciate help for others distros. If you create a package, let me know!
+I appreciate help for others distros. If you create a package, let me know!
 
 
 ### Signature verification

@@ -1,5 +1,24 @@
 # looqs: Release notes
 
+## 2023-05-07 - v0.9
+Highlights: Tag support. Also begin new index mode to only index metadata (currently only path + file size, more to come).
+
+Note: Upgrading can take some time as new column indexes will be added
+
+CHANGES:
+
+ - gui: Improve font rendering in previews
+ - gui: Allow indexing only metadata
+ - gui: Allow adding content for files which only had metadata indexed before
+ - gui: Allow assigning tags by right clicking on paths
+ - cli: "add" command: Implement --verbose (-v)
+ - cli: "add" command: Implement --no-content and --fill-content
+ - cli: Add "tag" command which allows managing tags for paths.
+ - search: Add "tag:()", "t:()" filters
+ - Minor improvements and refactorings under the hood
+ - Add packages: Ubuntu 23.04.
+
+
 ## 2022-11-19 - v0.8.1
 
 CHANGES:
