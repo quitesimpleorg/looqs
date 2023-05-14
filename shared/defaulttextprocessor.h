@@ -11,7 +11,7 @@ class DefaultTextProcessor : public Processor
   public:
 	DefaultTextProcessor();
 	QString processText(const QByteArray &data) const;
-	QVector<PageData> process(const QByteArray &data) const override;
+	DocumentProcessResult process(const QByteArray &data) const override;
 };
 
 #endif // DEFAULTTEXTPROCESSOR_H

@@ -8,9 +8,9 @@ class OdtProcessor : public Processor
 	{
 		this->PREFERED_DATA_SOURCE = FILEPATH;
 	}
-	QVector<PageData> process(const QByteArray &data) const override;
+	DocumentProcessResult process(const QByteArray &data) const override;
 
-	QVector<PageData> process(QString path) const override;
+	DocumentProcessResult process(QString path) const override;
 };
 
 #endif // ODTPROCESSOR_H

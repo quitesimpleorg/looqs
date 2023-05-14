@@ -8,7 +8,7 @@ class TagStripperProcessor : public DefaultTextProcessor
 	TagStripperProcessor();
 
   public:
-	QVector<PageData> process(const QByteArray &data) const override;
+	DocumentProcessResult process(const QByteArray &data) const override;
 };
 
 #endif // XMLSTRIPPERPROCESSOR_H

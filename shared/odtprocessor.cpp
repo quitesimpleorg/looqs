@@ -3,12 +3,12 @@
 #include "odtprocessor.h"
 #include "tagstripperprocessor.h"
 
-QVector<PageData> OdtProcessor::process(const QByteArray & /*data*/) const
+DocumentProcessResult OdtProcessor::process(const QByteArray & /*data*/) const
 {
 	throw LooqsGeneralException("Not implemented yet");
 }
 
-QVector<PageData> OdtProcessor::process(QString path) const
+DocumentProcessResult OdtProcessor::process(QString path) const
 {
 	QuaZipFile zipFile(path);
 	zipFile.setFileName("content.xml");

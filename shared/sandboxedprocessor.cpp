@@ -65,18 +65,12 @@ void SandboxedProcessor::enableSandbox(QString readablePath)
 	exile_free_policy(policy);
 }
 
-void SandboxedProcessor::printResults(const QVector<PageData> &pageData)
+void SandboxedProcessor::printResults(const DocumentProcessResult &result)
 {
 	QFile fsstdout;
 	fsstdout.open(stdout, QIODevice::WriteOnly);
 	QDataStream stream(&fsstdout);
-
-	for(const PageData &data : pageData)
-	{
-		stream << data;
-		// fsstdout.flush();
-	}
-
+	stream << result;
 	fsstdout.close();
 }
 
@@ -102,7 +96,7 @@ SaveFileResult SandboxedProcessor::process()
 		return OK;
 	}
 
-	QVector<PageData> pageData;
+	DocumentProcessResult processResult;
 	QString absPath = fileInfo.absoluteFilePath();
 
 	try
@@ -111,13 +105,13 @@ SaveFileResult SandboxedProcessor::process()
 		{
 			/* Read access to FS needed... doh..*/
 			enableSandbox(absPath);
-			pageData = processor->process(absPath);
+			processResult = processor->process(absPath);
 		}
 		else
 		{
 			QByteArray data = Utils::readFile(absPath);
 			enableSandbox();
-			pageData = processor->process(data);
+			processResult = processor->process(data);
 		}
 	}
 	catch(LooqsGeneralException &e)
@@ -126,6 +120,6 @@ SaveFileResult SandboxedProcessor::process()
 		return PROCESSFAIL;
 	}
 
-	printResults(pageData);
-	return pageData.isEmpty() ? OK_WASEMPTY : OK;
+	printResults(processResult);
+	return processResult.pages.isEmpty() ? OK_WASEMPTY : OK;
 }
