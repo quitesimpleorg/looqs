@@ -2,8 +2,8 @@
 #define PROCESSOR_H
 #include <QVector>
 #include <QFile>
-#include "pagedata.h"
 #include "utils.h"
+#include "documentprocessresult.h"
 enum DataSource
 {
 	FILEPATH,
@@ -18,8 +18,8 @@ class Processor
 	 * a single file */
 	DataSource PREFERED_DATA_SOURCE = ARRAY;
 	Processor();
-	virtual QVector<PageData> process(const QByteArray &data) const = 0;
-	virtual QVector<PageData> process(QString path) const
+	virtual DocumentProcessResult process(const QByteArray &data) const = 0;
+	virtual DocumentProcessResult process(QString path) const
 	{
 		return process(Utils::readFile(path));
 	}

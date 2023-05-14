@@ -10,7 +10,7 @@ class NothingProcessor : public Processor
 	NothingProcessor();
 
   public:
-	QVector<PageData> process(const QByteArray & /*data*/) const override
+	DocumentProcessResult process(const QByteArray & /*data*/) const override
 	{
 		return {};
 	}
