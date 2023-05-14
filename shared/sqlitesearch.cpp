@@ -148,6 +148,11 @@ QPair<QString, QVector<QString>> SqliteSearch::createSql(const Token &token)
 		return {" file.id IN (SELECT fileid FROM filetag WHERE tagid = (SELECT id FROM tag WHERE name = ?)) ",
 				{value.toLower()}};
 	}
+	if(token.type == FILTER_OUTLINE_CONTAINS)
+	{
+		return {" outline.text LIKE '%' || ? || '%'  ", {value.toLower()}};
+	}
+
 	throw LooqsGeneralException("Unknown token passed (should not happen)");
 }
 
@@ -156,6 +161,7 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 	QString whereSql;
 	QVector<QString> bindValues;
 	bool isContentSearch = (query.getTokensMask() & FILTER_CONTENT) == FILTER_CONTENT;
+	bool isOutlineSearch = query.hasOutlineSearch();
 	if(query.getTokens().isEmpty())
 	{
 		throw LooqsGeneralException("Nothing to search for supplied");
@@ -200,15 +206,22 @@ QSqlQuery SqliteSearch::makeSqlQuery(const LooqsQuery &query)
 	}
 	else
 	{
+		QString pageColumn = "'0' as page";
+		QString joiners = "";
+		if(isOutlineSearch)
+		{
+			pageColumn = "outline.page as page";
+			joiners = " INNER JOIN outline ON outline.fileid = file.id ";
+		}
 		if(sortSql.isEmpty())
 		{
 			sortSql = "ORDER BY file.mtime DESC";
 		}
-		prepSql = "SELECT file.path AS path, '0' as page,  file.mtime AS mtime, file.size AS size, file.filetype AS "
-				  "filetype FROM file WHERE  1=1 AND " +
-				  whereSql + " " + sortSql;
+		prepSql = "SELECT DISTINCT file.path AS path, " + pageColumn +
+				  ",file.mtime AS mtime, file.size AS size, "
+				  "file.filetype AS filetype FROM file" +
+				  joiners + " WHERE  1=1 AND " + whereSql + " " + sortSql;
 	}
-
 	if(query.getLimit() > 0)
 	{
 		prepSql += " LIMIT " + QString::number(query.getLimit());
@@ -242,7 +255,7 @@ QVector<SearchResult> SqliteSearch::search(const LooqsQuery &query)
 		throw LooqsGeneralException("SQL Error: " + dbQuery.lastError().text());
 	}
 
-	bool contentSearch = query.hasContentSearch();
+	bool contentSearch = query.hasContentSearch() || query.hasOutlineSearch();
 	while(dbQuery.next())
 	{
 		SearchResult result;
