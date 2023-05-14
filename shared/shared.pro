@@ -42,6 +42,8 @@ SOURCES += sqlitesearch.cpp \
     dbmigrator.cpp \
     defaulttextprocessor.cpp \
     dirscanworker.cpp \
+    documentoutlineentry.cpp \
+    documentprocessresult.cpp \
     encodingdetector.cpp \
     filesaver.cpp \
     filescanworker.cpp \
@@ -72,6 +74,8 @@ HEADERS += sqlitesearch.h \
     dbmigrator.h \
     defaulttextprocessor.h \
     dirscanworker.h \
+    documentoutlineentry.h \
+    documentprocessresult.h \
     encodingdetector.h \
     filedata.h \
     filesaver.h \
