@@ -110,7 +110,7 @@ int FileSaver::processFiles(const QVector<QString> paths, std::function<SaveFile
 
 SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 {
-	QVector<PageData> pageData;
+	DocumentProcessResult processResult;
 	QString canonicalPath = fileInfo.canonicalFilePath();
 
 	int processorReturnCode = -1;
@@ -169,11 +169,10 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 			 * finishes.
 			 */
 			QDataStream in(process.readAllStandardOutput());
-			while(!in.atEnd())
+
+			if(!in.atEnd())
 			{
-				PageData pd;
-				in >> pd;
-				pageData.append(pd);
+				in >> processResult;
 			}
 			processorReturnCode = process.exitCode();
 			if(processorReturnCode != OK && processorReturnCode != OK_WASEMPTY)
@@ -185,7 +184,7 @@ SaveFileResult FileSaver::saveFile(const QFileInfo &fileInfo)
 			}
 		}
 	}
-	SaveFileResult result = this->dbService->saveFile(fileInfo, pageData, this->fileSaverOptions.metadataOnly);
+	SaveFileResult result = this->dbService->saveFile(fileInfo, processResult, this->fileSaverOptions.metadataOnly);
 	if(result == OK && processorReturnCode == OK_WASEMPTY)
 	{
 		return OK_WASEMPTY;
