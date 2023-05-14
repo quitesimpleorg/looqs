@@ -68,6 +68,7 @@ class LooqsQuery
 		this->limit = limit;
 	}
 	bool hasContentSearch() const;
+	bool hasOutlineSearch() const;
 	bool hasPathSearch() const;
 
 	void addSortCondition(SortCondition sc);
