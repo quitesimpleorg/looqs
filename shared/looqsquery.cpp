@@ -29,6 +29,11 @@ bool LooqsQuery::hasContentSearch() const
 	return (this->getTokensMask() & FILTER_CONTENT) == FILTER_CONTENT;
 }
 
+bool LooqsQuery::hasOutlineSearch() const
+{
+	return (this->getTokensMask() & FILTER_OUTLINE_CONTAINS) == FILTER_OUTLINE_CONTAINS;
+}
+
 bool LooqsQuery::hasPathSearch() const
 {
 	return (this->getTokensMask() & FILTER_PATH) == FILTER_PATH;
@@ -288,6 +293,10 @@ LooqsQuery LooqsQuery::build(QString expression, TokenType loneWordsTokenType, b
 			else if(filtername == "t" || filtername == "tag")
 			{
 				tokenType = FILTER_TAG_ASSIGNED;
+			}
+			else if(filtername == "toc" || filtername == "outline")
+			{
+				tokenType = FILTER_OUTLINE_CONTAINS;
 			}
 			// TODO: given this is not really a "filter", this feels slightly misplaced here
 			else if(filtername == "sort")
