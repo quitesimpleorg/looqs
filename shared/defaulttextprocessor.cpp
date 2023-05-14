@@ -24,7 +24,9 @@ QString DefaultTextProcessor::processText(const QByteArray &data) const
 	return {};
 }
 
-QVector<PageData> DefaultTextProcessor::process(const QByteArray &data) const
+DocumentProcessResult DefaultTextProcessor::process(const QByteArray &data) const
 {
-	return {{0, processText(data)}};
+	DocumentProcessResult result;
+	result.pages.append({0, processText(data)});
+	return result;
 }

@@ -2,7 +2,7 @@
 #define SANDBOXEDPROCESSOR_H
 #include <QString>
 #include <QMimeDatabase>
-#include "pagedata.h"
+#include "documentprocessresult.h"
 #include "savefileresult.h"
 
 class SandboxedProcessor
@@ -12,7 +12,7 @@ class SandboxedProcessor
 	QMimeDatabase mimeDatabase;
 
 	void enableSandbox(QString readablePath = "");
-	void printResults(const QVector<PageData> &pageData);
+	void printResults(const DocumentProcessResult &pageData);
 
   public:
 	SandboxedProcessor(QString filepath)
