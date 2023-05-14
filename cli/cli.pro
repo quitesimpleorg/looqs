@@ -46,6 +46,8 @@ packagesExist(quazip1-qt5) {
 }
 
 INCLUDEPATH += $$PWD/../shared
+INCLUDEPATH += /usr/include/poppler/qt5/
+
 DEPENDPATH += $$PWD/../shared
 
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../shared/release/libshared.a
