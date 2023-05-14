@@ -5,9 +5,30 @@ PdfProcessor::PdfProcessor()
 {
 }
 
-QVector<PageData> PdfProcessor::process(const QByteArray &data) const
+QVector<DocumentOutlineEntry> PdfProcessor::createOutline(const QVector<Poppler::OutlineItem> &outlineItems) const
 {
-	QVector<PageData> result;
+	QVector<DocumentOutlineEntry> result;
+	for(const Poppler::OutlineItem &outlineItem : outlineItems)
+	{
+		DocumentOutlineEntry documentOutlineEntry;
+		documentOutlineEntry.text = outlineItem.name();
+		documentOutlineEntry.type = OUTLINE_DESTINATION_TYPE_PAGE;
+		if(!outlineItem.destination().isNull())
+		{
+			documentOutlineEntry.destinationPage = outlineItem.destination()->pageNumber();
+		}
+		if(outlineItem.hasChildren())
+		{
+			documentOutlineEntry.children = createOutline(outlineItem.children());
+		}
+		result.append(documentOutlineEntry);
+	}
+	return result;
+}
+
+DocumentProcessResult PdfProcessor::process(const QByteArray &data) const
+{
+	DocumentProcessResult result;
 	QScopedPointer<Poppler::Document> doc(Poppler::Document::loadFromData(data));
 	if(doc.isNull())
 	{
@@ -26,12 +47,13 @@ QVector<PageData> PdfProcessor::process(const QByteArray &data) const
 	for(auto i = 0; i < pagecount; i++)
 	{
 		QString text = doc->page(i)->text(entirePage);
-		result.append({static_cast<unsigned int>(i + 1), text});
+		result.pages.append({static_cast<unsigned int>(i + 1), text});
 		/*TODO: hack, so we can fts search several words over the whole document, not just pages.
 		 * this of course uses more space and should be solved differently.
 		 */
 		entire += text;
 	}
-	result.append({0, entire});
+	result.pages.append({0, entire});
+	result.outlines = createOutline(doc->outline());
 	return result;
 }
