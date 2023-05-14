@@ -253,6 +253,29 @@ bool SqliteDbService::insertToFTS(bool useTrigrams, QSqlDatabase &db, int fileid
 	return true;
 }
 
+bool SqliteDbService::insertOutline(QSqlDatabase &db, int fileid, const QVector<DocumentOutlineEntry> &outlines)
+{
+	QSqlQuery outlineQuery(db);
+	outlineQuery.prepare("INSERT INTO outline(fileid, text, page) VALUES(?,?,?)");
+	outlineQuery.addBindValue(fileid);
+	for(const DocumentOutlineEntry &outline : outlines)
+	{
+		outlineQuery.bindValue(1, outline.text.toLower());
+		outlineQuery.bindValue(2, outline.destinationPage);
+		if(!outlineQuery.exec())
+		{
+			Logger::error() << "Failed outline insertion " << outlineQuery.lastError() << Qt::endl;
+			return false;
+		}
+		if(!insertOutline(db, fileid, outline.children))
+		{
+			Logger::error() << "Failed outline insertion (children)) " << outlineQuery.lastError() << Qt::endl;
+			return false;
+		}
+	}
+	return true;
+}
+
 QSqlQuery SqliteDbService::exec(QString querystr, std::initializer_list<QVariant> args)
 {
 	auto query = QSqlQuery(dbFactory->forCurrentThread());
@@ -278,7 +301,7 @@ bool SqliteDbService::execBool(QString querystr, std::initializer_list<QVariant>
 	return query.value(0).toBool();
 }
 
-SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &pageData, bool pathsOnly)
+SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, DocumentProcessResult &processResult, bool pathsOnly)
 {
 	QString absPath = fileInfo.absoluteFilePath();
 	auto mtime = fileInfo.lastModified().toSecsSinceEpoch();
@@ -323,16 +346,22 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, QVector<PageData> &
 	if(!pathsOnly)
 	{
 		int lastid = inserterQuery.lastInsertId().toInt();
-		if(!insertToFTS(false, db, lastid, pageData))
+		if(!insertToFTS(false, db, lastid, processResult.pages))
 		{
 			db.rollback();
 			Logger::error() << "Failed to insert data to FTS index " << Qt::endl;
 			return DBFAIL;
 		}
-		if(!insertToFTS(true, db, lastid, pageData))
+		if(!insertToFTS(true, db, lastid, processResult.pages))
 		{
 			db.rollback();
 			Logger::error() << "Failed to insert data to FTS index " << Qt::endl;
+			return DBFAIL;
+		}
+		if(!insertOutline(db, lastid, processResult.outlines))
+		{
+			db.rollback();
+			Logger::error() << "Failed to insert outline data " << Qt::endl;
 			return DBFAIL;
 		}
 	}
