@@ -5,7 +5,7 @@
 
 #include "databasefactory.h"
 #include "utils.h"
-#include "pagedata.h"
+#include "documentprocessresult.h"
 #include "filedata.h"
 #include "../shared/sqlitesearch.h"
 #include "../shared/token.h"
@@ -22,7 +22,7 @@ class SqliteDbService
 
   public:
 	SqliteDbService(DatabaseFactory &dbFactory);
-	SaveFileResult saveFile(QFileInfo fileInfo, QVector<PageData> &pageData, bool pathsOnly);
+	SaveFileResult saveFile(QFileInfo fileInfo, DocumentProcessResult &pageData, bool pathsOnly);
 
 	bool deleteFile(QString path);
 	bool fileExistsInDatabase(QString path);
@@ -42,6 +42,7 @@ class SqliteDbService
 	QVector<SearchResult> search(const LooqsQuery &query);
 
 	std::optional<QChar> queryFileType(QString absPath);
+	bool insertOutline(QSqlDatabase &db, int fileid, const QVector<DocumentOutlineEntry> &outlines);
 };
 
 #endif // SQLITEDBSERVICE_H
