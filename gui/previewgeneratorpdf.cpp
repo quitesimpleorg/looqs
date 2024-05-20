@@ -13,20 +13,21 @@ Poppler::Document *PreviewGeneratorPdf::document(QString path)
 		return documentcache.value(path);
 	}
 	locker.unlock();
-	Poppler::Document *result = Poppler::Document::load(path);
-	if(result == nullptr)
+	auto result = Poppler::Document::load(path);
+	if(!result)
 	{
+		qDebug() << "Failed to load document: " << path;
 		// TODO: some kind of user feedback would be nice
 		return nullptr;
 	}
 	result->setRenderHint(Poppler::Document::TextAntialiasing);
 	result->setRenderHint(Poppler::Document::TextHinting);
 	result->setRenderHint(Poppler::Document::TextSlightHinting);
-
+	auto ptr = result.release();
 	locker.relock();
-	documentcache.insert(path, result);
+	documentcache.insert(path, ptr);
 	locker.unlock();
-	return result;
+	return ptr;
 }
 
 QSharedPointer<PreviewResult> PreviewGeneratorPdf::generate(RenderConfig config, QString documentPath,
@@ -36,10 +37,12 @@ QSharedPointer<PreviewResult> PreviewGeneratorPdf::generate(RenderConfig config,
 	Poppler::Document *doc = document(documentPath);
 	if(doc == nullptr)
 	{
+		qDebug() << "Failed to obtain document for: " << documentPath;
 		return QSharedPointer<PreviewResult>(result);
 	}
 	if(doc->isLocked())
 	{
+		qDebug() << "Failed to open document as its locked: " << documentPath;
 		return QSharedPointer<PreviewResult>(result);
 	}
 	int p = (int)page - 1;
@@ -47,7 +50,12 @@ QSharedPointer<PreviewResult> PreviewGeneratorPdf::generate(RenderConfig config,
 	{
 		p = 0;
 	}
-	Poppler::Page *pdfPage = doc->page(p);
+	auto pdfPage = doc->page(p);
+	if(!pdfPage)
+	{
+		qDebug() << "Failed to open page " << p << " for document" << documentPath;
+		return QSharedPointer<PreviewResult>(result);
+	}
 	QImage img = pdfPage->renderToImage(config.scaleX, config.scaleY);
 	for(QString &word : config.wordsToHighlight)
 	{

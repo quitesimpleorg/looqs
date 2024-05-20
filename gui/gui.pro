@@ -71,8 +71,8 @@ HEADERS += \
 FORMS += \
         mainwindow.ui
 
-INCLUDEPATH += /usr/include/poppler/qt5/
-INCLUDEPATH += /usr/include/quazip5
+INCLUDEPATH += /usr/include/poppler/qt6/
+INCLUDEPATH += /usr/include/quazip6
 
 QT += widgets sql
 
@@ -80,12 +80,12 @@ win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../shared/release/ -ls
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../shared/debug/ -lshared
 else:unix: LIBS += -L$$OUT_PWD/../shared/ -lshared
 
-LIBS += -luchardet -lpoppler-qt5 -lquazip5
+LIBS += -luchardet -lpoppler-qt6 -lquazip6
 
-packagesExist(quazip1-qt5) {
-	PKGCONFIG += quazip1-qt5
+packagesExist(quazip1-qt6) {
+	PKGCONFIG += quazip1-qt6
 	CONFIG += link_pkgconfig
-	LIBS -= -lquazip5
+	LIBS -= -lquazip6
 }
 
 INCLUDEPATH += $$PWD/../shared

@@ -1,6 +1,6 @@
 #ifndef PDFPROCESSOR_H
 #define PDFPROCESSOR_H
-#include <poppler-qt5.h>
+#include <poppler-qt6.h>
 #include "processor.h"
 class PdfProcessor : public Processor
 {

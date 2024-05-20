@@ -68,22 +68,25 @@ void IPCPreviewClient::start(RenderConfig config, const QVector<RenderTarget> &t
 	if(socket->isOpen() && socket->isWritable())
 	{
 		QDataStream stream(socket);
+		stream.startTransaction();
 		stream << GeneratePreviews;
 		stream << config;
 		stream << targets;
+		stream.commitTransaction();
 		socket->flush();
 
-		int numTarget = 0;
+		qsizetype numTarget = 0;
 		if(socket->isOpen() && socket->isReadable() && socket->state() == QLocalSocket::ConnectedState)
 		{
 			do
 			{
-				socket->waitForReadyRead(100);
+				socket->waitForReadyRead(5000);
 				stream.startTransaction();
 				stream >> numTarget;
 			} while(!stream.commitTransaction() && socket->state() == QLocalSocket::ConnectedState);
 			if(numTarget != targets.count())
 			{
+				qDebug() << "Target count mismatch";
 				emit error("IPC Error: Server reports less targets than it should");
 				return;
 			}

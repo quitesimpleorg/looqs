@@ -1,4 +1,4 @@
-#include <poppler-qt5.h>
+#include <poppler-qt6.h>
 #include <QLabel>
 #include <QtDebug>
 #include <QFileInfo>
@@ -15,10 +15,8 @@
 #include <QFileDialog>
 #include <QScreen>
 #include <QProgressDialog>
-#include <QDesktopWidget>
 #include <QWidgetAction>
 #include <QInputDialog>
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "clicklabel.h"
@@ -673,7 +671,7 @@ void MainWindow::previewReceived()
 		headerLabel->setText(QString("Path: ") + preview->getDocumentPath());
 
 		ClickLabel *label = dynamic_cast<ClickLabel *>(preview->createPreviewWidget());
-		label->setMaximumWidth(QApplication::desktop()->availableGeometry().width() - 200);
+		label->setMaximumWidth(QApplication::primaryScreen()->availableGeometry().width() - 200);
 
 		QVBoxLayout *previewLayout = new QVBoxLayout();
 
@@ -702,7 +700,7 @@ void MainWindow::previewReceived()
 
 		previewLayout->addWidget(headerLabel);
 
-		previewLayout->setMargin(0);
+		previewLayout->setContentsMargins(0, 0, 0, 0);
 		previewLayout->insertStretch(0, 1);
 		previewLayout->insertStretch(-1, 1);
 		previewLayout->setAlignment(Qt::AlignCenter);

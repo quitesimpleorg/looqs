@@ -1,11 +1,11 @@
 #ifndef WILDCARDMATCHER_H
 #define WILDCARDMATCHER_H
 #include <QStringList>
-#include <QRegExp>
+#include <QRegularExpression>
 class WildcardMatcher
 {
   private:
-	QVector<QRegExp> regexes;
+	QVector<QRegularExpression> regexes;
 	QStringList patterns;
 
   public:

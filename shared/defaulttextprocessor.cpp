@@ -1,6 +1,6 @@
 #include <QFile>
 #include <QDataStream>
-#include <QTextCodec>
+#include <QStringDecoder>
 #include <QDebug>
 #include "defaulttextprocessor.h"
 
@@ -13,10 +13,10 @@ QString DefaultTextProcessor::processText(const QByteArray &data) const
 	QString encoding = encodingDetector.detectEncoding(data);
 	if(!encoding.isEmpty())
 	{
-		QTextCodec *codec = QTextCodec::codecForName(encoding.toUtf8());
-		if(codec != nullptr)
+		QStringDecoder decoder = QStringDecoder(encoding.toStdString().c_str());
+		if(decoder.isValid())
 		{
-			return codec->toUnicode(data);
+			return decoder(data);
 		}
 		qWarning() << "No codec found for " << encoding;
 		return QString(data);

@@ -5,9 +5,8 @@ void WildcardMatcher::setPatterns(QStringList patterns)
 	this->regexes.clear();
 	for(QString &str : patterns)
 	{
-		QRegExp regexp;
-		regexp.setPattern(str);
-		regexp.setPatternSyntax(QRegExp::WildcardUnix);
+		QRegularExpression regexp;
+		regexp.setPattern(QRegularExpression::wildcardToRegularExpression(str));
 		this->regexes.append(regexp);
 	}
 }
@@ -18,9 +17,10 @@ WildcardMatcher::WildcardMatcher()
 
 bool WildcardMatcher::match(QString haystack) const
 {
-	for(const QRegExp &regexp : this->regexes)
+	for(const QRegularExpression &regexp : this->regexes)
 	{
-		if(regexp.exactMatch(haystack))
+		QRegularExpressionMatch match = regexp.match(haystack);
+		if(match.hasMatch())
 		{
 			return true;
 		}

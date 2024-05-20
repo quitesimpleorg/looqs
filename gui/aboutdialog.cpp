@@ -19,7 +19,6 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
 	closeButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 	connect(closeButton, &QPushButton::clicked, this, &QDialog::close);
 
-	closeLayout->setMargin(10);
 	closeLayout->addStretch(10);
 	closeLayout->addWidget(closeButton);
 
@@ -32,7 +31,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
 	QLabel *aboutLooqs = new QLabel(this);
 	QString html = "<h2>looqs</h2>";
 	html += "Full-text search with previews for your files<br><br>";
-	html += "Copyright (c) 2018-2022: Albert Schwarzkopf<br><br>";
+	html += "Copyright (c) 2018-2024: Albert Schwarzkopf<br><br>";
 	html += QString("Version: %1<br><br>").arg(Common::versionText());
 	html += "Contact: looqs at quitesimple dot org<br><br>";
 	html += "Website: <a href=\"https://quitesimple.org\">https://quitesimple.org</a><br><br>";

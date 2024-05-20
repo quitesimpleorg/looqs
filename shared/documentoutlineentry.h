@@ -3,6 +3,7 @@
 #include <QMetaType>
 #include <QDataStream>
 #include <QString>
+#include <QVector>
 
 enum OutlineDestinationType
 {

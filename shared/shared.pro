@@ -14,11 +14,11 @@ CONFIG += staticlib
 CONFIG += c++17
 
 INCLUDEPATH += $$PWD/../sandbox/exile.h/
-INCLUDEPATH += /usr/include/poppler/qt5/ /usr/include/quazip5
+INCLUDEPATH += /usr/include/poppler/qt6/ /usr/include/quazip5
 
 # Dirty, we only need the includes here but well this magic works, so...
-packagesExist(quazip1-qt5) {
-       PKGCONFIG += quazip1-qt5
+packagesExist(quazip1-qt6) {
+       PKGCONFIG += quazip1-qt6
        CONFIG += link_pkgconfig
 }
 

@@ -1,6 +1,6 @@
 #ifndef PREVIEWGENERATORPDF_H
 #define PREVIEWGENERATORPDF_H
-#include <poppler-qt5.h>
+#include <poppler-qt6.h>
 #include "previewgenerator.h"
 #include "previewresultpdf.h"
 

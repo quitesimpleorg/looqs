@@ -14,7 +14,7 @@ QByteArray Utils::readFile(QString path)
 	QByteArray data = file.readAll();
 	if(data.isEmpty() && file.error() != QFileDevice::FileError::NoError)
 	{
-		throw LooqsGeneralException("Error reading file: " + path + ", Error: " + file.error());
+		throw LooqsGeneralException("Error reading file: " + path + ", Error: " + QString::number(file.error()));
 	}
 	return data;
 }

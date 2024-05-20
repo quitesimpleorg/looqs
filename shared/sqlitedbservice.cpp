@@ -2,6 +2,7 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QSqlError>
+#include <QRegularExpression>
 #include "looqsgeneralexception.h"
 #include "sqlitedbservice.h"
 #include "filedata.h"
@@ -84,13 +85,12 @@ unsigned int SqliteDbService::getFiles(QVector<FileData> &results, QString wildC
 	// TODO: port this to QRegularExpression once >5.12 gets more widespread because of this bug
 	// https://bugreports.qt.io/browse/QTBUG-72539?focusedCommentId=439053&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel
 	bool usePattern = !wildCardPattern.isEmpty();
-	QRegExp regexPattern(wildCardPattern);
-	regexPattern.setPatternSyntax(QRegExp::PatternSyntax::WildcardUnix);
+	QRegularExpression regexPattern(QRegularExpression::wildcardToRegularExpression(wildCardPattern));
 
 	while(query.next())
 	{
 		QString absPath = query.value(0).toString();
-		if(!usePattern || regexPattern.exactMatch(absPath))
+		if(!usePattern || regexPattern.match(absPath).hasMatch())
 		{
 			FileData current;
 			current.absPath = absPath;

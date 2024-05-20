@@ -110,7 +110,7 @@ void IndexSyncer::sync()
 			if(!this->fileSaverOptions.keepGoing)
 			{
 				QString errorMsg = QString("Failed to update all files selected for updating in this batch. Updated") +
-								   updatedFilesCount + "out of" + shouldHaveUpdatedCount + "selected for updating";
+								   QString::number(updatedFilesCount) + "out of" + QString::number(shouldHaveUpdatedCount) + "selected for updating";
 				emit error(errorMsg);
 				emit finished(totalUpdatesFilesCount, totalDeletedFilesCount, totalErroredFilesCount);
 			}

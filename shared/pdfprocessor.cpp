@@ -1,5 +1,4 @@
 #include <QScopedPointer>
-#include <poppler-qt5.h>
 #include "pdfprocessor.h"
 PdfProcessor::PdfProcessor()
 {
@@ -29,8 +28,8 @@ QVector<DocumentOutlineEntry> PdfProcessor::createOutline(const QVector<Poppler:
 DocumentProcessResult PdfProcessor::process(const QByteArray &data) const
 {
 	DocumentProcessResult result;
-	QScopedPointer<Poppler::Document> doc(Poppler::Document::loadFromData(data));
-	if(doc.isNull())
+	auto doc(Poppler::Document::loadFromData(data));
+	if(!doc)
 	{
 		throw LooqsGeneralException("Failed to process pdf data");
 	}

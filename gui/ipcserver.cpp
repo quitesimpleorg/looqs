@@ -51,7 +51,9 @@ void IpcServer::spawnerNewConnection()
 			} while(!stream.commitTransaction() && socket->state() == QLocalSocket::ConnectedState);
 			if(socket->state() == QLocalSocket::ConnectedState)
 			{
+				stream.startTransaction();
 				stream << targets.count();
+				stream.commitTransaction();
 				socket->flush();
 				IPCPreviewWorker *previewWorker = new IPCPreviewWorker(socket);
 				connect(previewWorker, &IPCPreviewWorker::finished, this, [previewWorker] { delete previewWorker; });
@@ -59,6 +61,7 @@ void IpcServer::spawnerNewConnection()
 			}
 			else
 			{
+				qDebug() << "Deleting socket...";
 				delete socket;
 			}
 		}
