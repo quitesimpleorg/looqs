@@ -10,6 +10,7 @@ PreviewCoordinator::PreviewCoordinator()
 	connect(&ipcPreviewClient, &IPCPreviewClient::finished, this, [&] { emit completedGeneration(); });
 	connect(this, &PreviewCoordinator::ipcStartGeneration, &ipcPreviewClient, &IPCPreviewClient::startGeneration,
 			Qt::QueuedConnection);
+	connect(&ipcPreviewClient, &IPCPreviewClient::error, this, [&](QString err) { emit error(err); });
 
 	this->ipcClientThread.start();
 }
