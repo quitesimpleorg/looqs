@@ -6,7 +6,7 @@ void WildcardMatcher::setPatterns(QStringList patterns)
 	for(QString &str : patterns)
 	{
 		QRegularExpression regexp;
-		regexp.setPattern(QRegularExpression::wildcardToRegularExpression(str));
+		regexp.setPattern(QRegularExpression::wildcardToRegularExpression(str, QRegularExpression::UnanchoredWildcardConversion));
 		this->regexes.append(regexp);
 	}
 }
