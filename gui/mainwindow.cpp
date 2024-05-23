@@ -630,6 +630,8 @@ void MainWindow::saveSettings()
 								  "Failed to remove old database. Settings not saved.");
 			return;
 		}
+		QFile::remove(Common::databasePath() + "-shm");
+		QFile::remove(Common::databasePath() + "-wal");
 	}
 
 	QSettings settings;
