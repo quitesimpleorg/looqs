@@ -19,7 +19,7 @@ QDataStream &operator>>(QDataStream &in, DocumentOutlineEntry &pd)
 {
 	in >> pd.text >> pd.type >> pd.destinationPage;
 
-	int numChildren;
+	qsizetype numChildren;
 	in >> numChildren;
 	for(int i = 0; i < numChildren; i++)
 	{

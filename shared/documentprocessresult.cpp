@@ -1,5 +1,5 @@
 #include "documentprocessresult.h"
-
+#include <QDebug>
 QDataStream &operator<<(QDataStream &out, const DocumentProcessResult &pd)
 {
 	out << pd.pages.size();
@@ -17,7 +17,7 @@ QDataStream &operator<<(QDataStream &out, const DocumentProcessResult &pd)
 
 QDataStream &operator>>(QDataStream &in, DocumentProcessResult &pd)
 {
-	int numPages, numOutlines;
+	qsizetype numPages, numOutlines;
 	in >> numPages;
 	in >> numOutlines;
 
