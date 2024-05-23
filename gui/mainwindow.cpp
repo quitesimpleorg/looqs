@@ -303,6 +303,7 @@ void MainWindow::startIndexing()
 	ui->txtPathScanAdd->setEnabled(false);
 	ui->btnAddPath->setEnabled(false);
 	ui->btnChoosePath->setEnabled(false);
+	ui->btnDeletePath->setEnabled(false);
 	ui->txtSearch->setEnabled(false);
 	ui->previewProcessBar->setValue(0);
 	ui->previewProcessBar->setVisible(true);
@@ -352,6 +353,7 @@ void MainWindow::finishIndexing()
 	ui->txtPathScanAdd->setEnabled(true);
 	ui->btnAddPath->setEnabled(true);
 	ui->btnChoosePath->setEnabled(true);
+	ui->btnDeletePath->setEnabled(true);
 	ui->txtSearch->setEnabled(true);
 	if(result.erroredPaths > 0)
 	{
