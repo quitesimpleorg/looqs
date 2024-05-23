@@ -82,10 +82,9 @@ unsigned int SqliteDbService::getFiles(QVector<FileData> &results, QString wildC
 		throw LooqsGeneralException("Error while trying to retrieve files from database: " + query.lastError().text());
 	}
 
-	// TODO: port this to QRegularExpression once >5.12 gets more widespread because of this bug
-	// https://bugreports.qt.io/browse/QTBUG-72539?focusedCommentId=439053&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel
 	bool usePattern = !wildCardPattern.isEmpty();
-	QRegularExpression regexPattern(QRegularExpression::wildcardToRegularExpression(wildCardPattern));
+	QString regex = QRegularExpression::wildcardToRegularExpression(wildCardPattern, QRegularExpression::UnanchoredWildcardConversion);
+	QRegularExpression regexPattern(regex);
 
 	while(query.next())
 	{
@@ -166,7 +165,7 @@ QVector<QString> SqliteDbService::getPathsForTag(QString tag)
 bool SqliteDbService::setTags(QString path, const QSet<QString> &tags)
 {
 	QSqlDatabase db = dbFactory->forCurrentThread();
-	if(!db.transaction())
+	if(!this->beginTransaction(db))
 	{
 		Logger::error() << "Failed to open transaction for " << path << " : " << db.lastError() << Qt::endl;
 		return false;
@@ -182,6 +181,8 @@ bool SqliteDbService::setTags(QString path, const QSet<QString> &tags)
 		return false;
 	}
 
+	deletionQuery.finish();
+
 	for(const QString &tag : tags)
 	{
 		QSqlQuery tagQuery = QSqlQuery(db);
@@ -193,6 +194,7 @@ bool SqliteDbService::setTags(QString path, const QSet<QString> &tags)
 			Logger::error() << "Failed to insert tag " << tagQuery.lastError() << Qt::endl;
 			return false;
 		}
+		tagQuery.finish();
 		QSqlQuery fileTagQuery(db);
 		fileTagQuery.prepare(
 			"INSERT INTO filetag(fileid, tagid) VALUES((SELECT id FROM file WHERE path = ?), (SELECT id "
@@ -205,8 +207,9 @@ bool SqliteDbService::setTags(QString path, const QSet<QString> &tags)
 			Logger::error() << "Failed to assign tag to file" << Qt::endl;
 			return false;
 		}
+		fileTagQuery.finish();
 	}
-	if(!db.commit())
+	if(!this->commitTransaction(db))
 	{
 		db.rollback();
 		Logger::error() << "Failed to commit transaction when saving tags" << Qt::endl;
@@ -240,6 +243,7 @@ bool SqliteDbService::insertToFTS(bool useTrigrams, QSqlDatabase &db, int fileid
 			Logger::error() << "Failed fts insertion " << ftsQuery.lastError() << Qt::endl;
 			return false;
 		}
+		ftsQuery.finish();
 		QSqlQuery contentQuery(db);
 		contentQuery.prepare(contentInsertStatement);
 		contentQuery.addBindValue(fileid);
@@ -249,6 +253,7 @@ bool SqliteDbService::insertToFTS(bool useTrigrams, QSqlDatabase &db, int fileid
 			Logger::error() << "Failed content insertion " << contentQuery.lastError() << Qt::endl;
 			return false;
 		}
+		contentQuery.finish();
 	}
 	return true;
 }
@@ -314,6 +319,32 @@ bool SqliteDbService::execBool(QString querystr, std::initializer_list<QVariant>
 	return query.value(0).toBool();
 }
 
+/*
+ *  The default only opens BEGIN TRANSACTION, but for multi-threaded, IMMEDIATE TRANSACTION is the more reasonable choice */
+bool SqliteDbService::beginTransaction(QSqlDatabase &db)
+{
+	QSqlQuery query(db);
+	if(!query.exec("BEGIN IMMEDIATE TRANSACTION"))
+	{
+		Logger::error() << "Immediate transaction could not be acquired" << query.lastError() << Qt::endl;
+		/* TODO: handle maybe the busy time out here */
+		return false;
+	}
+	return true;
+}
+
+bool SqliteDbService::commitTransaction(QSqlDatabase &db)
+{
+	QSqlQuery query(db);
+	if(!query.exec("COMMIT TRANSACTION"))
+	{
+		Logger::error() << "Transaction failed to commit" << Qt::endl;
+		/* TODO: handle maybe the busy time out here */
+		return false;
+	}
+	return true;
+}
+
 SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, DocumentProcessResult &processResult, bool pathsOnly)
 {
 	QString absPath = fileInfo.absoluteFilePath();
@@ -323,6 +354,11 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, DocumentProcessResu
 	{
 		fileType = 'f';
 	}
+
+	/* Insertion can take a long time and other threads can be be busy... we are not guaranteed to get a lock for the transaction.
+	 *  Don't want to set the sqlite busy handler to eternity. */
+	QMutexLocker lock(&this->writeMutex);
+
 
 	QSqlDatabase db = dbFactory->forCurrentThread();
 	QSqlQuery delQuery(db);
@@ -336,7 +372,7 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, DocumentProcessResu
 	inserterQuery.addBindValue(fileInfo.size());
 	inserterQuery.addBindValue(fileType);
 
-	if(!db.transaction())
+	if(!this->beginTransaction(db))
 	{
 		Logger::error() << "Failed to open transaction for " << absPath << " : " << db.lastError() << Qt::endl;
 		return DBFAIL;
@@ -348,6 +384,7 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, DocumentProcessResu
 		db.rollback();
 		return DBFAIL;
 	}
+	delQuery.finish();
 
 	if(!inserterQuery.exec())
 	{
@@ -355,10 +392,11 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, DocumentProcessResu
 		db.rollback();
 		return DBFAIL;
 	}
+	int lastid = inserterQuery.lastInsertId().toInt();
+	inserterQuery.finish();
 
 	if(!pathsOnly)
 	{
-		int lastid = inserterQuery.lastInsertId().toInt();
 		if(!insertToFTS(false, db, lastid, processResult.pages))
 		{
 			db.rollback();
@@ -379,7 +417,7 @@ SaveFileResult SqliteDbService::saveFile(QFileInfo fileInfo, DocumentProcessResu
 		}
 	}
 
-	if(!db.commit())
+	if(!this->commitTransaction(db))
 	{
 		db.rollback();
 		Logger::error() << "Failed to commit transaction for " << absPath << " : " << db.lastError() << Qt::endl;
@@ -409,7 +447,7 @@ bool SqliteDbService::addTag(QString tag, const QVector<QString> &paths)
 	fileTagQuery.prepare("INSERT INTO filetag(fileid, tagid) VALUES((SELECT id FROM file WHERE path = ?), (SELECT id "
 						 "FROM tag WHERE name = ?))");
 	fileTagQuery.bindValue(1, tag);
-	if(!db.transaction())
+	if(!this->beginTransaction(db))
 	{
 		Logger::error() << "Failed to open transaction to add paths for tag " << tag << " : " << db.lastError()
 						<< Qt::endl;
@@ -421,6 +459,7 @@ bool SqliteDbService::addTag(QString tag, const QVector<QString> &paths)
 		Logger::error() << "Failed INSERT query" << tagQuery.lastError() << Qt::endl;
 		return false;
 	}
+	tagQuery.finish();
 
 	for(const QString &path : paths)
 	{
@@ -431,9 +470,9 @@ bool SqliteDbService::addTag(QString tag, const QVector<QString> &paths)
 			Logger::error() << "Failed to add paths to tag" << Qt::endl;
 			return false;
 		}
+		fileTagQuery.finish();
 	}
-
-	if(!db.commit())
+	if(!this->commitTransaction(db))
 	{
 		db.rollback();
 		Logger::error() << "Failed to commit tag insertion transaction" << db.lastError() << Qt::endl;
@@ -464,6 +503,7 @@ bool SqliteDbService::removePathsForTag(QString tag, const QVector<QString> &pat
 			Logger::error() << "An error occured while trying to remove paths from tag assignment" << Qt::endl;
 			return false;
 		}
+		fileTagQuery.finish();
 	}
 	return true;
 }
@@ -471,7 +511,7 @@ bool SqliteDbService::removePathsForTag(QString tag, const QVector<QString> &pat
 bool SqliteDbService::deleteTag(QString tag)
 {
 	QSqlDatabase db = dbFactory->forCurrentThread();
-	if(!db.transaction())
+	if(!this->beginTransaction(db))
 	{
 		Logger::error() << "Failed to open transaction while trying to delete tag " << tag << " : " << db.lastError()
 						<< Qt::endl;
@@ -488,6 +528,7 @@ bool SqliteDbService::deleteTag(QString tag)
 		Logger::error() << "Error while trying to delete tag: " << db.lastError() << Qt::endl;
 		return false;
 	}
+	assignmentDeleteQuery.finish();
 
 	QSqlQuery deleteTagQuery(db);
 	deleteTagQuery.prepare("DELETE FROM tag WHERE name = ?");
@@ -498,8 +539,9 @@ bool SqliteDbService::deleteTag(QString tag)
 		Logger::error() << "Error while trying to delete tag: " << db.lastError() << Qt::endl;
 		return false;
 	}
+	deleteTagQuery.finish();
 
-	if(!db.commit())
+	if(!this->commitTransaction(db))
 	{
 		db.rollback();
 		Logger::error() << "Error while trying to delete tag: " << db.lastError() << Qt::endl;

@@ -1,6 +1,7 @@
 #ifndef SQLITEDBSERVICE_H
 #define SQLITEDBSERVICE_H
 #include <QFileInfo>
+#include <QMutexLocker>
 #include <optional>
 
 #include "databasefactory.h"
@@ -19,6 +20,11 @@ class SqliteDbService
 
 	QSqlQuery exec(QString query, std::initializer_list<QVariant> args);
 	bool execBool(QString querystr, std::initializer_list<QVariant> args);
+
+	bool beginTransaction(QSqlDatabase &db);
+	bool commitTransaction(QSqlDatabase &db);
+
+	QMutex writeMutex;
 
   public:
 	SqliteDbService(DatabaseFactory &dbFactory);
@@ -43,6 +49,8 @@ class SqliteDbService
 
 	std::optional<QChar> queryFileType(QString absPath);
 	bool insertOutline(QSqlDatabase &db, int fileid, const QVector<DocumentOutlineEntry> &outlines);
+
+	bool runWalCheckpoint();
 };
 
 #endif // SQLITEDBSERVICE_H
