@@ -260,17 +260,24 @@ bool SqliteDbService::insertOutline(QSqlDatabase &db, int fileid, const QVector<
 	outlineQuery.addBindValue(fileid);
 	for(const DocumentOutlineEntry &outline : outlines)
 	{
-		outlineQuery.bindValue(1, outline.text.toLower());
-		outlineQuery.bindValue(2, outline.destinationPage);
-		if(!outlineQuery.exec())
+		QString text = outline.text.trimmed();
+		if(text.length() > 0)
 		{
-			Logger::error() << "Failed outline insertion " << outlineQuery.lastError() << Qt::endl;
-			return false;
-		}
-		if(!insertOutline(db, fileid, outline.children))
-		{
-			Logger::error() << "Failed outline insertion (children)) " << outlineQuery.lastError() << Qt::endl;
-			return false;
+			text = text.toLower();
+
+			outlineQuery.bindValue(1, text);
+			outlineQuery.bindValue(2, outline.destinationPage);
+			if(!outlineQuery.exec())
+			{
+				Logger::error() << "Failed outline insertion " << outlineQuery.lastError() << Qt::endl;
+				return false;
+			}
+			outlineQuery.finish();
+			if(!insertOutline(db, fileid, outline.children))
+			{
+				Logger::error() << "Failed outline insertion (children)) " << outlineQuery.lastError() << Qt::endl;
+				return false;
+			}
 		}
 	}
 	return true;
