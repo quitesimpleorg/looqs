@@ -163,6 +163,7 @@ void Indexer::processFinishedWorker()
 	--this->runningWorkers;
 	if(!isRunning())
 	{
+		this->db->runWalCheckpoint();
 		emit finished();
 	}
 }

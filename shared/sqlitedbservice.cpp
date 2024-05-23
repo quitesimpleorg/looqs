@@ -276,6 +276,12 @@ bool SqliteDbService::insertOutline(QSqlDatabase &db, int fileid, const QVector<
 	return true;
 }
 
+bool SqliteDbService::runWalCheckpoint()
+{
+	auto query = QSqlQuery(dbFactory->forCurrentThread());
+	return query.exec("PRAGMA wal_checkpoint(TRUNCATE);");
+}
+
 QSqlQuery SqliteDbService::exec(QString querystr, std::initializer_list<QVariant> args)
 {
 	auto query = QSqlQuery(dbFactory->forCurrentThread());
