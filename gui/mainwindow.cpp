@@ -319,7 +319,9 @@ void MainWindow::startIndexing()
 	}
 	this->indexer->setTargetPaths(paths);
 	QString ignorePatterns = ui->txtIgnorePatterns->text();
-	this->indexer->setIgnorePattern(ignorePatterns.split(";"));
+	QStringList patterns = ignorePatterns.split(";");
+	patterns.removeAll(QString{});
+	this->indexer->setIgnorePattern(patterns);
 
 	FileSaverOptions options;
 	options.fillExistingContentless =
