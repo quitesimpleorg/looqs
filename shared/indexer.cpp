@@ -30,7 +30,7 @@ void Indexer::beginIndexing()
 			pattern += "/";
 		}
 		pattern += "*";
-		ignoreList.append(excludedPath);
+		ignoreList.append(pattern);
 	}
 	ignoreList.append(this->ignorePattern);
 	wildcardMatcher.setPatterns(ignoreList);
