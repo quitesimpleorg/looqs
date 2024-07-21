@@ -25,11 +25,10 @@ void enableIpcSandbox()
 		qCritical() << "Failed to init policy for sandbox";
 		exit(EXIT_FAILURE);
 	}
-	policy->namespace_options = EXILE_UNSHARE_USER | EXILE_UNSHARE_MOUNT | EXILE_UNSHARE_NETWORK;
+	policy->namespace_options = 0;
 	policy->no_new_privs = 1;
-	policy->drop_caps = 1;
+	policy->drop_caps = 0;
 	policy->vow_promises = exile_vows_from_str("thread cpath rpath wpath unix stdio proc error");
-	policy->mount_path_policies_to_chroot = 1;
 
 	QString ipcSocketPath = Common::ipcSocketPath();
 	QFileInfo info{ipcSocketPath};
