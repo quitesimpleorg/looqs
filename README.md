@@ -28,7 +28,7 @@ There is no need to write the long form of filters. There are also booleans avai
 The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state of the GUI.
 
 ## Current status
-Latest version: 2023-05-07, v0.9
+Latest version: 2024-07-21, v0.10
 
 Please keep in mind: looqs is still at an early stage and may exhibit some weirdness and contain bugs.
 
@@ -77,18 +77,7 @@ To build on Ubuntu and Debian, clone the repo and then run:
 git submodule init
 git submodule update
 sudo apt install build-essential qt6-base-dev libqt6sql6-sqlite libpoppler-qt6-dev libuchardet-dev libquazip1-qt6-dev
-qmake
-make
-```
-
-### Void
-```
-# as root
-xbps-install qt5-devel poppler-qt5-devel quazip-qt5-devel uchardet-devel gcc make
-# as user
-git submodule init
-git submodule update
-qmake
+qmake6
 make
 ```
 
@@ -99,7 +88,7 @@ At this point, looqs is not in any official distro package repo, but I maintain 
 
 
 
-### Ubuntu 23.04, 22.10, 22.04
+### Ubuntu 24.04
 Latest release can be installed using apt from the repo.
 ```
 # First, obtain key, assume it's trusted.
@@ -112,29 +101,6 @@ sudo apt-get install looqs
 ```
 ### Gentoo (EXPERIMENTAL)
 Available in this overlay: https://github.com/quitesimpleorg/quitesimple-overlay
-
-### Prebuilt tarball (distro-agnostic) (EXPERIMENTAL)
-looqs is also distributed as a tarball containing prebuilt binaries and its library dependencies. The tarball is
-built using the Gentoo Hardened toolchain and the Qt version is smaller than what distributions usually
-include. It does not include libraries that should mess with fontrendering or the graphics stack. The binaries should run on any recent Linux distribution (requires glibc 2.34 or newer at least) and expects
-dependencies such as libGL to be provided by your distribution already (should be the case).
-
-It's considered experimental for two reasons. Firstly, looqs has no updater (yet). You will have to manually check for updates. Secondly, I can't guarantee that I'll be quick with updates of the tarball specifically if the library versions become outdated between looqs updates.
-
-You are therefore encouraged to use distro-native packages or to build it yourself if possible.
-
-The tarball can be obtained here: https://repo.quitesimple.org/tarball/looqs
-
-Quick start:
-
-```
-# Verify sig, see the end of this document: gpg --verify looqs-v0.4.tar.xz.sig
-tar xf looqs-v0.4.tar.xz # Replace with the actual version you have obtained
-cd looqs-v0.4
-./looqs-gui # or ./looqs for the CLI
-```
-
-An AppImage may accompany the tarball in the future.
 
 
 ### Other distros
