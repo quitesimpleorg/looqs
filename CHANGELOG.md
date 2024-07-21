@@ -1,13 +1,15 @@
 # looqs: Release notes
-## 2024-05-xx - v0.10
+## 2024-07-21 - v0.10
 CHANGES:
  - Move to Qt6, drop Qt5 support.
  - Index ToC of PDFs
  - ToC can be searched with filter: toc:(query). (Basic, more to come).
  - sqlite: Improvements so rare "database locked" errors don't occur.
+ - sandbox: Disable mechanisms based on namespaces (for now), as we no longer can assume them to be available
+ on some distros such as Ubuntu 24.04. Needs some clean solution.
  - Minor fixes
- - Add packages: Ubuntu 23.10.
- - Remove packages: Ubuntu 22.10
+ - Add package for Ubuntu 24.04.
+ - Drop support for tarball with pre-built binaries. It may or may not return in future releases.
 
 ## 2023-05-07 - v0.9
 Highlights: Tag support. Also begin new index mode to only index metadata (currently only path + file size, more to come).
