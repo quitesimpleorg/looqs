@@ -76,7 +76,7 @@ To build on Ubuntu and Debian, clone the repo and then run:
 ```
 git submodule init
 git submodule update
-sudo apt install build-essential qtbase5-dev libqt5sql5-sqlite libpoppler-qt5-dev libuchardet-dev libquazip5-dev
+sudo apt install build-essential qt6-base-dev libqt6sql6-sqlite libpoppler-qt6-dev libuchardet-dev libquazip1-qt6-dev
 qmake
 make
 ```
