@@ -5,30 +5,32 @@ looqs is a tool that creates a full-text search index for your files. It allows 
 ### Preview
 looqs allows you to look inside files. It highlights what you have searched for.
 
-![Screenshot looqs](https://garage.quitesimple.org/assets/looqs/orwell.png)
-![Screenshot looqs search fstream](https://garage.quitesimple.org/assets/looqs/fstream_write.png)
+![Screenshot looqs](https://quitesimple.org/share/assets/looqs/orwell.png)
+![Screenshot looqs search fstream](https://quitesimple.org/share/assets/looqs/fstream_write.png)
 
 ### Results list
 #### Classic results list
 Just enter what you want to find, it will search paths and file content.
-![Screenshot looqs results](https://garage.quitesimple.org/assets/looqs/looqs_diary.png)
+![Screenshot looqs results](https://quitesimple.org/share/assets/looqs/looqs_diary.png)
 
 #### Searching with filters
 You can be more specific to get what you want with filters
 
 **Filters (long form)**
-![Screenshot looqs results](https://garage.quitesimple.org/assets/looqs/opearting_systems_looqs.png)
+![Screenshot looqs results](https://quitesimple.org/share/assets/looqs/opearting_systems_looqs.png)
 
 **Filters (short form)**
 
 There is no need to write the long form of filters. There are also booleans available
 
-![Screenshot looqs results](https://garage.quitesimple.org/assets/looqs/looqs_beatles_marley.png)
+![Screenshot looqs results](https://quitesimple.org/share/assets/looqs/looqs_beatles_marley.png)
 
 The screenshots in this section may occasionally be slightly outdated, but they are usually recent enough to get an overall impression of the current state of the GUI.
 
 ## Current status
 Latest version: 2024-07-21, v0.10
+
+As my personal workflow has changed, the intrinsic motivation to work on this project has gone down. Development is therefore paused.
 
 Please keep in mind: looqs is still at an early stage and may exhibit some weirdness and contain bugs.
 
@@ -67,8 +69,10 @@ Please see the [Contribution guidelines](CONTRIBUTING.md) file.
 ## Documentation
 Please see [USAGE.md](USAGE.md) for the user manual. There is also [HACKING.md](HACKING.md) with more technical information.
 
-
 ## Build
+
+### Signature verification
+Release tags can be verified with  [my PGP public key](https://quitesimple.org/share/pubkey). For what it's worth, its fingerprint is: `C342 CA02 D2EC 2E14 F3C3  D5FF 7F7B 4C08 02CD 02F2`
 
 ### Debian/Ubuntu
 
@@ -83,31 +87,4 @@ make
 
 The GUI is located in `gui/looqs-gui`, the binary for the CLI is in `cli/looqs`
 
-## Packages
-At this point, looqs is not in any official distro package repo, but I maintain some packages.
 
-
-
-### Ubuntu 24.04
-Latest release can be installed using apt from the repo.
-```
-# First, obtain key, assume it's trusted.
-wget -O- https://repo.quitesimple.org/repo.quitesimple.org.asc  | gpg --dearmor > repo.quitesimple.org-keyring.gpg
-cat repo.quitesimple.org-keyring.gpg | sudo tee -a /usr/share/keyrings/repo.quitesimple.org.gpg > /dev/null
-
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/repo.quitesimple.org.gpg] https://repo.quitesimple.org/debian/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/quitesimple.list
-sudo apt-get update
-sudo apt-get install looqs
-```
-### Gentoo (EXPERIMENTAL)
-Available in this overlay: https://github.com/quitesimpleorg/quitesimple-overlay
-
-
-### Other distros
-I appreciate help for others distros. If you create a package, let me know!
-
-
-### Signature verification
-Release tags can be verified with  [my PGP public key](https://quitesimple.org/share/pubkey). For what little it's worth, its fingerprint is: `C342 CA02 D2EC 2E14 F3C3  D5FF 7F7B 4C08 02CD 02F2`
-
-Packages can be verified with the [repo-specific public key](https://repo.quitesimple.org/repo.quitesimple.org.asc). For what little it's worth, its fingerprint is: `1B49 45B3 16B2 468A 3DAC  C1E0 75EF 3FE8 D753 C8F9`
